@@ -1,0 +1,1 @@
+{"version":3,"file":"simple-moving-average.js","sourceRoot":"","sources":["../../../../src/core/calculations/moving-averages/simple-moving-average.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,SAAS,CAAA;AACvC,MAAM,UAAU,mBAAmB,CAAC,IAAc,EAAE,MAAc;IAChE,OAAO,aAAa,CAAC,IAAI,EAAE,MAAM,EAAE,KAAK,CAAC,CAAA;AAC3C,CAAC"}

@@ -1,0 +1,1 @@
+export { ta } from './ta';

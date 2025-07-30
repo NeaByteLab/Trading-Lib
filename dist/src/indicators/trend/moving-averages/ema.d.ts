@@ -1,0 +1,13 @@
+declare const EMA: {
+    new (): {
+        calculate(data: import("../../..").MarketData | number[], config?: import("../../..").IndicatorConfig): import("../../..").IndicatorResult;
+        name: string;
+        description: string;
+        category: string;
+        validateInput(_data: import("../../..").MarketData | number[], _config?: import("../../..").IndicatorConfig): void;
+        getSourceData(data: import("../../..").MarketData, source?: string): number[];
+    };
+}, ema: (_data: import("../../..").MarketData | number[], _length?: number, _source?: string) => number[];
+export { EMA };
+export { ema };
+//# sourceMappingURL=ema.d.ts.map

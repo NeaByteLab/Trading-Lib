@@ -1,0 +1,62 @@
+export const DEFAULT_LENGTHS = {
+    SMA: 20,
+    EMA: 20,
+    WMA: 20,
+    HULL: 20,
+    RSI: 14,
+    MACD: 12,
+    MACD_SIGNAL: 26,
+    MACD_HISTOGRAM: 9,
+    STOCHASTIC: 14,
+    STOCHASTIC_K: 3,
+    STOCHASTIC_D: 3,
+    WILLIAMS_R: 14,
+    CCI: 20,
+    ATR: 14,
+    BOLLINGER: 20,
+    BOLLINGER_STD: 2,
+    KELTNER: 20,
+    KELTNER_MULT: 2,
+    DONCHIAN: 20,
+    OBV: 1,
+    VWAP: 1,
+    MFI: 14,
+    CMF: 20,
+    ADX: 14,
+    DMI: 14,
+    PARABOLIC: 0.02,
+    ICHIMOKU_TENKAN: 9,
+    ICHIMOKU_KIJUN: 26,
+    ICHIMOKU_SENKOU_B: 52,
+    ICHIMOKU_DISPLACEMENT: 26,
+    SUPER_TREND: 10,
+    SUPER_TREND_MULT: 3
+};
+export const DEFAULT_MULTIPLIERS = {
+    BOLLINGER: 2,
+    KELTNER: 2,
+    ATR: 1,
+    SUPER_TREND: 3,
+    PARABOLIC: 0.02
+};
+export const OVERBOUGHT_OVERSOLD = {
+    RSI_OVERBOUGHT: 70,
+    RSI_OVERSOLD: 30,
+    STOCHASTIC_OVERBOUGHT: 80,
+    STOCHASTIC_OVERSOLD: 20,
+    WILLIAMS_R_OVERBOUGHT: -20,
+    WILLIAMS_R_OVERSOLD: -80,
+    CCI_OVERBOUGHT: 100,
+    CCI_OVERSOLD: -100
+};
+export const PINE_SOURCE_OPTIONS = [
+    'open',
+    'high',
+    'low',
+    'close',
+    'hl2',
+    'hlc3',
+    'ohlc4',
+    'volume'
+];
+//# sourceMappingURL=indicator-constants.js.map

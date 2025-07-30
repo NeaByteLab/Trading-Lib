@@ -1,0 +1,54 @@
+import type { MarketData } from '@core/types/indicator-types';
+/**
+ * Validate market data format
+ *
+ * @param data - Market data to validate
+ * @throws {Error} If market data is invalid
+ */
+export declare function validateMarketData(data: MarketData): void;
+/**
+ * Validate volume data
+ *
+ * @param data - Market data to validate
+ * @throws {Error} If volume data is missing
+ */
+export declare function validateVolumeData(data: MarketData): void;
+/**
+ * Validate array data
+ *
+ * @param data - Array to validate
+ * @param minLength - Minimum required length
+ * @throws {Error} If array is invalid
+ */
+export declare function validateArray(data: number[], minLength?: number): void;
+/**
+ * Validate length parameter
+ *
+ * @param length - Length parameter to validate
+ * @param minLength - Minimum allowed length
+ * @throws {Error} If length is invalid
+ */
+export declare function validateLength(length: number, minLength?: number): void;
+/**
+ * Sanitize array by removing NaN values
+ *
+ * @param data - Array to sanitize
+ * @returns Sanitized array
+ */
+export declare function sanitizeArray(data: number[]): number[];
+/**
+ * Validate indicator configuration
+ *
+ * @param config - Configuration to validate
+ * @param allowedSources - Allowed source values
+ * @throws {Error} If configuration is invalid
+ */
+export declare function validateIndicatorConfig(config?: {
+    length?: number;
+    source?: string;
+}, allowedSources?: string[]): void;
+/**
+ * Validate OHLCV data object
+ */
+export declare function validateOHLCV(dataObj: Record<string, number>): boolean;
+//# sourceMappingURL=validation-utils.d.ts.map

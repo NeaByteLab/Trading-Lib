@@ -1,0 +1,77 @@
+{
+  "name": "@neabytelab/trading-lib",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A comprehensive TypeScript trading indicators library with 125+ technical analysis indicators",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src --fix",
+    "check:duplication": "jscpd src --reporters html,console --output ./reports",
+    "check:quality": "npm run lint && npm run check:duplication",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm run test && npm run lint"
+  },
+  "keywords": [
+    "trading",
+    "technical-analysis",
+    "indicators",
+    "finance",
+    "stocks",
+    "crypto",
+    "forex",
+    "rsi",
+    "macd",
+    "moving-average",
+    "bollinger-bands",
+    "pine-script",
+    "typescript"
+  ],
+  "author": "NeaByteLab",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NeaByteLab/Trading-Lib.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NeaByteLab/Trading-Lib/issues"
+  },
+  "homepage": "https://github.com/NeaByteLab/Trading-Lib#readme",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint": "^9.32.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-sonarjs": "^3.0.4",
+    "jest": "^30.0.5",
+    "jscpd": "^4.0.5",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3"
+  }
+}
