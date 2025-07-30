@@ -1,11 +1,10 @@
 import { BaseIndicator } from '@base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Aroon indicator
+ * Aroon Indicator
  *
- * Measures the time between highs and lows over a time period.
- * Formula: Aroon Up = ((Period - Days Since High) / Period) × 100
- *          Aroon Down = ((Period - Days Since Low) / Period) × 100
+ * A momentum indicator that measures the time between highs and lows.
+ * Values range from 0 to 100, with higher values indicating stronger trends.
  *
  * @example
  * ```typescript
@@ -19,7 +18,6 @@ export declare class Aroon extends BaseIndicator {
     constructor();
     calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
     private calculateAroon;
-    private findExtremes;
 }
 /**
  * Calculate Aroon values using wrapper function

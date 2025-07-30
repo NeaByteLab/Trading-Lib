@@ -28,17 +28,14 @@ import { validateVolumeData } from '@utils/validation-utils'
  */
 export function moneyFlowIndex(data: MarketData, length: number): number[] {
   validateVolumeData(data)
-
   const typicalPrices = PriceCalculations.typical(data)
-
   return ArrayUtils.processWindow(typicalPrices, length, (window, i) => {
     const { positiveFlow, negativeFlow } = calculateMoneyFlows(window, data.volume!, i, length)
-
     if (negativeFlow === 0) {
-      return 100
+      return positiveFlow > 0 ? 100 : 50
     } else {
       const moneyRatio = positiveFlow / negativeFlow
-      return 100 - (100 / (1 + moneyRatio))
+      return 100 - 100 / (1 + moneyRatio)
     }
   })
 }
@@ -58,30 +55,23 @@ function calculateMoneyFlows(
   currentIndex: number,
   length: number
 ): { positiveFlow: number; negativeFlow: number } {
-  // Use centralized window slicing utility
   const windowPrices = ArrayUtils.getWindowSlice(typicalPrices, currentIndex, length)
   const windowVolumes = ArrayUtils.getWindowSlice(volumes, currentIndex, length)
-
   let positiveFlow = 0
   let negativeFlow = 0
-
   ArrayUtils.processArray(windowPrices, (currentPrice, j) => {
     const currentVolume = windowVolumes[j]
     const prevPrice = j > 0 ? windowPrices[j - 1] : currentPrice
-
     if (currentPrice === undefined || currentVolume === undefined || prevPrice === undefined) {
       return
     }
-
     const priceChange = currentPrice - prevPrice
     const moneyFlow = currentPrice * currentVolume
-
     if (priceChange > 0) {
       positiveFlow += moneyFlow
     } else if (priceChange < 0) {
       negativeFlow += moneyFlow
     }
   })
-
   return { positiveFlow, negativeFlow }
 }

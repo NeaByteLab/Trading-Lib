@@ -20,7 +20,6 @@ export interface IndicatorConfig {
   [key: string]: number | string | boolean | undefined
 }
 export interface IndicatorFunction {
-
   (_data: MarketData | number[], _config?: IndicatorConfig): IndicatorResult
 }
 export interface MultiResult {

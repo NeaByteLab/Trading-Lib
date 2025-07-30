@@ -1,23 +1,4 @@
-import { BaseIndicator } from '@base/base-indicator';
-import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
-/**
- * CMF (Chaikin Money Flow) indicator
- *
- * A volume-based indicator that measures buying and selling pressure.
- * Formula: CMF = Σ(Money Flow Volume) / Σ(Volume) over period
- *
- * @example
- * ```typescript
- * const cmf = new CMF()
- * const result = cmf.calculate(marketData, { length: 20 })
- * console.log(result.values) // CMF values
- * ```
- */
-export declare class CMF extends BaseIndicator {
-    constructor();
-    calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-    private calculateCMF;
-}
+import type { MarketData } from '@core/types/indicator-types';
 /**
  * Calculate CMF values using wrapper function
  *

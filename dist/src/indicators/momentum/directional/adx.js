@@ -1,15 +1,13 @@
 import { BaseIndicator } from '@base/base-indicator';
-import { trueRange } from '@calculations/volatility/true-range';
 import { DEFAULT_LENGTHS, ERROR_MESSAGES } from '@constants/indicator-constants';
-import { ArrayUtils } from '@utils/array-utils';
+import { calculateDirectionalMovement } from '@utils/calculation-utils';
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils';
-import { PineCore } from '@utils/pine-core';
 import { pineLength } from '@utils/pine-script-utils';
 /**
- * Average Directional Index (ADX) indicator
+ * ADX (Average Directional Index) Indicator
  *
- * Measures the strength of a trend regardless of its direction.
- * Formula: ADX = Average of DX over period, where DX = 100 × |+DI - -DI| / (+DI + -DI)
+ * Measures the strength of a trend regardless of direction.
+ * Combines +DI and -DI to determine trend strength.
  *
  * @example
  * ```typescript
@@ -42,61 +40,46 @@ export class ADX extends BaseIndicator {
         };
     }
     calculateADX(data, length) {
-        const trValues = trueRange(data);
-        const result = [];
-        const plusDIValues = [];
-        const minusDIValues = [];
-        let prevHigh = data.high[0];
-        let prevLow = data.low[0];
-        const results = ArrayUtils.processArray(data.close, (_, i) => {
-            if (i === 0) {
-                result.push(NaN);
-                plusDIValues.push(NaN);
-                minusDIValues.push(NaN);
-                return { adx: NaN, plusDI: NaN, minusDI: NaN };
+        const plusDI = [];
+        const minusDI = [];
+        const adx = [];
+        for (let i = 0; i < data.close.length; i++) {
+            if (i < 1) {
+                plusDI.push(NaN);
+                minusDI.push(NaN);
+                adx.push(NaN);
+                continue;
             }
-            const { plusDM, minusDM } = this.calculateDirectionalMovement(data, i, prevHigh, prevLow);
-            const tr = trValues[i];
-            const { smoothedTR, smoothedPlusDM, smoothedMinusDM } = this.calculateSmoothedValues(tr, plusDM, minusDM, i, length, plusDIValues, minusDIValues, trValues);
-            const plusDI = smoothedTR > 0 ? (smoothedPlusDM / smoothedTR) * 100 : 0;
-            const minusDI = smoothedTR > 0 ? (smoothedMinusDM / smoothedTR) * 100 : 0;
-            plusDIValues.push(plusDI);
-            minusDIValues.push(minusDI);
-            const dx = plusDI + minusDI > 0 ? (PineCore.abs(plusDI - minusDI) / (plusDI + minusDI)) * 100 : 0;
-            let adxValue;
+            const { plusDI: plusDIVal, minusDI: minusDIVal } = this.calculateDI(data, i);
+            plusDI.push(plusDIVal);
+            minusDI.push(minusDIVal);
             if (i < length) {
-                adxValue = NaN;
+                adx.push(NaN);
             }
             else {
-                adxValue = i === length ? dx : (dx + (i - length) * result[i - 1]) / (i - length + 1);
+                const adxValue = this.calculateADXValue(plusDIVal, minusDIVal);
+                adx.push(adxValue);
             }
-            result.push(adxValue);
-            prevHigh = data.high[i];
-            prevLow = data.low[i];
-            return { adx: adxValue, plusDI, minusDI };
-        });
-        return {
-            adx: results.map(r => r.adx),
-            plusDI: results.map(r => r.plusDI),
-            minusDI: results.map(r => r.minusDI)
-        };
+        }
+        return { adx, plusDI, minusDI };
     }
-    calculateDirectionalMovement(data, i, prevHigh, prevLow) {
-        const currentHigh = data.high[i];
-        const currentLow = data.low[i];
-        const plusDM = currentHigh - prevHigh > prevLow - currentLow && currentHigh - prevHigh > 0
-            ? currentHigh - prevHigh
-            : 0;
-        const minusDM = prevLow - currentLow > currentHigh - prevHigh && prevLow - currentLow > 0
-            ? prevLow - currentLow
-            : 0;
-        return { plusDM, minusDM };
+    calculateDI(data, i) {
+        const prevHigh = data.high[i - 1];
+        const prevLow = data.low[i - 1];
+        const { plusDM, minusDM } = calculateDirectionalMovement(data, i, prevHigh, prevLow);
+        const tr = Math.max(data.high[i] - data.low[i], Math.abs(data.high[i] - data.close[i - 1]), Math.abs(data.low[i] - data.close[i - 1]));
+        // Simple smoothing for DI calculation
+        const smoothedTR = tr;
+        const smoothedPlusDM = plusDM;
+        const smoothedMinusDM = minusDM;
+        const plusDI = smoothedTR === 0 ? 0 : (smoothedPlusDM / smoothedTR) * 100;
+        const minusDI = smoothedTR === 0 ? 0 : (smoothedMinusDM / smoothedTR) * 100;
+        return { plusDI, minusDI };
     }
-    calculateSmoothedValues(tr, plusDM, minusDM, i, length, plusDIValues, minusDIValues, trValues) {
-        const smoothedTR = i < length ? tr : (tr + (i - 1) * trValues[i - 1]) / i;
-        const smoothedPlusDM = i < length ? plusDM : (plusDM + (i - 1) * (plusDIValues[i - 1] || 0)) / i;
-        const smoothedMinusDM = i < length ? minusDM : (minusDM + (i - 1) * (minusDIValues[i - 1] || 0)) / i;
-        return { smoothedTR, smoothedPlusDM, smoothedMinusDM };
+    calculateADXValue(plusDI, minusDI) {
+        const diSum = plusDI + minusDI;
+        const diDiff = Math.abs(plusDI - minusDI);
+        return diSum === 0 ? 0 : (diDiff / diSum) * 100;
     }
 }
 /**

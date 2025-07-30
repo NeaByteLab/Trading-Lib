@@ -18,6 +18,5 @@ import { PinePrice } from '@utils/pine-core';
  * ```
  */
 export function medianPrice(data) {
-    // Use PinePrice utilities instead of manual calculations
     return PinePrice.hl2(data);
 }

@@ -1,5 +1,4 @@
 import { BaseIndicator } from '@base/base-indicator'
-import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { validateIndicatorData } from '@utils/validation-utils'
 
@@ -33,14 +32,8 @@ export abstract class OscillatorIndicator extends BaseIndicator {
    */
   override validateInput(data: MarketData | number[], config?: IndicatorConfig): void {
     validateIndicatorData(data)
-
     const length = config?.length || this.defaultLength
-    if (length < this.minLength) {
-      throw new Error(ERROR_MESSAGES.LENGTH_MIN_REQUIRED.replace('{minLength}', this.minLength.toString()))
-    }
-    if (this.maxLength && length > this.maxLength) {
-      throw new Error(ERROR_MESSAGES.LENGTH_MAX_EXCEEDED.replace('{maxLength}', this.maxLength.toString()))
-    }
+    this.validateLength(length, this.minLength, this.maxLength)
   }
 
   /**
@@ -55,12 +48,9 @@ export abstract class OscillatorIndicator extends BaseIndicator {
    */
   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
     this.validateInput(data, config)
-
     const source = Array.isArray(data) ? data : data.close
     const length = config?.length || this.defaultLength
-
     const values = this.calculateOscillator(source, length)
-
     return {
       values,
       metadata: {

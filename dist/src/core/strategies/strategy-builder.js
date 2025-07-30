@@ -61,11 +61,9 @@ export class StrategyBuilder {
             if (prevFast === undefined || prevSlow === undefined || isNaN(prevFast) || isNaN(prevSlow)) {
                 return 0;
             }
-            // Bullish crossover: fast crosses above slow
             if (prevFast <= prevSlow && fast > slow) {
                 return 1;
             }
-            // Bearish crossover: fast crosses below slow
             else if (prevFast >= prevSlow && fast < slow) {
                 return -1;
             }
@@ -84,8 +82,10 @@ export class StrategyBuilder {
      */
     static createDivergence(priceData, indicatorData, length = 14) {
         const maxLength = MathUtils.max([priceData.close.length, indicatorData.values.length]);
-        const signals = [];
-        for (let i = length; i < maxLength; i++) {
+        return ArrayUtils.processArray(Array.from({ length: maxLength }, (_, i) => i), (_, i) => {
+            if (i < length) {
+                return 0;
+            }
             const priceSlice = priceData.close.slice(i - length + 1, i + 1);
             const indicatorSlice = indicatorData.values.slice(i - length + 1, i + 1);
             const priceHigh = MathUtils.max(priceSlice);
@@ -94,18 +94,15 @@ export class StrategyBuilder {
             const indicatorLow = MathUtils.min(indicatorSlice);
             const currentPrice = priceData.close[i];
             const currentIndicator = indicatorData.values[i];
-            // Bullish divergence: price makes lower low, indicator makes higher low
             if (currentPrice === priceLow && currentIndicator > indicatorLow) {
-                signals.push(1);
+                return 1;
             }
-            // Bearish divergence: price makes higher high, indicator makes lower high
             else if (currentPrice === priceHigh && currentIndicator < indicatorHigh) {
-                signals.push(-1);
+                return -1;
             }
             else {
-                signals.push(0);
+                return 0;
             }
-        }
-        return signals;
+        });
     }
 }

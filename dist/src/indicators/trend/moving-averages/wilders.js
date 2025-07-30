@@ -6,11 +6,15 @@ import { pineLength, pineSource } from '@utils/pine-script-utils';
 /**
  * Calculate Wilder's Smoothing
  *
+ * Applies Wilder's smoothing algorithm to price data.
+ * Formula: Smoothed = Previous + (Current - Previous) / Length
+ *
  * @param data - Source data array
- * @param length - Smoothing period
+ * @param length - Smoothing period (default: 14)
  * @returns Smoothed values array
+ * @throws {Error} If length is invalid
  */
-function calculateWilders(data, length) {
+function calculateWilders(data, length = 14) {
     if (length <= 0) {
         throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }

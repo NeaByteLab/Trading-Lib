@@ -10,7 +10,7 @@ import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/i
  * @example
  * ```typescript
  * const aroon = new AroonOscillator()
- * const result = aroon.calculate(marketData, { length: 14 })
+ * const result = aroon.calculate(marketData, { length: 25 })
  * console.log(result.values) // Aroon Oscillator values
  * ```
  */
@@ -23,7 +23,7 @@ export declare class AroonOscillator extends BaseIndicator {
  * Calculate Aroon Oscillator values using wrapper function
  *
  * @param data - Market data or price array
- * @param length - Calculation period (default: 14)
+ * @param length - Calculation period (default: 25)
  * @param source - Price source (default: 'close')
  * @returns Aroon Oscillator values array
  */

@@ -13,8 +13,8 @@
  * const changes = PineCore.change(prices) // [10, -5, 10, -13]
  * ```
  */
-import * as CalculationUtils from './calculation-utils';
-import { sanitizeArray } from './validation-utils';
+import * as CalculationUtils from '@core/utils/calculation-utils';
+import { sanitizeArray } from '@core/utils/validation-utils';
 /**
  * Pine Script Core Functions Interface
  * Provides all essential Pine Script functions in a unified interface
@@ -72,6 +72,10 @@ export declare const PineCore: {
     safeDivision: typeof CalculationUtils.safeDivision;
     sanitizeArray: typeof sanitizeArray;
     shiftArray: typeof CalculationUtils.shiftArray;
+    kthSmallest: typeof CalculationUtils.kthSmallest;
+    kthLargest: typeof CalculationUtils.kthLargest;
+    median: typeof CalculationUtils.calculateMedian;
+    percentile: typeof CalculationUtils.calculatePercentile;
 };
 /**
  * Pine Script Price Functions

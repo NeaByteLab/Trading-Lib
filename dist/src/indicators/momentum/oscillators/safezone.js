@@ -1,6 +1,5 @@
 import { VolatilityIndicator } from '@base/volatility-indicator';
-import { ArrayUtils } from '@utils/array-utils';
-import { calculateMean, calculateStandardDeviation } from '@utils/calculation-utils';
+import { calculateBands } from '@utils/calculation-utils';
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils';
 import { pineLength, pineSource } from '@utils/pine-script-utils';
 /**
@@ -12,36 +11,7 @@ import { pineLength, pineSource } from '@utils/pine-script-utils';
  * @returns Safezone values object
  */
 function calculateSafezone(data, length, multiplier) {
-    const result = {
-        upper: [],
-        middle: [],
-        lower: []
-    };
-    return ArrayUtils.processValidWindow(data, length, (window) => {
-        const validValues = window.filter(val => !isNaN(val));
-        if (validValues.length === 0) {
-            return {
-                upper: NaN,
-                middle: NaN,
-                lower: NaN
-            };
-        }
-        const ma = calculateMean(validValues);
-        const stdDev = calculateStandardDeviation(validValues);
-        const safezoneDistance = stdDev * multiplier;
-        return {
-            upper: ma + safezoneDistance,
-            middle: ma,
-            lower: ma - safezoneDistance
-        };
-    }).reduce((acc, curr) => {
-        if (typeof curr === 'object' && curr !== null) {
-            acc.upper.push(curr.upper);
-            acc.middle.push(curr.middle);
-            acc.lower.push(curr.lower);
-        }
-        return acc;
-    }, result);
+    return calculateBands(data, length, multiplier);
 }
 /**
  * Safezone Indicator

@@ -1,4 +1,4 @@
-import { VolatilityIndicator } from '@base/volatility-indicator';
+import { VolatilityIndicator } from '@core/base/volatility-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
  * Bollinger Bands Indicator
@@ -28,9 +28,10 @@ export declare class BollingerBandsIndicator extends VolatilityIndicator {
  * @param length - Calculation period (default: 20)
  * @param multiplier - Standard deviation multiplier (default: 2.0)
  * @param source - Price source (default: 'close')
+ * @param maType - Moving average type ('sma' or 'ema', default: 'sma')
  * @returns Bollinger Bands with upper, middle, and lower bands
  */
-export declare function bollinger(data: MarketData | number[], length?: number, multiplier?: number, source?: string): {
+export declare function bollinger(data: MarketData | number[], length?: number, multiplier?: number, source?: string, maType?: 'sma' | 'ema'): {
     upper: number[];
     middle: number[];
     lower: number[];

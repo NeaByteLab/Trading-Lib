@@ -1,7 +1,7 @@
 import { BaseIndicator } from '@base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Super Trend indicator
+ * Super Trend Indicator
  *
  * A trend-following indicator that combines ATR with price action.
  * Formula: Super Trend = ATR-based dynamic support/resistance levels
@@ -17,19 +17,6 @@ import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/i
 export declare class SuperTrend extends BaseIndicator {
     constructor();
     calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-    private calculateSuperTrend;
-    /**
-     * Calculate basic upper and lower bands
-     */
-    private calculateBasicBands;
-    /**
-     * Calculate final upper and lower bands
-     */
-    private calculateFinalBands;
-    /**
-     * Calculate Super Trend value based on current conditions
-     */
-    private calculateSuperTrendValue;
 }
 /**
  * Calculate Super Trend values using wrapper function

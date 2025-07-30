@@ -1,5 +1,4 @@
 import { BaseIndicator } from '@base/base-indicator'
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
 import { createIndicatorWrapper } from '@utils/indicator-utils'
@@ -16,7 +15,7 @@ import { pineLength, pineSource } from '@utils/pine-script-utils'
  * @example
  * ```typescript
  * const aroon = new AroonOscillator()
- * const result = aroon.calculate(marketData, { length: 14 })
+ * const result = aroon.calculate(marketData, { length: 25 })
  * console.log(result.values) // Aroon Oscillator values
  * ```
  */
@@ -28,7 +27,7 @@ export class AroonOscillator extends BaseIndicator {
   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
     this.validateInput(data, config)
     const source = pineSource(data, config?.source)
-    const length = pineLength(config?.length || DEFAULT_LENGTHS.ADX, DEFAULT_LENGTHS.ADX)
+    const length = pineLength(config?.length || 25, 25)
     const values = this.calculateAroonOscillator(source, length)
     return {
       values,
@@ -57,7 +56,7 @@ export class AroonOscillator extends BaseIndicator {
  * Calculate Aroon Oscillator values using wrapper function
  *
  * @param data - Market data or price array
- * @param length - Calculation period (default: 14)
+ * @param length - Calculation period (default: 25)
  * @param source - Price source (default: 'close')
  * @returns Aroon Oscillator values array
  */

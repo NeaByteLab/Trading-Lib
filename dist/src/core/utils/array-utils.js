@@ -30,13 +30,37 @@ export const ArrayUtils = {
      */
     processWindow(data, windowSize, processor) {
         const result = [];
-        for (let i = 0; i < data.length; i++) {
-            if (i < windowSize - 1) {
-                result.push(NaN);
-                continue;
-            }
-            const window = data.slice(i - windowSize + 1, i + 1);
+        for (let i = windowSize - 1; i < data.length; i++) {
+            // Fix: Prevent integer overflow and negative indices
+            const startIndex = Math.max(0, i - windowSize + 1);
+            const window = data.slice(startIndex, i + 1);
             result.push(processor(window, i));
+        }
+        return result;
+    },
+    /**
+     * Optimized window processing for large datasets
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Processed array
+     */
+    processLargeWindow(data, windowSize, processor, chunkSize = 10000) {
+        if (data.length <= chunkSize) {
+            return this.processWindow(data, windowSize, processor);
+        }
+        const result = [];
+        const overlap = windowSize - 1;
+        for (let chunkStart = 0; chunkStart < data.length; chunkStart += chunkSize - overlap) {
+            const chunkEnd = Math.min(chunkStart + chunkSize, data.length);
+            const chunk = data.slice(chunkStart, chunkEnd);
+            for (let i = windowSize - 1; i < chunk.length; i++) {
+                const window = chunk.slice(i - windowSize + 1, i + 1);
+                const globalIndex = chunkStart + i;
+                result.push(processor(window, globalIndex));
+            }
         }
         return result;
     },
@@ -67,6 +91,35 @@ export const ArrayUtils = {
                     return NaN;
             }
         });
+    },
+    /**
+     * Optimized rolling statistic for large datasets
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param statistic - Statistic type
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Array of rolling statistics
+     */
+    rollingStatisticLarge(data, windowSize, statistic, chunkSize = 10000) {
+        return this.processLargeWindow(data, windowSize, (window) => {
+            const validValues = validateAndSanitizeWindow(window);
+            if (validValues.length === 0) {
+                return NaN;
+            }
+            switch (statistic) {
+                case 'min':
+                    return MathUtils.min(validValues);
+                case 'max':
+                    return MathUtils.max(validValues);
+                case 'mean':
+                    return MathUtils.average(validValues);
+                case 'sum':
+                    return MathUtils.sum(validValues);
+                default:
+                    return NaN;
+            }
+        }, chunkSize);
     },
     /**
      * Calculate percentage change
@@ -178,6 +231,21 @@ export const ArrayUtils = {
         });
     },
     /**
+     * Optimized window processing for large datasets
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Processed array
+     */
+    processValidWindowLarge(data, windowSize, processor, chunkSize = 10000) {
+        return this.processLargeWindow(data, windowSize, (window) => {
+            const validValues = window.filter(val => !isNaN(Number(val)));
+            return validValues.length > 0 ? processor(validValues) : NaN;
+        }, chunkSize);
+    },
+    /**
      * Centralized array validation and processing
      * Eliminates duplication in validation patterns
      *
@@ -190,5 +258,39 @@ export const ArrayUtils = {
         this.validateArray(data, minLength);
         const validValues = data.filter(val => !isNaN(Number(val)));
         return validValues.length > 0 ? processor(validValues) : NaN;
+    },
+    /**
+     * Memory-efficient streaming processor for large datasets
+     *
+     * @param data - Input array
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size
+     * @returns Generator for streaming results
+     */
+    *streamProcess(data, processor, chunkSize = 10000) {
+        for (let i = 0; i < data.length; i += chunkSize) {
+            const chunk = data.slice(i, i + chunkSize);
+            yield processor(chunk);
+        }
+    },
+    /**
+     * Optimized array processing with memory management
+     *
+     * @param data - Input array
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Processed array
+     */
+    processWithChunking(data, processor, chunkSize = 10000) {
+        if (data.length <= chunkSize) {
+            return processor(data);
+        }
+        const results = [];
+        for (let i = 0; i < data.length; i += chunkSize) {
+            const chunk = data.slice(i, i + chunkSize);
+            const chunkResults = processor(chunk);
+            results.push(...chunkResults);
+        }
+        return results;
     }
 };

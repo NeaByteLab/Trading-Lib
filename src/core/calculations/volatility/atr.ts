@@ -1,8 +1,8 @@
+import { movingAverage } from '@calculations/moving-averages'
 import { ERROR_MESSAGES } from '@constants/indicator-constants'
+import { trueRange } from '@core/calculations/volatility/true-range'
 import type { MarketData } from '@core/types/indicator-types'
 import { wildersSmoothing } from '@utils/calculation-utils'
-
-import { trueRange } from './true-range'
 
 /**
  * Calculate Average True Range (ATR)
@@ -27,17 +27,15 @@ import { trueRange } from './true-range'
  * console.log(atrValues) // ATR values
  * ```
  */
-export function atr(data: MarketData, length: number, smoothing: 'wilders' | 'sma' = 'wilders'): number[] {
+export function atr(data: MarketData, length: number, smoothing: 'wilders' | 'rma' | 'sma' = 'wilders'): number[] {
   if (length <= 0) {
     throw new Error(ERROR_MESSAGES.INVALID_PARAMETERS)
   }
   const trValues = trueRange(data)
 
-  if (smoothing === 'wilders') {
+  if (smoothing === 'wilders' || smoothing === 'rma') {
     return wildersSmoothing(trValues, length)
   } else {
-    // Use simple moving average for smoothing
-    const { movingAverage } = require('@calculations/moving-averages')
     return movingAverage(trValues, length, 'sma')
   }
 }

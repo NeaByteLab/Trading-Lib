@@ -13,10 +13,10 @@
  * const changes = PineCore.change(prices) // [10, -5, 10, -13]
  * ```
  */
-import * as CalculationUtils from './calculation-utils';
-import { PriceCalculations } from './calculation-utils';
-import { MathUtils } from './math-utils';
-import { sanitizeArray } from './validation-utils';
+import * as CalculationUtils from '@core/utils/calculation-utils';
+import { PriceCalculations } from '@core/utils/calculation-utils';
+import { MathUtils } from '@core/utils/math-utils';
+import { sanitizeArray } from '@core/utils/validation-utils';
 /**
  * Pine Script Core Functions Interface
  * Provides all essential Pine Script functions in a unified interface
@@ -68,7 +68,12 @@ export const PineCore = {
     // Utility Functions
     safeDivision: CalculationUtils.safeDivision,
     sanitizeArray,
-    shiftArray: CalculationUtils.shiftArray
+    shiftArray: CalculationUtils.shiftArray,
+    // K-Selection Functions
+    kthSmallest: CalculationUtils.kthSmallest,
+    kthLargest: CalculationUtils.kthLargest,
+    median: CalculationUtils.calculateMedian,
+    percentile: CalculationUtils.calculatePercentile
 };
 /**
  * Pine Script Price Functions

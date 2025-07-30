@@ -102,6 +102,58 @@ export function loadStableData(count) {
     };
 }
 /**
+ * Load all available data for comprehensive testing
+ *
+ * @returns Complete market data
+ */
+export function loadAllData() {
+    return loadTestData();
+}
+/**
+ * Load data optimized for large period testing
+ *
+ * @param minPeriod - Minimum period to test (default: 200)
+ * @returns Market data with enough points for large period testing
+ */
+export function loadLargePeriodData(minPeriod = 200) {
+    const fullData = loadTestData();
+    const requiredLength = minPeriod * 3;
+    if (fullData.close.length < requiredLength) {
+        console.warn(`⚠️ Available data (${fullData.close.length}) is less than recommended (${requiredLength}) for period ${minPeriod}`);
+        return fullData;
+    }
+    return fullData;
+}
+/**
+ * Load data for specific market conditions
+ *
+ * @param condition - Market condition type
+ * @param count - Number of records (default: 500)
+ * @returns Market data for specific condition
+ */
+export function loadConditionalData(condition, count = 500) {
+    const fullData = loadTestData();
+    switch (condition) {
+        case 'bullish':
+            // Use data from bullish period (around line 40-140)
+            return loadTestDataSubset(40, Math.min(count, fullData.close.length - 40));
+        case 'bearish':
+            // Use data from bearish period (around line 150-250)
+            return loadTestDataSubset(150, Math.min(count, fullData.close.length - 150));
+        case 'sideways':
+            // Use data from sideways period (around line 200-300)
+            return loadTestDataSubset(200, Math.min(count, fullData.close.length - 200));
+        case 'volatile':
+            // Use data from volatile period (around line 50-150)
+            return loadTestDataSubset(50, Math.min(count, fullData.close.length - 50));
+        case 'stable':
+            // Use data from stable period (around line 300-400)
+            return loadTestDataSubset(300, Math.min(count, fullData.close.length - 300));
+        default:
+            return loadTestDataSubset(0, count);
+    }
+}
+/**
  * Get a subset of test data for specific test scenarios
  *
  * @param count - Number of records to return
@@ -132,6 +184,18 @@ export function getTestDataByType(type, count = 100) {
         default:
             return loadTestDataSubset(0, count);
     }
+}
+/**
+ * Get comprehensive test data for all examples
+ *
+ * @param useAllData - Whether to use all available data (default: true)
+ * @returns Market data optimized for comprehensive testing
+ */
+export function getComprehensiveTestData(useAllData = true) {
+    if (useAllData) {
+        return loadAllData();
+    }
+    return loadLargePeriodData(200);
 }
 function isValidArray(arr, length) {
     return Array.isArray(arr) && arr.length === length;

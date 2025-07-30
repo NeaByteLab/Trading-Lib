@@ -1,4 +1,3 @@
-import { VolatilityIndicator } from '@base/volatility-indicator';
 import type { MarketData } from '@core/types/indicator-types';
 /**
  * Standard Deviation Indicator
@@ -14,10 +13,18 @@ import type { MarketData } from '@core/types/indicator-types';
  * console.log(result.values) // Standard deviation values
  * ```
  */
-export declare class StandardDeviationIndicator extends VolatilityIndicator {
-    constructor();
-    protected calculateVolatility(data: number[], length: number, _multiplier: number): number[];
-}
+export declare const StandardDeviationIndicator: {
+    new (): {
+        calculate(data: MarketData | number[], config?: import("@core/types/indicator-types").IndicatorConfig): import("@core/types/indicator-types").IndicatorResult;
+        name: string;
+        description: string;
+        category: string;
+        validateInput(_data: MarketData | number[], _config?: import("@core/types/indicator-types").IndicatorConfig): void;
+        validateLength(length: number, minLength: number, maxLength?: number): void;
+        validateMultiplier(multiplier: number): void;
+        getSourceData(data: MarketData, source?: string): number[];
+    };
+};
 /**
  * Calculate Standard Deviation using wrapper function
  *

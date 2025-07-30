@@ -1,6 +1,7 @@
+import { movingAverage } from '@calculations/moving-averages';
 import { ERROR_MESSAGES } from '@constants/indicator-constants';
+import { trueRange } from '@core/calculations/volatility/true-range';
 import { wildersSmoothing } from '@utils/calculation-utils';
-import { trueRange } from './true-range';
 /**
  * Calculate Average True Range (ATR)
  *
@@ -29,12 +30,10 @@ export function atr(data, length, smoothing = 'wilders') {
         throw new Error(ERROR_MESSAGES.INVALID_PARAMETERS);
     }
     const trValues = trueRange(data);
-    if (smoothing === 'wilders') {
+    if (smoothing === 'wilders' || smoothing === 'rma') {
         return wildersSmoothing(trValues, length);
     }
     else {
-        // Use simple moving average for smoothing
-        const { movingAverage } = require('@calculations/moving-averages');
         return movingAverage(trValues, length, 'sma');
     }
 }

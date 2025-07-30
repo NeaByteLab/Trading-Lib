@@ -1,10 +1,10 @@
 import { BaseIndicator } from '@base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Directional Movement Index (DMI) indicator
+ * DMI (Directional Movement Index) Indicator
  *
- * Measures the strength of directional movement in price.
- * Formula: +DI = (Smoothed +DM / Smoothed TR) × 100, -DI = (Smoothed -DM / Smoothed TR) × 100
+ * Measures the strength and direction of price movement.
+ * Consists of +DI and -DI components.
  *
  * @example
  * ```typescript
@@ -18,8 +18,7 @@ export declare class DMI extends BaseIndicator {
     constructor();
     calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
     private calculateDMI;
-    private calculateDirectionalMovement;
-    private calculateSmoothedValues;
+    private calculateDI;
 }
 /**
  * Calculate DMI values using wrapper function

@@ -1,7 +1,7 @@
 import { BaseIndicator } from '@base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Ichimoku Cloud indicator
+ * Ichimoku Cloud Indicator
  *
  * Provides multiple components of the Ichimoku Cloud system:
  * - Tenkan-sen (Conversion Line)
@@ -23,51 +23,7 @@ import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/i
  */
 export declare class IchimokuCloud extends BaseIndicator {
     constructor();
-    /**
-     * Calculate Ichimoku Cloud values
-     *
-     * @param data - Market data
-     * @param config - Indicator configuration
-     * @returns Ichimoku Cloud calculation result
-     */
     calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-    /**
-     * Calculate Ichimoku Cloud components using centralized utilities
-     *
-     * @param data - Market data
-     * @param tenkanPeriod - Tenkan-sen period
-     * @param kijunPeriod - Kijun-sen period
-     * @param senkouBPeriod - Senkou Span B period
-     * @param displacement - Displacement period
-     * @returns All Ichimoku components
-     */
-    private calculateIchimoku;
-    /**
-     * Calculate midpoint (highest high + lowest low) / 2
-     *
-     * @param high - High prices array
-     * @param low - Low prices array
-     * @param period - Calculation period
-     * @returns Midpoint values array
-     */
-    private calculateMidpoint;
-    /**
-     * Calculate Senkou Span A
-     *
-     * @param tenkan - Tenkan-sen values
-     * @param kijun - Kijun-sen values
-     * @param displacement - Displacement period
-     * @returns Senkou Span A values
-     */
-    private calculateSenkouA;
-    /**
-     * Shift array by specified amount
-     *
-     * @param array - Input array
-     * @param shift - Shift amount (positive = forward, negative = backward)
-     * @returns Shifted array
-     */
-    private shiftArray;
 }
 /**
  * Calculate Ichimoku Cloud values using wrapper function

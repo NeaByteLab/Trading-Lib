@@ -1,15 +1,11 @@
 import { BaseIndicator } from '@base/base-indicator';
-import { movingAverage } from '@calculations/moving-averages';
 import { DEFAULT_LENGTHS } from '@constants/indicator-constants';
 import { rsi } from '@indicators/momentum/oscillators/rsi';
-import { ArrayUtils } from '@utils/array-utils';
-import { calculateRangePercentage } from '@utils/calculation-utils';
+import { calculateStochasticRSI } from '@utils/calculation-utils';
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils';
-import { PineCore } from '@utils/pine-core';
 import { pineLength } from '@utils/pine-script-utils';
-import { sanitizeArray } from '@utils/validation-utils';
 /**
- * Stochastic RSI indicator
+ * Stochastic RSI Indicator
  *
  * A momentum oscillator that applies the Stochastic formula to RSI values.
  * Formula: StochRSI = (RSI - RSI_min) / (RSI_max - RSI_min)
@@ -45,15 +41,7 @@ export class StochasticRSI extends BaseIndicator {
     }
     calculateStochasticRSI(data, rsiLength, kLength, dLength) {
         const rsiValues = Array.isArray(data) ? rsi(data, rsiLength) : rsi(data.close, rsiLength);
-        const k = ArrayUtils.processWindow(rsiValues, kLength, (window, i) => {
-            const currentRSI = rsiValues[i];
-            const validValues = sanitizeArray(window);
-            const maxRSI = PineCore.max(validValues);
-            const minRSI = PineCore.min(validValues);
-            return calculateRangePercentage(currentRSI, minRSI, maxRSI, 1);
-        });
-        const d = movingAverage(k, dLength, 'sma');
-        return { k, d };
+        return calculateStochasticRSI(rsiValues, kLength, dLength);
     }
 }
 /**

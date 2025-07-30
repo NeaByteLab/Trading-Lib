@@ -30,11 +30,11 @@ export function moneyFlowIndex(data, length) {
     return ArrayUtils.processWindow(typicalPrices, length, (window, i) => {
         const { positiveFlow, negativeFlow } = calculateMoneyFlows(window, data.volume, i, length);
         if (negativeFlow === 0) {
-            return 100;
+            return positiveFlow > 0 ? 100 : 50;
         }
         else {
             const moneyRatio = positiveFlow / negativeFlow;
-            return 100 - (100 / (1 + moneyRatio));
+            return 100 - 100 / (1 + moneyRatio);
         }
     });
 }
@@ -48,7 +48,6 @@ export function moneyFlowIndex(data, length) {
  * @returns Positive and negative money flows
  */
 function calculateMoneyFlows(typicalPrices, volumes, currentIndex, length) {
-    // Use centralized window slicing utility
     const windowPrices = ArrayUtils.getWindowSlice(typicalPrices, currentIndex, length);
     const windowVolumes = ArrayUtils.getWindowSlice(volumes, currentIndex, length);
     let positiveFlow = 0;

@@ -1,6 +1,5 @@
-import { BaseIndicator } from '@base/base-indicator';
-import { ERROR_MESSAGES } from '@constants/indicator-constants';
-import { validateIndicatorData } from '@utils/validation-utils';
+import { BaseIndicator } from '@core/base/base-indicator';
+import { validateIndicatorData } from '@core/utils/validation-utils';
 /**
  * Base class for volatility indicators
  * Eliminates duplication in volatility validation and processing patterns
@@ -25,16 +24,11 @@ export class VolatilityIndicator extends BaseIndicator {
      */
     validateInput(data, config) {
         validateIndicatorData(data);
-        const length = config?.length || this.defaultLength;
-        if (length < this.minLength) {
-            throw new Error(ERROR_MESSAGES.LENGTH_MIN_REQUIRED.replace('{minLength}', this.minLength.toString()));
-        }
-        if (this.maxLength && length > this.maxLength) {
-            throw new Error(ERROR_MESSAGES.LENGTH_MAX_EXCEEDED.replace('{maxLength}', this.maxLength.toString()));
-        }
+        const length = config?.length !== undefined ? config.length : this.defaultLength;
+        this.validateLength(length, this.minLength, this.maxLength);
         const multiplier = config?.['multiplier'];
-        if (multiplier <= 0) {
-            throw new Error(ERROR_MESSAGES.INVALID_MULTIPLIER);
+        if (multiplier !== undefined) {
+            this.validateMultiplier(multiplier);
         }
     }
     /**

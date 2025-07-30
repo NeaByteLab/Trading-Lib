@@ -1,5 +1,6 @@
-import { ERROR_MESSAGES } from '@constants/indicator-constants';
-import { PriceCalculations } from '@utils/calculation-utils';
+import { ERROR_MESSAGES } from '@core/constants/indicator-constants';
+import { PriceCalculations } from '@core/utils/calculation-utils';
+import { validateIndicatorData } from '@core/utils/validation-utils';
 /**
  * Base class for all technical indicators
  * Provides common functionality and validation
@@ -16,11 +17,32 @@ export class BaseIndicator {
     /**
      * Validate input data and configuration
      *
-     * @param _data - Input data (unused in base implementation)
-     * @param _config - Configuration (unused in base implementation)
+     * @param _data - Input data
+     * @param _config - Configuration
      */
     validateInput(_data, _config) {
-        // Base implementation - override in subclasses for specific validation
+        validateIndicatorData(_data);
+    }
+    /**
+     * Centralized length validation
+     * Eliminates duplication across all indicators
+     */
+    validateLength(length, minLength, maxLength) {
+        if (length < minLength) {
+            throw new Error(ERROR_MESSAGES.LENGTH_MIN_REQUIRED.replace('{minLength}', minLength.toString()));
+        }
+        if (maxLength && length > maxLength) {
+            throw new Error(ERROR_MESSAGES.LENGTH_MAX_EXCEEDED.replace('{maxLength}', maxLength.toString()));
+        }
+    }
+    /**
+     * Centralized multiplier validation
+     * Eliminates duplication across volatility indicators
+     */
+    validateMultiplier(multiplier) {
+        if (multiplier <= 0) {
+            throw new Error(ERROR_MESSAGES.INVALID_MULTIPLIER);
+        }
     }
     /**
      * Get source data based on configuration

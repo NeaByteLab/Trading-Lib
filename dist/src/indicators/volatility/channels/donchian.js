@@ -1,93 +1,54 @@
-import { VolatilityIndicator } from '@base/volatility-indicator';
-import { ERROR_MESSAGES } from '@constants/indicator-constants';
-import { ArrayUtils } from '@utils/array-utils';
-import { MathUtils } from '@utils/math-utils';
-import { pineLength } from '@utils/pine-script-utils';
-/**
- * Calculate Donchian Channel
- *
- * Upper Band = Highest High over n periods
- * Lower Band = Lowest Low over n periods
- * Middle Band = (Upper + Lower) / 2
- *
- * @param high - High prices array
- * @param low - Low prices array
- * @param length - Lookback period
- * @returns Object with upper, middle, and lower bands
- */
-function calculateDonchianChannel(high, low, length) {
-    const upper = ArrayUtils.processArray(high, (_, i) => {
-        if (i < length - 1) {
-            return NaN;
-        }
-        const window = ArrayUtils.getWindowSlice(high, i, length);
-        const validValues = window.filter(val => !isNaN(val));
-        return validValues.length > 0 ? MathUtils.max(validValues) : NaN;
-    });
-    const lower = ArrayUtils.processArray(low, (_, i) => {
-        if (i < length - 1) {
-            return NaN;
-        }
-        const window = ArrayUtils.getWindowSlice(low, i, length);
-        const validValues = window.filter(val => !isNaN(val));
-        return validValues.length > 0 ? MathUtils.min(validValues) : NaN;
-    });
-    const middle = ArrayUtils.processArray(upper, (upperVal, i) => {
-        const lowerVal = lower[i];
-        return !isNaN(upperVal) && lowerVal !== undefined && !isNaN(lowerVal) ? (upperVal + lowerVal) / 2 : NaN;
-    });
-    return { upper, middle, lower };
-}
+import { BaseIndicator } from '@core/base/base-indicator';
+import { DEFAULT_LENGTHS } from '@core/constants/indicator-constants';
+import { calculateDonchianChannel } from '@core/utils/calculation-utils';
+import { createMultiResultIndicatorWrapper } from '@core/utils/indicator-utils';
+import { pineLength } from '@core/utils/pine-script-utils';
 /**
  * Donchian Channel Indicator
  *
- * Measures volatility by calculating the highest high and lowest low over a period.
- * Upper band = highest high, lower band = lowest low, middle band = average of both.
+ * A volatility indicator that shows the highest high and lowest low over a specified period.
+ * Upper Band = Highest High, Lower Band = Lowest Low, Middle Band = (Upper + Lower) / 2
  *
  * @example
  * ```typescript
- * const donchian = new DonchianChannelIndicator()
+ * const donchian = new DonchianChannel()
  * const result = donchian.calculate(marketData, { length: 20 })
  * console.log(result.values) // Middle band values
  * console.log(result.metadata.upper) // Upper band values
  * console.log(result.metadata.lower) // Lower band values
  * ```
  */
-export class DonchianChannelIndicator extends VolatilityIndicator {
+export class DonchianChannel extends BaseIndicator {
     constructor() {
-        super('DonchianChannelIndicator', 'Donchian Channel', 20, 1.0, 1);
-    }
-    calculateVolatility(_data, _length, _multiplier) {
-        return [];
+        super('Donchian', 'Donchian Channel', 'volatility');
     }
     calculate(data, config) {
         this.validateInput(data, config);
-        if (Array.isArray(data)) {
-            throw new Error(ERROR_MESSAGES.MISSING_OHLC);
-        }
-        const length = pineLength(config?.length || 20, 20);
-        const { upper, middle, lower } = calculateDonchianChannel(data.high, data.low, length);
+        const length = pineLength(config?.length || DEFAULT_LENGTHS.DONCHIAN, DEFAULT_LENGTHS.DONCHIAN);
+        const { upper, middle, lower } = this.calculateDonchianChannel(data, length);
         return {
             values: middle,
             metadata: {
                 length,
+                source: 'hlc3',
                 upper,
-                lower,
-                source: config?.source || 'close'
+                lower
             }
         };
     }
+    calculateDonchianChannel(data, length) {
+        return calculateDonchianChannel(data.high, data.low, length);
+    }
 }
 /**
- * Calculate Donchian Channel using wrapper function
+ * Calculate Donchian Channel values using wrapper function
  *
- * @param data - Market data with high, low arrays
- * @param length - Lookback period (default: 20)
- * @returns Object with upper, middle, and lower bands
+ * @param data - Market data
+ * @param length - Calculation period (default: 20)
+ * @returns Object with upper, middle, and lower band arrays
  */
-export function donchianChannel(data, length = 20) {
-    const indicator = new DonchianChannelIndicator();
-    const result = indicator.calculate(data, { length });
+export function donchianChannel(data, length) {
+    const result = createMultiResultIndicatorWrapper(DonchianChannel, data, length);
     return {
         upper: result.metadata['upper'],
         middle: result.values,

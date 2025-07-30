@@ -7,5 +7,5 @@
  * @returns Array of moving average values
  * @throws {Error} If data is empty or length is invalid
  */
-export declare function movingAverage(data: number[], length: number, type?: 'sma' | 'ema' | 'wma' | 'hull'): number[];
+export declare function movingAverage(data: number[], length: number, type?: 'sma' | 'ema' | 'wma' | 'hull' | 'rma'): number[];
 //# sourceMappingURL=index.d.ts.map

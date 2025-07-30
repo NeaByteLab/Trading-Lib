@@ -1,21 +1,4 @@
-import { BaseIndicator } from '@base/base-indicator';
-import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
-/**
- * Absolute Price Oscillator indicator
- *
- * APO = Fast EMA - Slow EMA
- *
- * @example
- * ```typescript
- * const apo = new APO()
- * const result = apo.calculate(marketData, { fastLength: 12, slowLength: 26 })
- * console.log(result.values) // APO values
- * ```
- */
-export declare class APO extends BaseIndicator {
-    constructor();
-    calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-}
+import type { MarketData } from '@core/types/indicator-types';
 /**
  * Calculate Absolute Price Oscillator values
  *

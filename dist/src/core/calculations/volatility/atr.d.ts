@@ -22,5 +22,5 @@ import type { MarketData } from '@core/types/indicator-types';
  * console.log(atrValues) // ATR values
  * ```
  */
-export declare function atr(data: MarketData, length: number, smoothing?: 'wilders' | 'sma'): number[];
+export declare function atr(data: MarketData, length: number, smoothing?: 'wilders' | 'rma' | 'sma'): number[];
 //# sourceMappingURL=atr.d.ts.map

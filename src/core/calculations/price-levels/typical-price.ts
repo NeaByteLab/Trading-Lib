@@ -21,6 +21,5 @@ import { PinePrice } from '@utils/pine-core'
  * ```
  */
 export function typicalPrice(data: MarketData): number[] {
-  // Use PinePrice utilities instead of manual calculations
   return PinePrice.hlc3(data)
 }

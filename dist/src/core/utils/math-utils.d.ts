@@ -7,21 +7,19 @@ export declare const MathUtils: {
      */
     abs(value: number): number;
     /**
-     * Find minimum value in array
-     *
-     * @param array - Input array
-     * @returns Minimum value
-     * @throws {Error} If array is empty
-     */
-    min(array: number[]): number;
-    /**
      * Find maximum value in array
      *
      * @param array - Input array
-     * @returns Maximum value
-     * @throws {Error} If array is empty
+     * @returns Maximum value or NaN if array is empty
      */
     max(array: number[]): number;
+    /**
+     * Find minimum value in array
+     *
+     * @param array - Input array
+     * @returns Minimum value or NaN if array is empty
+     */
+    min(array: number[]): number;
     /**
      * Calculate square root
      *
@@ -61,21 +59,21 @@ export declare const MathUtils: {
     /**
      * Calculate sine
      *
-     * @param value - Input value in radians
+     * @param value - Input value
      * @returns Sine value
      */
     sin(value: number): number;
     /**
      * Calculate cosine
      *
-     * @param value - Input value in radians
+     * @param value - Input value
      * @returns Cosine value
      */
     cos(value: number): number;
     /**
      * Calculate tangent
      *
-     * @param value - Input value in radians
+     * @param value - Input value
      * @returns Tangent value
      */
     tan(value: number): number;
@@ -83,25 +81,25 @@ export declare const MathUtils: {
      * Calculate arcsine
      *
      * @param value - Input value
-     * @returns Arcsine value in radians
+     * @returns Arcsine value
      */
     asin(value: number): number;
     /**
      * Calculate arccosine
      *
      * @param value - Input value
-     * @returns Arccosine value in radians
+     * @returns Arccosine value
      */
     acos(value: number): number;
     /**
      * Calculate arctangent
      *
      * @param value - Input value
-     * @returns Arctangent value in radians
+     * @returns Arctangent value
      */
     atan(value: number): number;
     /**
-     * Calculate floor value
+     * Calculate floor
      *
      * @param value - Input value
      * @returns Floor value
@@ -131,16 +129,16 @@ export declare const MathUtils: {
     /**
      * Calculate modulo
      *
-     * @param dividend - Dividend
-     * @param divisor - Divisor
+     * @param dividend - Dividend value
+     * @param divisor - Divisor value
      * @returns Modulo result
      */
     mod(dividend: number, divisor: number): number;
     /**
      * Calculate remainder
      *
-     * @param dividend - Dividend
-     * @param divisor - Divisor
+     * @param dividend - Dividend value
+     * @param divisor - Divisor value
      * @returns Remainder result
      */
     rem(dividend: number, divisor: number): number;
@@ -168,41 +166,37 @@ export declare const MathUtils: {
      */
     lcm(a: number, b: number): number;
     /**
-     * Calculate sum of array
+     * Calculate sum with numerical stability
      *
      * @param array - Input array
-     * @returns Sum result
-     * @throws {Error} If array is empty
+     * @returns Sum value
      */
     sum(array: number[]): number;
     /**
-     * Calculate average of array
+     * Calculate average with numerical stability
      *
      * @param array - Input array
-     * @returns Average result
-     * @throws {Error} If array is empty
+     * @returns Average value
      */
     average(array: number[]): number;
     /**
-     * Find minimum value in window
+     * Calculate rolling minimum
      *
      * @param array - Input array
      * @param windowSize - Window size
-     * @returns Array of minimum values
-     * @throws {Error} If windowSize is invalid
+     * @returns Array of rolling minimum values
      */
     rollingMin(array: number[], windowSize: number): number[];
     /**
-     * Find maximum value in window
+     * Calculate rolling maximum
      *
      * @param array - Input array
      * @param windowSize - Window size
-     * @returns Array of maximum values
-     * @throws {Error} If windowSize is invalid
+     * @returns Array of rolling maximum values
      */
     rollingMax(array: number[], windowSize: number): number[];
     /**
-     * Calculate change between two values
+     * Calculate change between values
      *
      * @param current - Current value
      * @param previous - Previous value
@@ -210,35 +204,33 @@ export declare const MathUtils: {
      */
     change(current: number, previous: number): number;
     /**
-     * Calculate changes for array
+     * Calculate array of changes
      *
      * @param array - Input array
      * @returns Array of changes
      */
     changeArray(array: number[]): number[];
     /**
-     * Calculate absolute values for array
+     * Calculate absolute values of array
      *
      * @param array - Input array
      * @returns Array of absolute values
      */
     absArray(array: number[]): number[];
     /**
-     * Calculate highest value in window
+     * Calculate highest values in rolling window
      *
      * @param array - Input array
      * @param windowSize - Window size
-     * @returns Array with highest values
-     * @throws {Error} If windowSize is invalid
+     * @returns Array of highest values
      */
     highest(array: number[], windowSize: number): number[];
     /**
-     * Calculate lowest value in window
+     * Calculate lowest values in rolling window
      *
      * @param array - Input array
      * @param windowSize - Window size
-     * @returns Array with lowest values
-     * @throws {Error} If windowSize is invalid
+     * @returns Array of lowest values
      */
     lowest(array: number[], windowSize: number): number[];
     /**
@@ -254,9 +246,63 @@ export declare const MathUtils: {
      * Round value to specified decimals
      *
      * @param value - Input value
-     * @param decimals - Number of decimal places (default: 0)
+     * @param decimals - Number of decimal places
      * @returns Rounded value
      */
     round(value: number, decimals?: number): number;
+    /**
+     * Calculate correlation coefficient
+     *
+     * @param x - First array
+     * @param y - Second array
+     * @returns Correlation coefficient
+     */
+    correlation(x: number[], y: number[]): number;
+    /**
+     * Transpose matrix
+     *
+     * @param matrix - Input matrix
+     * @returns Transposed matrix
+     */
+    transpose(matrix: number[][]): number[][];
+    /**
+     * Multiply matrices
+     *
+     * @param a - First matrix
+     * @param b - Second matrix
+     * @returns Product matrix
+     */
+    multiply(a: number[][], b: number[][]): number[][];
+    /**
+     * Create augmented matrix for Gaussian elimination
+     *
+     * @param A - Coefficient matrix
+     * @param b - Constant vector
+     * @returns Augmented matrix
+     */
+    createAugmentedMatrix(A: number[][], b: number[][]): number[][];
+    /**
+     * Perform Gaussian elimination with partial pivoting
+     *
+     * @param augmented - Augmented matrix
+     * @param n - Matrix size
+     */
+    performGaussianElimination(augmented: number[][], n: number): void;
+    /**
+     * Perform back substitution to solve the system
+     *
+     * @param augmented - Augmented matrix in row echelon form
+     * @param n - Matrix size
+     * @returns Solution vector
+     */
+    backSubstitution(augmented: number[][], n: number): number[];
+    /**
+     * Solve linear system using Gaussian elimination
+     *
+     * @param A - Coefficient matrix
+     * @param b - Constant vector
+     * @returns Solution vector
+     */
+    solveLinearSystem(A: number[][], b: number[][]): number[][];
 };
 //# sourceMappingURL=math-utils.d.ts.map

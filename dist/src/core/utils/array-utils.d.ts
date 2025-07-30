@@ -21,6 +21,16 @@ export declare const ArrayUtils: {
      */
     processWindow<T, R>(data: T[], windowSize: number, processor: (window: T[], index: number) => R): R[];
     /**
+     * Optimized window processing for large datasets
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Processed array
+     */
+    processLargeWindow<T, R>(data: T[], windowSize: number, processor: (window: T[], index: number) => R, chunkSize?: number): R[];
+    /**
      * Calculate rolling statistic
      *
      * @param data - Input array
@@ -29,6 +39,16 @@ export declare const ArrayUtils: {
      * @returns Array of rolling statistics
      */
     rollingStatistic(data: number[], windowSize: number, statistic: "min" | "max" | "mean" | "sum"): number[];
+    /**
+     * Optimized rolling statistic for large datasets
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param statistic - Statistic type
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Array of rolling statistics
+     */
+    rollingStatisticLarge(data: number[], windowSize: number, statistic: "min" | "max" | "mean" | "sum", chunkSize?: number): number[];
     /**
      * Calculate percentage change
      *
@@ -89,6 +109,16 @@ export declare const ArrayUtils: {
      */
     processValidWindow<T, R>(data: T[], windowSize: number, processor: (validWindow: T[]) => R): (R | number)[];
     /**
+     * Optimized window processing for large datasets
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Processed array
+     */
+    processValidWindowLarge<T, R>(data: T[], windowSize: number, processor: (validWindow: T[]) => R, chunkSize?: number): (R | number)[];
+    /**
      * Centralized array validation and processing
      * Eliminates duplication in validation patterns
      *
@@ -98,5 +128,23 @@ export declare const ArrayUtils: {
      * @returns Processed array
      */
     processValidArray<T, R>(data: T[], processor: (validData: T[]) => R, minLength?: number): R | number;
+    /**
+     * Memory-efficient streaming processor for large datasets
+     *
+     * @param data - Input array
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size
+     * @returns Generator for streaming results
+     */
+    streamProcess<T, R>(data: T[], processor: (chunk: T[]) => R[], chunkSize?: number): Generator<R[], void, unknown>;
+    /**
+     * Optimized array processing with memory management
+     *
+     * @param data - Input array
+     * @param processor - Processing function
+     * @param chunkSize - Chunk size for large datasets
+     * @returns Processed array
+     */
+    processWithChunking<T, R>(data: T[], processor: (chunk: T[]) => R[], chunkSize?: number): R[];
 };
 //# sourceMappingURL=array-utils.d.ts.map

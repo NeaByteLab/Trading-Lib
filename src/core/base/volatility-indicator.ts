@@ -1,7 +1,6 @@
-import { BaseIndicator } from '@base/base-indicator'
-import { ERROR_MESSAGES } from '@constants/indicator-constants'
+import { BaseIndicator } from '@core/base/base-indicator'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
-import { validateIndicatorData } from '@utils/validation-utils'
+import { validateIndicatorData } from '@core/utils/validation-utils'
 
 /**
  * Base class for volatility indicators
@@ -36,18 +35,11 @@ export abstract class VolatilityIndicator extends BaseIndicator {
    */
   override validateInput(data: MarketData | number[], config?: IndicatorConfig): void {
     validateIndicatorData(data)
-
-    const length = config?.length || this.defaultLength
-    if (length < this.minLength) {
-      throw new Error(ERROR_MESSAGES.LENGTH_MIN_REQUIRED.replace('{minLength}', this.minLength.toString()))
-    }
-    if (this.maxLength && length > this.maxLength) {
-      throw new Error(ERROR_MESSAGES.LENGTH_MAX_EXCEEDED.replace('{maxLength}', this.maxLength.toString()))
-    }
-
+    const length = config?.length !== undefined ? config.length : this.defaultLength
+    this.validateLength(length, this.minLength, this.maxLength)
     const multiplier = config?.['multiplier'] as number
-    if (multiplier <= 0) {
-      throw new Error(ERROR_MESSAGES.INVALID_MULTIPLIER)
+    if (multiplier !== undefined) {
+      this.validateMultiplier(multiplier)
     }
   }
 
@@ -63,13 +55,10 @@ export abstract class VolatilityIndicator extends BaseIndicator {
    */
   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
     this.validateInput(data, config)
-
     const source = Array.isArray(data) ? data : data.close
     const length = config?.length || this.defaultLength
     const multiplier = (config?.['multiplier'] as number) || this.defaultMultiplier
-
     const values = this.calculateVolatility(source, length, multiplier)
-
     return {
       values,
       metadata: {

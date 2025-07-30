@@ -1,7 +1,7 @@
 import { BaseIndicator } from '@base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Parabolic SAR (Stop and Reverse) indicator
+ * Parabolic SAR Indicator
  *
  * Calculates dynamic support and resistance levels that follow price action.
  * Used to identify potential reversal points and trend direction.
@@ -16,18 +16,6 @@ import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/i
 export declare class ParabolicSAR extends BaseIndicator {
     constructor();
     calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-    /**
-     * Calculate Parabolic SAR values using centralized utilities
-     *
-     * @param data - Market data
-     * @param acceleration - Acceleration factor
-     * @param maximum - Maximum acceleration
-     * @returns Parabolic SAR values array
-     */
-    private handleLongPosition;
-    private handleShortPosition;
-    private applyStopLoss;
-    private calculateParabolicSAR;
 }
 /**
  * Calculate Parabolic SAR values using wrapper function

@@ -19,7 +19,6 @@ export class StrategyBuilder {
     if (!indicators || indicators.length === 0) {
       throw new Error(ERROR_MESSAGES.INDICATORS_REQUIRED)
     }
-
     const maxLength = MathUtils.max(indicators.map(ind => ind.values.length))
     const combinedValues = ArrayUtils.processArray(Array.from({ length: maxLength }, (_, i) => i), (_, i) => {
       const validValues = indicators
@@ -32,7 +31,6 @@ export class StrategyBuilder {
         return MathUtils.average(validValues)
       }
     })
-
     return {
       values: combinedValues,
       metadata: {
@@ -55,27 +53,20 @@ export class StrategyBuilder {
     return ArrayUtils.processArray(Array.from({ length: maxLength }, (_, i) => i), (_, i) => {
       const fast = fastIndicator.values[i]
       const slow = slowIndicator.values[i]
-
       if (fast === undefined || slow === undefined || isNaN(fast) || isNaN(slow)) {
         return NaN
       }
-
       if (i === 0) {
         return 0
       }
-
       const prevFast = fastIndicator.values[i - 1]
       const prevSlow = slowIndicator.values[i - 1]
-
       if (prevFast === undefined || prevSlow === undefined || isNaN(prevFast) || isNaN(prevSlow)) {
         return 0
       }
-
-      // Bullish crossover: fast crosses above slow
       if (prevFast <= prevSlow && fast > slow) {
         return 1
       }
-      // Bearish crossover: fast crosses below slow
       else if (prevFast >= prevSlow && fast < slow) {
         return -1
       }
@@ -99,33 +90,27 @@ export class StrategyBuilder {
     length: number = 14
   ): number[] {
     const maxLength = MathUtils.max([priceData.close.length, indicatorData.values.length])
-    const signals: number[] = []
-
-    for (let i = length; i < maxLength; i++) {
+    return ArrayUtils.processArray(Array.from({ length: maxLength }, (_, i) => i), (_, i) => {
+      if (i < length) {
+        return 0
+      }
       const priceSlice = priceData.close.slice(i - length + 1, i + 1)
       const indicatorSlice = indicatorData.values.slice(i - length + 1, i + 1)
-
       const priceHigh = MathUtils.max(priceSlice)
       const priceLow = MathUtils.min(priceSlice)
       const indicatorHigh = MathUtils.max(indicatorSlice)
       const indicatorLow = MathUtils.min(indicatorSlice)
-
       const currentPrice = priceData.close[i]!
       const currentIndicator = indicatorData.values[i]!
-
-      // Bullish divergence: price makes lower low, indicator makes higher low
       if (currentPrice === priceLow && currentIndicator > indicatorLow) {
-        signals.push(1)
+        return 1
       }
-      // Bearish divergence: price makes higher high, indicator makes lower high
       else if (currentPrice === priceHigh && currentIndicator < indicatorHigh) {
-        signals.push(-1)
+        return -1
       }
       else {
-        signals.push(0)
+        return 0
       }
-    }
-
-    return signals
+    })
   }
 }

@@ -7,6 +7,7 @@ export declare const DEFAULT_LENGTHS: {
     readonly EMA: 20;
     readonly WMA: 20;
     readonly HULL: 20;
+    readonly RMA: 20;
     readonly RSI: 14;
     readonly MACD: 12;
     readonly MACD_SIGNAL: 26;
@@ -43,6 +44,7 @@ export declare const DEFAULT_LENGTHS: {
     readonly SHANNON_BINS: 8;
     readonly SAFEZONE: 20;
     readonly SAFEZONE_MULT: 2;
+    readonly DPO: 20;
 };
 /**
  * Default multipliers for technical indicators
@@ -86,8 +88,13 @@ export type PineSource = typeof PINE_SOURCE_OPTIONS[number];
 export declare const ERROR_MESSAGES: {
     readonly ARRAY_LENGTH_MISMATCH: "All data arrays must have the same length";
     readonly ARRAY_REQUIRED: "Data must be an array";
+    readonly ATR_VALUES_REQUIRED: "ATR values array is required";
+    readonly CLOSE_ATR_LENGTH_MISMATCH: "Close and ATR arrays must have the same length";
+    readonly CLOSE_VOLUME_LENGTH_MISMATCH: "Close and volume arrays must have the same length";
+    readonly EMPTY_AFTER_NAN: "Array cannot be empty after filtering NaN values";
     readonly EMPTY_DATA: "Data array cannot be empty";
     readonly FAST_LENGTH_GREATER: "Fast length must be less than slow length";
+    readonly HIGH_LOW_LENGTH_MISMATCH: "High and low arrays must have the same length";
     readonly INDICATORS_REQUIRED: "At least one indicator is required";
     readonly INVALID_ALPHA: "Alpha must be between 0 and 1";
     readonly INVALID_DATA_FORMAT: "Invalid market data format";
@@ -95,9 +102,11 @@ export declare const ERROR_MESSAGES: {
     readonly INVALID_MOVING_AVERAGE_TYPE: "Invalid moving average type";
     readonly INVALID_MULTIPLIER: "Multiplier must be positive";
     readonly INVALID_PARAMETERS: "Invalid parameters for calculation";
+    readonly INVALID_PERCENTILE: "Percentile must be between 0 and 100";
     readonly INVALID_SIGMA: "Sigma must be positive";
     readonly INVALID_SOURCE: "Invalid source parameter";
     readonly INVALID_WINDOW_SIZE: "Window size must be positive";
+    readonly K_OUT_OF_BOUNDS: "K must be between 0 and {maxIndex}";
     readonly LENGTH_MAX_EXCEEDED: "Length must not exceed {maxLength}";
     readonly LENGTH_MIN_REQUIRED: "Length must be at least {minLength}";
     readonly MIN_LENGTH_REQUIRED: "Data must have at least {minLength} elements";
@@ -105,6 +114,7 @@ export declare const ERROR_MESSAGES: {
     readonly MISSING_OHLCV: "OHLCV market data is required";
     readonly MISSING_VOLUME: "Volume data is required";
     readonly NULL_UNDEFINED_DATA: "Input data cannot be null or undefined";
+    readonly OHLC_VOLUME_LENGTH_MISMATCH: "All price and volume arrays must have the same length";
     readonly VOLUME_REQUIRED: "Volume data is required for volume-based calculations";
     readonly VOLUME_WEIGHTED_REQUIRED: "Volume data is required for volume-weighted calculations";
 };

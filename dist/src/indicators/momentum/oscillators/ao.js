@@ -24,11 +24,23 @@ function createMedianPriceOscillator(name, description, defaultFastLength, defau
             if (fastLength >= slowLength) {
                 throw new Error(ERROR_MESSAGES.FAST_LENGTH_GREATER);
             }
-            const medianPrice = PriceCalculations.hl2(data);
+            // Validate data before calculation
+            if (Array.isArray(data)) {
+                throw new Error(ERROR_MESSAGES.MISSING_OHLC);
+            }
+            const marketData = data;
+            if (!marketData.high || !marketData.low || marketData.high.length === 0 || marketData.low.length === 0) {
+                throw new Error(ERROR_MESSAGES.EMPTY_DATA);
+            }
+            const medianPrice = PriceCalculations.hl2(marketData);
             const fastSMA = movingAverage(medianPrice, fastLength, 'sma');
             const slowSMA = movingAverage(medianPrice, slowLength, 'sma');
-            const values = ArrayUtils.processArray(fastSMA, (fast, i) => {
-                const slow = slowSMA[i];
+            // Ensure both arrays have the same length by aligning them
+            const minLength = Math.min(fastSMA.length, slowSMA.length);
+            const alignedFastSMA = fastSMA.slice(-minLength);
+            const alignedSlowSMA = slowSMA.slice(-minLength);
+            const values = ArrayUtils.processArray(alignedFastSMA, (fast, i) => {
+                const slow = alignedSlowSMA[i];
                 return fast !== undefined && slow !== undefined && !isNaN(fast) && !isNaN(slow) ? fast - slow : NaN;
             });
             return {

@@ -1,48 +1,7 @@
-import { VolatilityIndicator } from '@base/volatility-indicator';
-import { ArrayUtils } from '@utils/array-utils';
-import { calculateMean, calculateStandardDeviation } from '@utils/calculation-utils';
-import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils';
-import { pineLength, pineSource } from '@utils/pine-script-utils';
-/**
- * Calculate Bollinger Bands using centralized utilities
- *
- * @param data - Source data array
- * @param length - Calculation period
- * @param multiplier - Standard deviation multiplier
- * @returns Bollinger Bands values object
- */
-function calculateBollingerBands(data, length, multiplier) {
-    const result = {
-        upper: [],
-        middle: [],
-        lower: []
-    };
-    return ArrayUtils.processValidWindow(data, length, (window) => {
-        const validValues = window.filter(val => !isNaN(val));
-        if (validValues.length === 0) {
-            return {
-                upper: NaN,
-                middle: NaN,
-                lower: NaN
-            };
-        }
-        const ma = calculateMean(validValues);
-        const stdDev = calculateStandardDeviation(validValues);
-        const bandDistance = stdDev * multiplier;
-        return {
-            upper: ma + bandDistance,
-            middle: ma,
-            lower: ma - bandDistance
-        };
-    }).reduce((acc, curr) => {
-        if (typeof curr === 'object' && curr !== null) {
-            acc.upper.push(curr.upper);
-            acc.middle.push(curr.middle);
-            acc.lower.push(curr.lower);
-        }
-        return acc;
-    }, result);
-}
+import { VolatilityIndicator } from '@core/base/volatility-indicator';
+import { calculateBands } from '@core/utils/calculation-utils';
+import { createMultiResultIndicatorWrapper } from '@core/utils/indicator-utils';
+import { pineSource } from '@core/utils/pine-script-utils';
 /**
  * Bollinger Bands Indicator
  *
@@ -64,21 +23,19 @@ export class BollingerBandsIndicator extends VolatilityIndicator {
         super('BollingerBandsIndicator', 'Bollinger Bands', 20, 2.0, 1);
     }
     calculateVolatility(data, length, multiplier) {
-        const { middle } = calculateBollingerBands(data, length, multiplier);
+        const { middle } = calculateBands(data, length, multiplier);
         return middle;
     }
     calculate(data, config) {
-        this.validateInput(data, config);
+        const result = super.calculate(data, config);
         const source = pineSource(data, config?.source);
-        const length = pineLength(config?.length || 20, 20);
+        const length = config?.length || 20;
         const multiplier = config?.['multiplier'] || 2.0;
-        const { upper, middle, lower } = calculateBollingerBands(source, length, multiplier);
+        const { upper, lower } = calculateBands(source, length, multiplier);
         return {
-            values: middle,
+            values: result.values,
             metadata: {
-                length,
-                multiplier,
-                source: config?.source || 'close',
+                ...result.metadata,
                 upper,
                 lower
             }
@@ -92,15 +49,15 @@ export class BollingerBandsIndicator extends VolatilityIndicator {
  * @param length - Calculation period (default: 20)
  * @param multiplier - Standard deviation multiplier (default: 2.0)
  * @param source - Price source (default: 'close')
+ * @param maType - Moving average type ('sma' or 'ema', default: 'sma')
  * @returns Bollinger Bands with upper, middle, and lower bands
  */
-export function bollinger(data, length, multiplier, source) {
-    const result = createMultiResultIndicatorWrapper(BollingerBandsIndicator, data, length, source, { multiplier });
+export function bollinger(data, length, multiplier, source, maType = 'sma') {
+    const result = createMultiResultIndicatorWrapper(BollingerBandsIndicator, data, length, source, { multiplier, maType });
     return {
         upper: result.metadata['upper'],
         middle: result.values,
         lower: result.metadata['lower']
     };
 }
-// Export alias for backward compatibility
 export const bollingerBands = bollinger;

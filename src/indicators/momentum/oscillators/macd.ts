@@ -1,73 +1,55 @@
-import { BaseIndicator } from '@base/base-indicator'
 import { movingAverage } from '@calculations/moving-averages'
-import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
+import type { MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
-import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils'
-import { pineLength, pineSource } from '@utils/pine-script-utils'
+import { calculateEMADifference } from '@utils/calculation-utils'
 
 /**
- * MACD (Moving Average Convergence Divergence) indicator
+ * Calculate MACD with signal and histogram
  *
- * Calculates MACD line, signal line, and histogram using exponential moving averages.
- * MACD = Fast EMA - Slow EMA, Signal = EMA of MACD, Histogram = MACD - Signal
- *
- * @example
- * ```typescript
- * const macd = new MACD()
- * const result = macd.calculate(marketData, { fastLength: 12, slowLength: 26, signalLength: 9 })
- * console.log(result.values) // MACD line values
- * console.log(result.metadata.signal) // Signal line values
- * console.log(result.metadata.histogram) // Histogram values
- * ```
+ * @param data - Market data or price array
+ * @param fastLength - Fast EMA period (default: 12)
+ * @param slowLength - Slow EMA period (default: 26)
+ * @param signalLength - Signal line period (default: 9)
+ * @returns Object with MACD, signal, and histogram values
  */
-export class MACD extends BaseIndicator {
-  constructor() {
-    super('MACD', 'Moving Average Convergence Divergence', 'momentum')
-  }
-  calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
-    this.validateInput(data, config)
-    const source = pineSource(data, config?.source)
-    const fastLength = pineLength((config?.['fastLength'] as number) || 12, 12)
-    const slowLength = pineLength((config?.['slowLength'] as number) || 26, 26)
-    const signalLength = pineLength((config?.['signalLength'] as number) || 9, 9)
-    const { macd, signal, histogram } = this.calculateMACD(source, fastLength, slowLength, signalLength)
-    return {
-      values: macd,
-      metadata: {
-        length: fastLength,
-        fastLength,
-        slowLength,
-        signalLength,
-        source: config?.source || 'close',
-        signal,
-        histogram
+function calculateMACDWithSignal(data: number[], fastLength: number = 12, slowLength: number = 26, signalLength: number = 9): {
+  macd: number[]
+  signal: number[]
+  histogram: number[]
+} {
+  const macd = calculateEMADifference(data, fastLength, slowLength)
+
+  // Filter out NaN values for signal calculation
+  const validMacdValues = macd.filter(val => !isNaN(val) && isFinite(val))
+  let signal: number[]
+
+  if (validMacdValues.length === 0) {
+    signal = Array(macd.length).fill(NaN)
+  } else {
+    // Calculate EMA on valid values, then map back to original array
+    const validSignal = movingAverage(validMacdValues, signalLength, 'ema')
+    signal = Array(macd.length).fill(NaN)
+
+    let validIndex = 0
+    for (let i = 0; i < macd.length; i++) {
+      if (!isNaN(macd[i]!) && isFinite(macd[i]!)) {
+        if (validIndex < validSignal.length) {
+          signal[i] = validSignal[validIndex]!
+        }
+        validIndex++
       }
     }
   }
-  private calculateMACD(data: number[], fastLength: number, slowLength: number, signalLength: number): {
-    macd: number[]
-    signal: number[]
-    histogram: number[]
-  } {
-    const fastEMA = movingAverage(data, fastLength, 'ema')
-    const slowEMA = movingAverage(data, slowLength, 'ema')
-    const macd = ArrayUtils.processArray(fastEMA, (fast, i) => {
-      const slow = slowEMA[i]
-      if (fast === undefined || slow === undefined || isNaN(fast) || isNaN(slow)) {
-        return NaN
-      }
-      return fast - slow
-    })
-    const signal = movingAverage(macd, signalLength, 'ema')
-    const histogram = ArrayUtils.processArray(macd, (macdVal, i) => {
-      const signalVal = signal[i]
-      if (macdVal === undefined || signalVal === undefined || isNaN(macdVal) || isNaN(signalVal)) {
-        return NaN
-      }
-      return macdVal - signalVal
-    })
-    return { macd, signal, histogram }
-  }
+
+  const histogram = ArrayUtils.processArray(signal, (signalVal, i) => {
+    const macdVal = macd[i]
+    if (macdVal === undefined || signalVal === undefined || isNaN(macdVal) || isNaN(signalVal)) {
+      return NaN
+    }
+    return macdVal - signalVal
+  })
+
+  return { macd, signal, histogram }
 }
 
 /**
@@ -80,15 +62,11 @@ export class MACD extends BaseIndicator {
  * @param source - Price source (default: 'close')
  * @returns Object with macd, signal, and histogram arrays
  */
-export function macd(data: MarketData | number[], fastLength?: number, slowLength?: number, signalLength?: number, source?: string): {
+export function macd(data: MarketData | number[], fastLength?: number, slowLength?: number, signalLength?: number, _source?: string): {
   macd: number[]
   signal: number[]
   histogram: number[]
 } {
-  const result = createMultiResultIndicatorWrapper(MACD, data, fastLength, source, { slowLength, signalLength })
-  return {
-    macd: result.values,
-    signal: result.metadata['signal'] as number[],
-    histogram: result.metadata['histogram'] as number[]
-  }
+  const sourceData = Array.isArray(data) ? data : data.close
+  return calculateMACDWithSignal(sourceData, fastLength || 12, slowLength || 26, signalLength || 9)
 }

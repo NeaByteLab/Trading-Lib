@@ -1,244 +1,40 @@
 /**
- * Centralized calculation utilities for technical indicators
+ * Core calculation utilities for technical indicators
  *
- * Provides common calculation functions to eliminate code duplication.
+ * Provides fundamental calculation functions and re-exports from modular structure.
  * All indicators should use these utilities instead of manual implementations.
  *
  * @example
  * ```typescript
- * import { PriceCalculations, calculateRSI } from '@utils/calculation-utils'
+ * import { safeDivision, fillNaN, calculateRangePercentage } from '@utils/calculation-utils'
+ * import { calculateRSI, calculateCCI } from '@utils/calculations'
  *
- * const typical = PriceCalculations.typical(data)
+ * const result = safeDivision(numerator, denominator)
  * const rsi = calculateRSI(data.close, 14)
  * ```
  */
+// Re-export all calculation functions from modular structure
+export * from './calculations';
 import { ERROR_MESSAGES } from '@constants/indicator-constants';
-import { ArrayUtils } from './array-utils';
-import { MathUtils } from './math-utils';
-import { sanitizeArray } from './validation-utils';
+import { ArrayUtils } from '@core/utils/array-utils';
+import { MathUtils } from '@core/utils/math-utils';
 /**
- * Price calculation utilities
+ * Safe division with numerical stability
  *
- * Provides centralized price calculation functions to eliminate code duplication.
- * All indicators should use these utilities instead of manual implementations.
- */
-export const PriceCalculations = {
-    /**
-     * Calculate typical price (HLC3)
-     *
-     * @param data - Market data with high, low, close arrays
-     * @returns Array of typical prices
-     */
-    typical(data) {
-        return ArrayUtils.processArray(data.high, (_, i) => {
-            const high = data.high[i];
-            const low = data.low[i];
-            const close = data.close[i];
-            return (high + low + close) / 3;
-        });
-    },
-    /**
-     * Calculate HL2 (High + Low) / 2
-     *
-     * @param data - Market data with high, low arrays
-     * @returns Array of HL2 values
-     */
-    hl2(data) {
-        return ArrayUtils.processArray(data.high, (_, i) => {
-            const high = data.high[i];
-            const low = data.low[i];
-            return (high + low) / 2;
-        });
-    },
-    /**
-     * Calculate OHLC4 (Open + High + Low + Close) / 4
-     *
-     * @param data - Market data with open, high, low, close arrays
-     * @returns Array of OHLC4 values
-     */
-    ohlc4(data) {
-        return ArrayUtils.processArray(data.open, (_, i) => {
-            const open = data.open[i];
-            const high = data.high[i];
-            const low = data.low[i];
-            const close = data.close[i];
-            return (open + high + low + close) / 4;
-        });
-    }
-};
-/**
- * Calculate mean of array
- *
- * @param values - Array of numbers
- * @returns Mean value
- * @throws {Error} If array is empty
- */
-export function calculateMean(values) {
-    if (!values || values.length === 0) {
-        throw new Error(ERROR_MESSAGES.EMPTY_DATA);
-    }
-    const validValues = sanitizeArray(values);
-    if (validValues.length === 0) {
-        return NaN;
-    }
-    if (values.some(val => isNaN(val))) {
-        return NaN;
-    }
-    return MathUtils.average(validValues);
-}
-/**
- * Calculate variance of array
- *
- * @param values - Array of numbers
- * @returns Variance value
- */
-export function calculateVariance(values) {
-    const validValues = sanitizeArray(values);
-    if (validValues.length === 0) {
-        return NaN;
-    }
-    const mean = calculateMean(validValues);
-    if (isNaN(mean)) {
-        return NaN;
-    }
-    const squaredDifferences = validValues.map(val => MathUtils.pow(val - mean, 2));
-    // Use population variance formula: Σ(x - μ)² / n
-    return MathUtils.sum(squaredDifferences) / validValues.length;
-}
-/**
- * Calculate standard deviation
- *
- * @param values - Array of values
- * @returns Standard deviation
- */
-export function calculateStandardDeviation(values) {
-    if (!values || values.length === 0) {
-        return NaN;
-    }
-    const validValues = sanitizeArray(values);
-    if (validValues.length === 0) {
-        return NaN;
-    }
-    const variance = calculateVariance(validValues);
-    return MathUtils.sqrt(variance);
-}
-/**
- * Create rolling window from array
- *
- * @param data - Source array
- * @param windowSize - Size of rolling window
- * @returns Array of window arrays
- */
-export function rollingWindow(data, windowSize) {
-    return ArrayUtils.processArray(data, (_, i) => {
-        if (i <= data.length - windowSize) {
-            return data.slice(i, i + windowSize);
-        }
-        return null;
-    }).filter((window) => window !== null);
-}
-/**
- * Calculate rolling statistic
- *
- * @param data - Source array
- * @param windowSize - Window size
- * @param statistic - Statistic type
- * @returns Array of rolling statistics
- */
-export function calculateRollingStatistic(data, windowSize, statistic) {
-    const windows = rollingWindow(data, windowSize);
-    const result = [];
-    for (const window of windows) {
-        const validValues = sanitizeArray(window);
-        if (validValues.length === 0) {
-            result.push(NaN);
-            continue;
-        }
-        switch (statistic) {
-            case 'mean':
-                result.push(MathUtils.average(validValues));
-                break;
-            case 'median': {
-                const sorted = validValues.sort((a, b) => a - b);
-                const mid = MathUtils.floor(sorted.length / 2);
-                result.push(sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]);
-                break;
-            }
-            case 'min':
-                result.push(MathUtils.min(validValues));
-                break;
-            case 'max':
-                result.push(MathUtils.max(validValues));
-                break;
-            case 'sum':
-                result.push(MathUtils.sum(validValues));
-                break;
-            default:
-                result.push(NaN);
-        }
-    }
-    return result;
-}
-/**
- * Apply exponential smoothing to data
- *
- * @param data - Source data array
- * @param alpha - Smoothing factor (0-1)
- * @returns Smoothed data array
- */
-export function exponentialSmoothing(data, alpha) {
-    if (alpha < 0 || alpha > 1) {
-        throw new Error(ERROR_MESSAGES.INVALID_ALPHA);
-    }
-    return ArrayUtils.processArray(data, (val, i) => {
-        if (i === 0) {
-            return val;
-        }
-        else {
-            return (alpha * val) + ((1 - alpha) * (data[i - 1] ?? 0));
-        }
-    });
-}
-/**
- * Apply Wilder's smoothing to data
- *
- * @param data - Source data array
- * @param length - Smoothing period
- * @returns Smoothed data array
- */
-export function wildersSmoothing(data, length) {
-    if (length <= 0) {
-        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
-    }
-    return ArrayUtils.processArray(data, (val, i) => {
-        if (i < length - 1) {
-            return NaN;
-        }
-        else if (i === length - 1) {
-            // First smoothed value is the average of first 'length' values
-            const sum = data.slice(0, length).reduce((acc, v) => acc + v, 0);
-            return sum / length;
-        }
-        else {
-            // Subsequent values use Wilder's smoothing formula
-            const prevSmoothed = data[i - 1] ?? 0;
-            return ((prevSmoothed * (length - 1)) + val) / length;
-        }
-    });
-}
-/**
- * Safe division with fallback
- *
- * @param numerator - Numerator
- * @param denominator - Denominator
+ * @param numerator - Numerator value
+ * @param denominator - Denominator value
  * @param fallback - Fallback value if division by zero
  * @returns Division result or fallback
  */
 export function safeDivision(numerator, denominator, fallback = 0) {
-    if (denominator === 0 || isNaN(denominator)) {
+    if (denominator === 0 || isNaN(denominator) || !isFinite(denominator)) {
         return fallback;
     }
-    return numerator / denominator;
+    if (!isFinite(numerator)) {
+        return fallback;
+    }
+    const result = numerator / denominator;
+    return isFinite(result) ? result : fallback;
 }
 /**
  * Fill NaN values with specified value
@@ -263,90 +59,6 @@ export function shiftArray(data, offset) {
     return ArrayUtils.shift(data, offset);
 }
 /**
- * Calculate RSI using centralized utilities
- *
- * @param data - Source data array
- * @param length - RSI period
- * @returns RSI values array
- */
-export function calculateRSI(data, length) {
-    if (length <= 0) {
-        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
-    }
-    // Calculate price changes
-    const changes = ArrayUtils.processArray(data, (current, i) => {
-        if (i === 0) {
-            // First value has no previous value
-            return NaN;
-        }
-        const previous = data[i - 1];
-        return isNaN(current) || isNaN(previous) ? NaN : current - previous;
-    });
-    // Calculate gains and losses
-    const gains = ArrayUtils.processArray(changes, (change) => {
-        if (isNaN(change)) {
-            return NaN;
-        }
-        return change > 0 ? change : 0;
-    });
-    const losses = ArrayUtils.processArray(changes, (change) => {
-        if (isNaN(change)) {
-            return NaN;
-        }
-        return change < 0 ? MathUtils.abs(change) : 0;
-    });
-    const avgGains = wildersSmoothing(gains, length);
-    const avgLosses = wildersSmoothing(losses, length);
-    return ArrayUtils.processArray(avgGains, (avgGain, i) => {
-        const avgLoss = avgLosses[i];
-        if (isNaN(avgGain) || isNaN(avgLoss)) {
-            return NaN;
-        }
-        if (avgLoss === 0) {
-            return 100;
-        }
-        const rs = avgGain / avgLoss;
-        return 100 - (100 / (1 + rs));
-    });
-}
-/**
- * Calculate CCI using centralized utilities
- *
- * @param data - Source data array (should be typical prices HLC3)
- * @param length - CCI period
- * @returns CCI values array
- */
-export function calculateCCI(data, length) {
-    if (length <= 0) {
-        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
-    }
-    const CCI_CONSTANT = 0.015;
-    return ArrayUtils.processWindow(data, length, (window, _i) => {
-        const validValues = sanitizeArray(window);
-        if (validValues.length === 0) {
-            return NaN;
-        }
-        const currentPrice = window[window.length - 1];
-        const sma = calculateMean(validValues);
-        const meanDeviation = calculateMean(validValues.map(val => MathUtils.abs(val - sma)));
-        return meanDeviation === 0 ? 0 : (currentPrice - sma) / (CCI_CONSTANT * meanDeviation);
-    });
-}
-/**
- * Calculate CCI from OHLC data using typical prices
- *
- * @param data - Market data with high, low, close arrays
- * @param length - CCI period
- * @returns CCI values array
- */
-export function calculateCCIFromOHLC(data, length) {
-    if (length <= 0) {
-        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
-    }
-    const typicalPrices = PriceCalculations.typical(data);
-    return calculateCCI(typicalPrices, length);
-}
-/**
  * Calculate range percentage
  *
  * @param value - Current value
@@ -362,22 +74,287 @@ export function calculateRangePercentage(value, min, max, multiplier = 100) {
     return safeDivision(value - min, max - min) * multiplier;
 }
 /**
- * Calculate high/low range for window
+ * Calculate Price Percentage Change using centralized utilities
  *
- * @param highData - High prices array
- * @param lowData - Low prices array
- * @param currentIndex - Current index
- * @param windowSize - Window size
- * @returns Object with highest and lowest values
+ * @param current - Current price
+ * @param previous - Previous price
+ * @returns Percentage change
  */
-export function calculateHighLowRange(highData, lowData, currentIndex, windowSize) {
-    const highSlice = ArrayUtils.getWindowSlice(highData, currentIndex, windowSize);
-    const lowSlice = ArrayUtils.getWindowSlice(lowData, currentIndex, windowSize);
-    if (highSlice.length === 0 || lowSlice.length === 0) {
-        return { highest: NaN, lowest: NaN };
+export function calculatePricePercentageChange(current, previous) {
+    if (previous === 0) {
+        return NaN;
     }
+    return ((current - previous) / previous) * 100;
+}
+/**
+ * Calculate Price Comparison using centralized utilities
+ *
+ * @param price1 - First price series
+ * @param price2 - Second price series
+ * @param basePrice - Base price for comparison
+ * @returns Comparison metrics
+ */
+const ARRAYS_LENGTH_MISMATCH = 'Price arrays must have the same length';
+export function calculatePriceComparison(price1, price2, basePrice = 100) {
+    if (price1.length !== price2.length) {
+        throw new Error(ARRAYS_LENGTH_MISMATCH);
+    }
+    const ratio = ArrayUtils.processArray(price1, (val1, i) => {
+        const val2 = price2[i];
+        if (val2 === 0) {
+            return NaN;
+        }
+        return (val1 / val2) * basePrice;
+    });
+    const performance = ArrayUtils.processArray(price1, (val1, i) => {
+        const val2 = price2[i];
+        return calculatePricePercentageChange(val1, val2);
+    });
+    const validRatio = ratio.filter(val => !isNaN(val));
+    const validPerformance = performance.filter(val => !isNaN(val));
+    const correlation = validRatio.length > 1 ? MathUtils.correlation(validRatio, validPerformance) : 0;
+    return { ratio, performance, correlation };
+}
+/**
+ * Calculate Price Differential using centralized utilities
+ *
+ * @param price1 - First price series
+ * @param price2 - Second price series
+ * @returns Price differential values
+ */
+export function calculatePriceDifferential(price1, price2) {
+    if (price1.length !== price2.length) {
+        throw new Error(ARRAYS_LENGTH_MISMATCH);
+    }
+    return ArrayUtils.processArray(price1, (val1, i) => {
+        const val2 = price2[i];
+        return val1 - val2;
+    });
+}
+/**
+ * Calculate Price Ratio using centralized utilities
+ *
+ * @param price1 - First price series
+ * @param price2 - Second price series
+ * @returns Price ratio values
+ */
+export function calculatePriceRatio(price1, price2) {
+    if (price1.length !== price2.length) {
+        throw new Error(ARRAYS_LENGTH_MISMATCH);
+    }
+    return ArrayUtils.processArray(price1, (val1, i) => {
+        const val2 = price2[i];
+        if (val2 === 0) {
+            return NaN;
+        }
+        return val1 / val2;
+    });
+}
+/**
+ * Calculate Multiple Linear Regression coefficients using centralized utilities
+ *
+ * @param features - Feature matrix
+ * @param prices - Target prices array
+ * @returns MLR coefficients array
+ * @throws {Error} If data is empty or invalid
+ */
+export function calculateMLRCoefficients(features, prices) {
+    if (!features || features.length === 0) {
+        throw new Error(ERROR_MESSAGES.EMPTY_DATA);
+    }
+    if (!prices || prices.length === 0) {
+        throw new Error('Prices array cannot be empty');
+    }
+    const n = features.length;
+    const p = features[0]?.length || 0;
+    if (n === 0 || p === 0) {
+        return [];
+    }
+    const X = features.map(row => [1, ...row]);
+    const y = prices;
+    const XT = MathUtils.transpose(X);
+    const XTX = MathUtils.multiply(XT, X);
+    const XTy = MathUtils.multiply(XT, y.map(val => [val]));
+    const coefficients = MathUtils.solveLinearSystem(XTX, XTy);
+    return coefficients.map(row => row[0]).filter((val) => val !== undefined);
+}
+/**
+ * Predict value using MLR coefficients and features
+ *
+ * @param coefficients - MLR coefficients array
+ * @param features - Feature array
+ * @returns Predicted value
+ */
+export function predictMLR(coefficients, features) {
+    if (coefficients.length === 0) {
+        return 0;
+    }
+    let prediction = coefficients[0] || 0;
+    prediction += MathUtils.sum(features.map((feature, i) => (coefficients[i + 1] || 0) * feature));
+    return prediction;
+}
+/**
+ * Calculate Bayesian probability using logistic function
+ *
+ * @param features - Array of feature values
+ * @param weights - Array of weights
+ * @param bias - Bias term
+ * @returns Probability value (0-1)
+ */
+export function calculateBayesianProbability(features, weights, bias) {
+    const sum = features.reduce((acc, feature, i) => acc + (weights[i] || 0) * feature, bias);
+    return 1 / (1 + Math.exp(-sum));
+}
+/**
+ * Filter valid values from array (non-NaN, finite, non-zero)
+ *
+ * @param values - Array of values
+ * @returns Filtered array of valid values
+ */
+export function filterValidValues(values) {
+    return values.filter(val => !isNaN(val) && isFinite(val) && val !== 0);
+}
+/**
+ * Filter valid values from array (non-NaN, finite)
+ *
+ * @param values - Array of values
+ * @returns Filtered array of valid values
+ */
+export function filterFiniteValues(values) {
+    return values.filter(val => !isNaN(val) && isFinite(val));
+}
+/**
+ * Transform array values to finite or NaN
+ *
+ * @param values - Array of values
+ * @returns Transformed array
+ */
+export function transformToFinite(values) {
+    return values.map(val => isFinite(val) ? val : NaN);
+}
+/**
+ * Create array with predictions and fill with NaN
+ *
+ * @param length - Array length
+ * @param predictions - Predictions array
+ * @returns Filled array
+ */
+export function createPredictionArray(length, predictions) {
+    return Array(length).fill(NaN).map((_, i) => predictions[i] || NaN);
+}
+/**
+ * Process sequential predictions with lookback validation
+ *
+ * @param dataLength - Total data length
+ * @param lookback - Lookback period
+ * @param length - Calculation length
+ * @param predictionFn - Prediction function
+ * @returns Array of predictions
+ */
+export function processSequentialPredictions(dataLength, lookback, length, predictionFn) {
+    const predictions = [];
+    for (let i = lookback; i < dataLength; i++) {
+        if (i < length) {
+            predictions.push(NaN);
+            continue;
+        }
+        const prediction = predictionFn(i);
+        predictions.push(prediction !== null ? prediction : NaN);
+    }
+    return createPredictionArray(dataLength, predictions);
+}
+/**
+ * Extract property from result objects
+ *
+ * @param results - Array of result objects
+ * @param property - Property name to extract
+ * @returns Array of property values
+ */
+export function extractResultProperty(results, property) {
+    return results.map(r => r[property]);
+}
+/**
+ * Extract multiple properties from result objects
+ *
+ * @param results - Array of result objects
+ * @param properties - Array of property names to extract
+ * @returns Object with arrays of property values
+ */
+export function extractResultProperties(results, properties) {
+    const extracted = {};
+    properties.forEach(prop => {
+        extracted[prop] = results.map(r => r[prop]);
+    });
+    return extracted;
+}
+/**
+ * Calculate window average with validation
+ *
+ * @param window - Array of values
+ * @returns Average of valid values or NaN
+ */
+export function calculateWindowAverage(window) {
+    const validValues = window.filter(val => !isNaN(val) && isFinite(val));
+    if (validValues.length === 0) {
+        return NaN;
+    }
+    return validValues.reduce((sum, val) => sum + val, 0) / validValues.length;
+}
+/**
+ * Calculate window sum with validation
+ *
+ * @param window - Array of values
+ * @returns Sum of valid values or 0
+ */
+export function calculateWindowSum(window) {
+    const validValues = window.filter(val => !isNaN(val) && isFinite(val));
+    return validValues.reduce((sum, val) => sum + val, 0);
+}
+/**
+ * Handle NaN values in indicator results
+ *
+ * @param values - Array of indicator values
+ * @param fillValue - Value to replace NaN with (default: 0)
+ * @returns Array with NaN values replaced
+ */
+export function handleNaNValues(values, fillValue = 0) {
+    return values.map(value => isNaN(value) || !isFinite(value) ? fillValue : value);
+}
+/**
+ * Get valid indicator values (remove NaN and infinite values)
+ *
+ * @param values - Array of indicator values
+ * @returns Array with only valid finite values
+ */
+export function getValidValues(values) {
+    return values.filter(value => !isNaN(value) && isFinite(value));
+}
+/**
+ * Check if indicator result is valid
+ *
+ * @param values - Array of indicator values
+ * @returns True if all values are valid
+ */
+export function isValidIndicatorResult(values) {
+    return values.every(value => !isNaN(value) && isFinite(value));
+}
+/**
+ * Get indicator statistics
+ *
+ * @param values - Array of indicator values
+ * @returns Statistics object
+ */
+export function getIndicatorStatistics(values) {
+    const validValues = getValidValues(values);
+    const totalCount = values.length;
+    const validCount = validValues.length;
+    const hasNaN = values.some(v => isNaN(v));
+    const hasInfinite = values.some(v => !isFinite(v));
     return {
-        highest: MathUtils.max(highSlice),
-        lowest: MathUtils.min(lowSlice)
+        validCount,
+        totalCount,
+        validPercentage: totalCount > 0 ? (validCount / totalCount) * 100 : 0,
+        hasNaN,
+        hasInfinite
     };
 }

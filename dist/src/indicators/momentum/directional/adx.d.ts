@@ -1,10 +1,10 @@
 import { BaseIndicator } from '@base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Average Directional Index (ADX) indicator
+ * ADX (Average Directional Index) Indicator
  *
- * Measures the strength of a trend regardless of its direction.
- * Formula: ADX = Average of DX over period, where DX = 100 × |+DI - -DI| / (+DI + -DI)
+ * Measures the strength of a trend regardless of direction.
+ * Combines +DI and -DI to determine trend strength.
  *
  * @example
  * ```typescript
@@ -19,8 +19,8 @@ export declare class ADX extends BaseIndicator {
     constructor();
     calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
     private calculateADX;
-    private calculateDirectionalMovement;
-    private calculateSmoothedValues;
+    private calculateDI;
+    private calculateADXValue;
 }
 /**
  * Calculate ADX values using wrapper function

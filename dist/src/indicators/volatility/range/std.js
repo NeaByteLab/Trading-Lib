@@ -1,7 +1,8 @@
-import { VolatilityIndicator } from '@base/volatility-indicator';
-import { ArrayUtils } from '@utils/array-utils';
-import { calculateStandardDeviation } from '@utils/calculation-utils';
-import { createIndicatorWrapper } from '@utils/indicator-utils';
+import { createVolatilityIndicator } from '@core/factories/indicator-factory';
+import { ArrayUtils } from '@core/utils/array-utils';
+import { calculateStandardDeviation } from '@core/utils/calculation-utils';
+import { createIndicatorWrapper } from '@core/utils/indicator-utils';
+import { sanitizeArray } from '@core/utils/validation-utils';
 /**
  * Calculate Standard Deviation using centralized utilities
  *
@@ -11,7 +12,7 @@ import { createIndicatorWrapper } from '@utils/indicator-utils';
  */
 function calculateStd(data, length) {
     return ArrayUtils.processValidWindow(data, length, (window) => {
-        const validValues = window.filter(val => !isNaN(val));
+        const validValues = sanitizeArray(window);
         return validValues.length > 0 ? calculateStandardDeviation(validValues) : NaN;
     });
 }
@@ -29,14 +30,10 @@ function calculateStd(data, length) {
  * console.log(result.values) // Standard deviation values
  * ```
  */
-export class StandardDeviationIndicator extends VolatilityIndicator {
-    constructor() {
-        super('StandardDeviationIndicator', 'Standard Deviation', 20, 1.0, 1);
-    }
-    calculateVolatility(data, length, _multiplier) {
-        return calculateStd(data, length);
-    }
-}
+export const StandardDeviationIndicator = createVolatilityIndicator('StandardDeviationIndicator', 'Standard Deviation', (data, length) => {
+    const source = Array.isArray(data) ? data : data.close;
+    return calculateStd(source, length);
+}, 20);
 /**
  * Calculate Standard Deviation using wrapper function
  *

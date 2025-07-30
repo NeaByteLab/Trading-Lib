@@ -1,9 +1,11 @@
 import { BaseIndicator } from '@base/base-indicator';
 import { ERROR_MESSAGES } from '@constants/indicator-constants';
-import { ArrayUtils } from '@core/utils/array-utils';
-import { MathUtils } from '@core/utils/math-utils';
+import { ArrayUtils } from '@utils/array-utils';
+import { filterFiniteValues } from '@utils/calculation-utils';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
+import { MathUtils } from '@utils/math-utils';
 import { pineLength, pineSource } from '@utils/pine-script-utils';
+import { validateIndicatorData } from '@utils/validation-utils';
 /**
  * Calculate Adaptive Linear Moving Average (ALMA)
  *
@@ -15,6 +17,7 @@ import { pineLength, pineSource } from '@utils/pine-script-utils';
  * @param length - ALMA period (default: 9)
  * @param sigma - Sigma parameter for Gaussian filter (default: 6)
  * @returns ALMA values array
+ * @throws {Error} If data is empty or parameters are invalid
  */
 function calculateALMA(data, length = 9, sigma = 6) {
     if (!data || data.length === 0) {
@@ -32,7 +35,7 @@ function calculateALMA(data, length = 9, sigma = 6) {
         return MathUtils.exp(-MathUtils.pow(i - m, 2) / (2 * MathUtils.pow(s, 2)));
     });
     return ArrayUtils.processWindow(data, length, (window) => {
-        const validValues = window.filter(val => !isNaN(val));
+        const validValues = filterFiniteValues(window);
         if (validValues.length === 0) {
             return NaN;
         }
@@ -60,19 +63,7 @@ export class ALMA extends BaseIndicator {
         super('ALMA', 'Adaptive Linear Moving Average', 'trend');
     }
     validateInput(data, config) {
-        if (!data) {
-            throw new Error(ERROR_MESSAGES.EMPTY_DATA);
-        }
-        if (Array.isArray(data)) {
-            if (data.length === 0) {
-                throw new Error(ERROR_MESSAGES.EMPTY_DATA);
-            }
-        }
-        else {
-            if (!data.close || data.close.length === 0) {
-                throw new Error(ERROR_MESSAGES.INVALID_DATA_FORMAT);
-            }
-        }
+        validateIndicatorData(data);
         if (config?.length && config.length <= 0) {
             throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
         }
@@ -106,14 +97,5 @@ export class ALMA extends BaseIndicator {
  * @returns ALMA values array
  */
 export function alma(data, length, sigma, source) {
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-        throw new Error(ERROR_MESSAGES.EMPTY_DATA);
-    }
-    if (length !== undefined && length <= 0) {
-        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
-    }
-    if (sigma !== undefined && sigma <= 0) {
-        throw new Error(ERROR_MESSAGES.INVALID_SIGMA);
-    }
     return createIndicatorWrapper(ALMA, data, length, source, { sigma });
 }

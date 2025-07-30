@@ -30,12 +30,12 @@ export declare function validateArray(data: number[], minLength?: number): void;
  */
 export declare function validateLength(length: number, minLength?: number): void;
 /**
- * Sanitize array by removing NaN values
+ * Sanitize array by removing NaN, null, and undefined values
  *
  * @param data - Array to sanitize
  * @returns Sanitized array
  */
-export declare function sanitizeArray(data: number[]): number[];
+export declare function sanitizeArray(data: (number | null | undefined)[]): number[];
 /**
  * Validate indicator configuration
  *
@@ -48,9 +48,17 @@ export declare function validateIndicatorConfig(config?: {
     source?: string;
 }, allowedSources?: string[]): void;
 /**
- * Validate indicator data
+ * Validate indicator data - generic validator for both MarketData and number[]
  */
 export declare function validateIndicatorData(data: MarketData | number[]): void;
+/**
+ * Validate MarketData specifically (requires OHLC)
+ */
+export declare function validateMarketDataOnly(data: MarketData | number[]): MarketData;
+/**
+ * Validate number array specifically
+ */
+export declare function validateNumberArrayOnly(data: MarketData | number[]): number[];
 /**
  * Validate and sanitize window
  */

@@ -1,25 +1,4 @@
-import { BaseIndicator } from '@base/base-indicator';
-import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
-/**
- * MACD (Moving Average Convergence Divergence) indicator
- *
- * Calculates MACD line, signal line, and histogram using exponential moving averages.
- * MACD = Fast EMA - Slow EMA, Signal = EMA of MACD, Histogram = MACD - Signal
- *
- * @example
- * ```typescript
- * const macd = new MACD()
- * const result = macd.calculate(marketData, { fastLength: 12, slowLength: 26, signalLength: 9 })
- * console.log(result.values) // MACD line values
- * console.log(result.metadata.signal) // Signal line values
- * console.log(result.metadata.histogram) // Histogram values
- * ```
- */
-export declare class MACD extends BaseIndicator {
-    constructor();
-    calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-    private calculateMACD;
-}
+import type { MarketData } from '@core/types/indicator-types';
 /**
  * Calculate MACD values using wrapper function
  *
@@ -30,7 +9,7 @@ export declare class MACD extends BaseIndicator {
  * @param source - Price source (default: 'close')
  * @returns Object with macd, signal, and histogram arrays
  */
-export declare function macd(data: MarketData | number[], fastLength?: number, slowLength?: number, signalLength?: number, source?: string): {
+export declare function macd(data: MarketData | number[], fastLength?: number, slowLength?: number, signalLength?: number, _source?: string): {
     macd: number[];
     signal: number[];
     histogram: number[];

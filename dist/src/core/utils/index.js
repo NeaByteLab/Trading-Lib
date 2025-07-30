@@ -15,4 +15,4 @@ export * from './indicator-utils';
 // Re-export main Pine Script interface for easy access
 export { PineCore, PinePrice } from './pine-core';
 // Re-export new centralized utilities for easy access
-export { calculateRangePercentage, calculateHighLowRange } from './calculation-utils';
+export { calculateRangePercentage, calculateHighLowRange, calculateEMADifference, calculateWilliamsR, calculateShannonEntropy, calculateTrueRange, calculateBalanceOfPower, calculateLogReturns, calculateMomentum, calculateROC, calculatePPO, calculateTRIX, calculateTSI, calculateTwiggsMomentum, calculatePricePercentageChange, calculatePriceComparison, calculatePriceDifferential, calculatePriceRatio } from './calculation-utils';

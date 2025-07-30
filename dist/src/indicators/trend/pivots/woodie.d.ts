@@ -1,30 +1,36 @@
-import { BaseIndicator } from '@base/base-indicator';
-import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
+import type { MarketData } from '@core/types/indicator-types';
 /**
- * Woodie Pivot Points indicator
+ * Woodie Pivots Indicator
  *
- * Calculates Woodie pivot points and support/resistance levels.
- * Formula: PP = (H + L + 2C) / 4, R1 = (2 × PP) - L, S1 = (2 × PP) - H
+ * Calculates support and resistance levels based on the previous day's high, low, and close.
+ * Uses a modified pivot point formula that gives more weight to the close price.
  *
  * @example
  * ```typescript
  * const woodie = new WoodiePivots()
  * const result = woodie.calculate(marketData)
  * console.log(result.values) // Pivot point values
- * console.log(result.metadata.r1) // Resistance 1 values
- * console.log(result.metadata.s1) // Support 1 values
+ * console.log(result.metadata.r1) // R1 resistance levels
+ * console.log(result.metadata.s1) // S1 support levels
  * ```
  */
-export declare class WoodiePivots extends BaseIndicator {
-    constructor();
-    validateInput(data: MarketData | number[], _config?: IndicatorConfig): void;
-    calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-}
+export declare const WoodiePivots: {
+    new (): {
+        validateInput(data: MarketData | number[], _config?: import("@core/types/indicator-types").IndicatorConfig): void;
+        calculate(data: MarketData | number[], config?: import("@core/types/indicator-types").IndicatorConfig): import("@core/types/indicator-types").IndicatorResult;
+        name: string;
+        description: string;
+        category: string;
+        validateLength(length: number, minLength: number, maxLength?: number): void;
+        validateMultiplier(multiplier: number): void;
+        getSourceData(data: MarketData, source?: string): number[];
+    };
+};
 /**
- * Calculate Woodie Pivot Points using wrapper function
+ * Calculate Woodie Pivots using wrapper function
  *
- * @param data - Market data with OHLC
- * @returns Woodie pivot points with support and resistance levels
+ * @param data - Market data with high, low, close arrays
+ * @returns Woodie pivot levels
  */
 export declare function woodie(data: MarketData): {
     pp: number[];

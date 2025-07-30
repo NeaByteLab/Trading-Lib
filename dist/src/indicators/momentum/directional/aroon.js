@@ -1,14 +1,14 @@
 import { BaseIndicator } from '@base/base-indicator';
 import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { ArrayUtils } from '@utils/array-utils';
+import { extractResultProperties, findDaysSinceExtremes } from '@utils/calculation-utils';
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils';
 import { pineLength } from '@utils/pine-script-utils';
 /**
- * Aroon indicator
+ * Aroon Indicator
  *
- * Measures the time between highs and lows over a time period.
- * Formula: Aroon Up = ((Period - Days Since High) / Period) × 100
- *          Aroon Down = ((Period - Days Since Low) / Period) × 100
+ * A momentum indicator that measures the time between highs and lows.
+ * Values range from 0 to 100, with higher values indicating stronger trends.
  *
  * @example
  * ```typescript
@@ -27,7 +27,7 @@ export class Aroon extends BaseIndicator {
         if (Array.isArray(data)) {
             throw new Error(ERROR_MESSAGES.MISSING_OHLC);
         }
-        const length = pineLength(config?.length || 14, 14);
+        const length = pineLength(config?.length || 25, 25);
         const { up, down } = this.calculateAroon(data, length);
         return {
             values: up,
@@ -40,36 +40,19 @@ export class Aroon extends BaseIndicator {
     }
     calculateAroon(data, length) {
         const results = ArrayUtils.processArray(data.close, (_, i) => {
-            const { daysSinceHigh, daysSinceLow } = this.findExtremes(data, i, length);
+            if (i < length - 1) {
+                return { up: NaN, down: NaN };
+            }
+            const { daysSinceHigh, daysSinceLow } = findDaysSinceExtremes(data.high, data.low, i, length);
             const up = ((length - daysSinceHigh) / length) * 100;
             const down = ((length - daysSinceLow) / length) * 100;
             return { up, down };
         });
+        const extracted = extractResultProperties(results, ['up', 'down']);
         return {
-            up: results.map(r => r.up),
-            down: results.map(r => r.down)
+            up: extracted['up'],
+            down: extracted['down']
         };
-    }
-    findExtremes(data, currentIndex, length) {
-        // Use centralized window slicing utility
-        const highSlice = ArrayUtils.getWindowSlice(data.high, currentIndex, length);
-        const lowSlice = ArrayUtils.getWindowSlice(data.low, currentIndex, length);
-        const highestHigh = data.high[currentIndex];
-        const lowestLow = data.low[currentIndex];
-        let daysSinceHigh = 0;
-        let daysSinceLow = 0;
-        ArrayUtils.processArray(highSlice, (high, j) => {
-            const low = lowSlice[j];
-            const actualIndex = currentIndex - length + 1 + j;
-            if (high === highestHigh) {
-                daysSinceHigh = currentIndex - actualIndex;
-            }
-            if (low === lowestLow) {
-                daysSinceLow = currentIndex - actualIndex;
-            }
-            return { high, low };
-        });
-        return { daysSinceHigh, daysSinceLow };
     }
 }
 /**

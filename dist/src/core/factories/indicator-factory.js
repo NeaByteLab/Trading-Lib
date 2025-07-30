@@ -3,6 +3,7 @@ import { movingAverage } from '@calculations/moving-averages';
 import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
 import { pineLength, pineSource } from '@utils/pine-script-utils';
+import { validateArray, validateIndicatorData } from '@utils/validation-utils';
 /**
  * Moving Average Indicator Factory
  *
@@ -46,6 +47,107 @@ export function createMovingAverageIndicator(name, description, type, defaultLen
             return createIndicatorWrapper(MovingAverageIndicator, _data, _length, _source);
         }
     };
+}
+/**
+ * Pivot Indicator Factory
+ *
+ * Centralized factory for creating pivot point indicators.
+ * Eliminates code duplication across standard, Camarilla, Woodie, and DeMark pivots.
+ *
+ * @example
+ * ```typescript
+ * const standardPivots = createPivotIndicator('Standard Pivots', calculatePivotPoints)
+ * const camarillaPivots = createPivotIndicator('Camarilla Pivots', calculateCamarillaPivots)
+ * ```
+ */
+export function createPivotIndicator(name, description, calculator) {
+    class PivotIndicator extends BaseIndicator {
+        constructor() {
+            super(name, description, 'trend');
+        }
+        validateInput(data, _config) {
+            if (Array.isArray(data)) {
+                throw new Error(ERROR_MESSAGES.MISSING_OHLC);
+            }
+            validateIndicatorData(data);
+        }
+        calculate(data, config) {
+            this.validateInput(data, config);
+            const marketData = data;
+            const { pp, r1, r2, r3, s1, s2, s3 } = calculator(marketData.high, marketData.low, marketData.close);
+            return {
+                values: pp,
+                metadata: {
+                    length: pp.length,
+                    source: config?.source || 'close',
+                    r1,
+                    r2,
+                    r3,
+                    s1,
+                    s2,
+                    s3
+                }
+            };
+        }
+    }
+    return PivotIndicator;
+}
+/**
+ * Price Comparison Indicator Factory
+ *
+ * Centralized factory for creating price comparison indicators.
+ * Eliminates code duplication across price ratio, differential, and comparison indicators.
+ *
+ * @example
+ * ```typescript
+ * const priceRatio = createPriceComparisonIndicator('Price Ratio', calculatePriceRatio)
+ * const priceDiff = createPriceComparisonIndicator('Price Differential', calculatePriceDifferential)
+ * ```
+ */
+export function createPriceComparisonIndicator(name, description, calculator) {
+    class PriceComparisonIndicator extends BaseIndicator {
+        constructor() {
+            super(name, description, 'trend');
+        }
+        validateInput(_data, config) {
+            const price1 = config?.['price1'];
+            const price2 = config?.['price2'];
+            validateArray(price1);
+            validateArray(price2);
+            if (price1.length !== price2.length) {
+                throw new Error(ERROR_MESSAGES.ARRAY_LENGTH_MISMATCH);
+            }
+        }
+        calculate(data, config) {
+            this.validateInput(data, config);
+            const price1 = config?.['price1'];
+            const price2 = config?.['price2'];
+            const basePrice = config?.['basePrice'] || 100;
+            const result = calculator(price1, price2, basePrice);
+            if (Array.isArray(result)) {
+                return {
+                    values: result,
+                    metadata: {
+                        length: result.length,
+                        source: config?.source || 'comparison'
+                    }
+                };
+            }
+            else {
+                return {
+                    values: result.ratio,
+                    metadata: {
+                        length: result.ratio.length,
+                        performance: result.performance,
+                        correlation: result.correlation,
+                        basePrice,
+                        source: config?.source || 'comparison'
+                    }
+                };
+            }
+        }
+    }
+    return PriceComparisonIndicator;
 }
 /**
  * Oscillator Indicator Factory
@@ -99,6 +201,7 @@ function createGenericIndicator(name, description, category, calculator, default
  * @example
  * ```typescript
  * const atr = createVolatilityIndicator('ATR', 'Average True Range', calculateATR, 14)
+ * const std = createVolatilityIndicator('STD', 'Standard Deviation', calculateStd, 20)
  * ```
  */
 export function createVolatilityIndicator(name, description, calculator, defaultLength) {
@@ -120,6 +223,14 @@ export function createVolumeIndicator(name, description, calculator, defaultLeng
     return class extends BaseIndicator {
         constructor() {
             super(name, description, 'volume');
+        }
+        validateInput(data, _config) {
+            if (Array.isArray(data)) {
+                throw new Error(ERROR_MESSAGES.MISSING_OHLCV);
+            }
+            if (!data.volume) {
+                throw new Error(ERROR_MESSAGES.MISSING_VOLUME);
+            }
         }
         calculate(data, config) {
             this.validateInput(data, config);

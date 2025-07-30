@@ -1,4 +1,5 @@
 import { ERROR_MESSAGES } from '@constants/indicator-constants';
+import { calculateRMA } from '@core/calculations/moving-averages/rma';
 import { ArrayUtils } from '@utils/array-utils';
 import { MathUtils } from '@utils/math-utils';
 import { sanitizeArray } from '@utils/validation-utils';
@@ -18,7 +19,7 @@ export function movingAverage(data, length, type = 'sma') {
     if (length <= 0) {
         throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }
-    if (!['sma', 'ema', 'wma', 'hull'].includes(type)) {
+    if (!['sma', 'ema', 'wma', 'hull', 'rma'].includes(type)) {
         throw new Error(ERROR_MESSAGES.INVALID_MOVING_AVERAGE_TYPE);
     }
     switch (type) {
@@ -28,15 +29,17 @@ export function movingAverage(data, length, type = 'sma') {
             return calculateWMA(data, length);
         case 'hull':
             return calculateHMA(data, length);
+        case 'rma':
+            return calculateRMA(data, length);
         default:
             return calculateSMA(data, length);
     }
 }
 /**
- * Calculate Simple Moving Average (SMA)
+ * Calculate Simple Moving Average (SMA) with numerical stability
  *
  * Uses centralized window processing utilities.
- * Formula: SMA = Σ(Price) / Length
+ * Formula: SMA = Σ(Price) / n
  *
  * @param data - Source data array
  * @param length - SMA period
@@ -63,36 +66,49 @@ function calculateSMA(data, length) {
  */
 function calculateEMA(data, length) {
     const smoothingFactor = 2 / (length + 1);
-    return ArrayUtils.processArray(data, (val, i) => {
-        if (i < length - 1) {
-            // First length-1 values should be NaN (not enough data)
-            return NaN;
-        }
-        else if (i === length - 1) {
-            // First EMA value is SMA of first 'length' values
-            const window = data.slice(0, length);
-            const validValues = sanitizeArray(window);
-            if (validValues.length === 0) {
-                return NaN;
-            }
-            else {
-                return MathUtils.average(validValues);
-            }
+    const result = [];
+    const firstEMA = findFirstEMA(data, length);
+    if (firstEMA === null) {
+        return Array(data.length).fill(NaN);
+    }
+    for (let i = 0; i < firstEMA.index; i++) {
+        result.push(NaN);
+    }
+    result.push(firstEMA.value);
+    for (let i = firstEMA.index + 1; i < data.length; i++) {
+        const previousEMA = result[i - 1];
+        const currentValue = data[i];
+        if (isNaN(previousEMA) || isNaN(currentValue) || !isFinite(previousEMA) || !isFinite(currentValue)) {
+            result.push(NaN);
         }
         else {
-            // Subsequent values use EMA formula
-            const previousEMA = data[i - 1] ?? 0;
-            if (isNaN(previousEMA)) {
-                return NaN;
-            }
-            else {
-                return (val * smoothingFactor) + (previousEMA * (1 - smoothingFactor));
-            }
+            const currentEMA = (currentValue * smoothingFactor) + (previousEMA * (1 - smoothingFactor));
+            result.push(isFinite(currentEMA) ? currentEMA : NaN);
         }
-    });
+    }
+    return result;
 }
 /**
- * Calculate Weighted Moving Average (WMA)
+ * Find the first valid EMA value and its index with numerical stability
+ *
+ * @param data - Source data array
+ * @param length - EMA period
+ * @returns Object with index and value, or null if no valid EMA found
+ */
+function findFirstEMA(data, length) {
+    if (data.length < length) {
+        return null;
+    }
+    const firstWindow = data.slice(0, length);
+    const validValues = sanitizeArray(firstWindow);
+    if (validValues.length === 0) {
+        return null;
+    }
+    const firstEMA = MathUtils.average(validValues);
+    return isFinite(firstEMA) ? { index: length - 1, value: firstEMA } : null;
+}
+/**
+ * Calculate Weighted Moving Average (WMA) with numerical stability
  *
  * Uses centralized window processing utilities.
  * Formula: WMA = Σ(Price × Weight) / Σ(Weights)
@@ -102,20 +118,26 @@ function calculateEMA(data, length) {
  * @returns Array of WMA values
  */
 function calculateWMA(data, length) {
-    return ArrayUtils.processWindow(data, length, (window) => {
+    const result = ArrayUtils.processWindow(data, length, (window) => {
         const validValues = sanitizeArray(window);
         if (validValues.length === 0) {
             return NaN;
         }
         const weights = ArrayUtils.processArray(validValues, (_, i) => i + 1);
-        const weightedValues = ArrayUtils.processArray(validValues, (val, i) => val * weights[i]);
-        const weightedSum = MathUtils.sum(weightedValues);
+        const weightedSum = MathUtils.sum(validValues.map((val, i) => val * weights[i]));
         const weightSum = MathUtils.sum(weights);
-        return weightedSum / weightSum;
+        const result = weightSum === 0 ? NaN : weightedSum / weightSum;
+        return isFinite(result) ? result : NaN;
     });
+    // Pad the result to match the input data length
+    const padding = data.length - result.length;
+    if (padding > 0) {
+        return Array(padding).fill(NaN).concat(result);
+    }
+    return result;
 }
 /**
- * Calculate Hull Moving Average (HMA)
+ * Calculate Hull Moving Average (HMA) with numerical stability
  *
  * Uses centralized calculation utilities.
  * Formula: HMA = WMA(2 × WMA(n/2) - WMA(n))
@@ -125,10 +147,32 @@ function calculateWMA(data, length) {
  * @returns Array of HMA values
  */
 function calculateHMA(data, length) {
+    if (data.length < length) {
+        return Array(data.length).fill(NaN);
+    }
     const halfLength = MathUtils.floor(length / 2);
-    const sqrtLength = MathUtils.floor(MathUtils.sqrt(length));
+    const sqrtLength = Math.max(1, MathUtils.floor(MathUtils.sqrt(length)));
+    // Calculate WMA(n/2) and WMA(n)
     const wma1 = calculateWMA(data, halfLength);
     const wma2 = calculateWMA(data, length);
-    const diff = ArrayUtils.processArray(wma1, (val, i) => 2 * val - wma2[i]);
+    // Ensure both arrays have the same length as the input data
+    const paddedWma1 = wma1.length === data.length ? wma1 : Array(data.length - wma1.length).fill(NaN).concat(wma1);
+    const paddedWma2 = wma2.length === data.length ? wma2 : Array(data.length - wma2.length).fill(NaN).concat(wma2);
+    // Calculate 2 * WMA(n/2) - WMA(n)
+    const diff = [];
+    for (let i = 0; i < data.length; i++) {
+        const wma1Val = paddedWma1[i];
+        const wma2Val = paddedWma2[i];
+        if (wma1Val !== undefined && wma2Val !== undefined &&
+            !isNaN(wma1Val) && !isNaN(wma2Val) &&
+            isFinite(wma1Val) && isFinite(wma2Val)) {
+            const result = 2 * wma1Val - wma2Val;
+            diff.push(isFinite(result) ? result : NaN);
+        }
+        else {
+            diff.push(NaN);
+        }
+    }
+    // Calculate final WMA on the difference
     return calculateWMA(diff, sqrtLength);
 }

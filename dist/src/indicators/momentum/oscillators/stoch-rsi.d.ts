@@ -1,7 +1,7 @@
 import { BaseIndicator } from '@base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Stochastic RSI indicator
+ * Stochastic RSI Indicator
  *
  * A momentum oscillator that applies the Stochastic formula to RSI values.
  * Formula: StochRSI = (RSI - RSI_min) / (RSI_max - RSI_min)

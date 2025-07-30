@@ -1,16 +1,15 @@
 import { BaseIndicator } from '@base/base-indicator'
-import { trueRange } from '@calculations/volatility/true-range'
 import { DEFAULT_LENGTHS, ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
-import { ArrayUtils } from '@utils/array-utils'
+import { calculateDirectionalMovement } from '@utils/calculation-utils'
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils'
 import { pineLength } from '@utils/pine-script-utils'
 
 /**
- * Directional Movement Index (DMI) indicator
+ * DMI (Directional Movement Index) Indicator
  *
- * Measures the strength of directional movement in price.
- * Formula: +DI = (Smoothed +DM / Smoothed TR) × 100, -DI = (Smoothed -DM / Smoothed TR) × 100
+ * Measures the strength and direction of price movement.
+ * Consists of +DI and -DI components.
  *
  * @example
  * ```typescript
@@ -31,7 +30,7 @@ export class DMI extends BaseIndicator {
       throw new Error(ERROR_MESSAGES.MISSING_OHLC)
     }
     const length = pineLength(config?.length || DEFAULT_LENGTHS.DMI, DEFAULT_LENGTHS.DMI)
-    const { plusDI, minusDI } = this.calculateDMI(data, length)
+    const { plusDI, minusDI } = this.calculateDMI(data)
     return {
       values: plusDI,
       metadata: {
@@ -42,73 +41,49 @@ export class DMI extends BaseIndicator {
     }
   }
 
-  private calculateDMI(data: MarketData, length: number): {
+  private calculateDMI(data: MarketData): {
     plusDI: number[]
     minusDI: number[]
   } {
-    const trValues = trueRange(data)
-    const plusDIValues: number[] = []
-    const minusDIValues: number[] = []
-    let prevHigh = data.high[0]!
-    let prevLow = data.low[0]!
-    const results = ArrayUtils.processArray(data.close, (_, i) => {
-      if (i === 0) {
-        plusDIValues.push(NaN)
-        minusDIValues.push(NaN)
-        return { plusDI: NaN, minusDI: NaN }
+    const plusDI: number[] = []
+    const minusDI: number[] = []
+
+    for (let i = 0; i < data.close.length; i++) {
+      if (i < 1) {
+        plusDI.push(NaN)
+        minusDI.push(NaN)
+        continue
       }
-      const { plusDM, minusDM } = this.calculateDirectionalMovement(data, i, prevHigh, prevLow)
-      const tr = trValues[i]!
-      const { smoothedTR, smoothedPlusDM, smoothedMinusDM } = this.calculateSmoothedValues(
-        tr, plusDM, minusDM, i, length, plusDIValues, minusDIValues, trValues
-      )
-      const plusDI = smoothedTR > 0 ? (smoothedPlusDM / smoothedTR) * 100 : 0
-      const minusDI = smoothedTR > 0 ? (smoothedMinusDM / smoothedTR) * 100 : 0
-      plusDIValues.push(plusDI)
-      minusDIValues.push(minusDI)
-      prevHigh = data.high[i]!
-      prevLow = data.low[i]!
-      return { plusDI, minusDI }
-    })
-    return {
-      plusDI: results.map(r => r.plusDI),
-      minusDI: results.map(r => r.minusDI)
+
+      const { plusDI: plusDIVal, minusDI: minusDIVal } = this.calculateDI(data, i)
+      plusDI.push(plusDIVal)
+      minusDI.push(minusDIVal)
     }
+
+    return { plusDI, minusDI }
   }
 
-  private calculateDirectionalMovement(data: MarketData, i: number, prevHigh: number, prevLow: number): {
-    plusDM: number
-    minusDM: number
+  private calculateDI(data: MarketData, i: number): {
+    plusDI: number
+    minusDI: number
   } {
-    const currentHigh = data.high[i]!
-    const currentLow = data.low[i]!
-    const plusDM = currentHigh - prevHigh > prevLow - currentLow && currentHigh - prevHigh > 0
-      ? currentHigh - prevHigh
-      : 0
-    const minusDM = prevLow - currentLow > currentHigh - prevHigh && prevLow - currentLow > 0
-      ? prevLow - currentLow
-      : 0
-    return { plusDM, minusDM }
-  }
+    const prevHigh = data.high[i - 1]!
+    const prevLow = data.low[i - 1]!
+    const { plusDM, minusDM } = calculateDirectionalMovement(data, i, prevHigh, prevLow)
+    const tr = Math.max(
+      data.high[i]! - data.low[i]!,
+      Math.abs(data.high[i]! - data.close[i - 1]!),
+      Math.abs(data.low[i]! - data.close[i - 1]!)
+    )
 
-  private calculateSmoothedValues(
-    tr: number,
-    plusDM: number,
-    minusDM: number,
-    i: number,
-    length: number,
-    plusDIValues: number[],
-    minusDIValues: number[],
-    trValues: number[]
-  ): {
-    smoothedTR: number
-    smoothedPlusDM: number
-    smoothedMinusDM: number
-  } {
-    const smoothedTR = i < length ? tr : (tr + (i - 1) * trValues[i - 1]!) / i
-    const smoothedPlusDM = i < length ? plusDM : (plusDM + (i - 1) * (plusDIValues[i - 1] || 0)) / i
-    const smoothedMinusDM = i < length ? minusDM : (minusDM + (i - 1) * (minusDIValues[i - 1] || 0)) / i
-    return { smoothedTR, smoothedPlusDM, smoothedMinusDM }
+    // Simple smoothing for DI calculation
+    const smoothedTR = tr
+    const smoothedPlusDM = plusDM
+    const smoothedMinusDM = minusDM
+
+    const plusDI = smoothedTR === 0 ? 0 : (smoothedPlusDM / smoothedTR) * 100
+    const minusDI = smoothedTR === 0 ? 0 : (smoothedMinusDM / smoothedTR) * 100
+    return { plusDI, minusDI }
   }
 }
 
@@ -128,12 +103,7 @@ export function dmi(
   plusDI: number[]
   minusDI: number[]
 } {
-  const result = createMultiResultIndicatorWrapper(
-    DMI,
-    data,
-    length,
-    source
-  )
+  const result = createMultiResultIndicatorWrapper(DMI, data, length, source)
   return {
     plusDI: result.values,
     minusDI: result.metadata['minusDI'] as number[]

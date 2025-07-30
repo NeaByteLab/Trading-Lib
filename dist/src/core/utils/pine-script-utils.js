@@ -1,4 +1,4 @@
-import { PinePrice } from './pine-core';
+import { PinePrice } from '@utils/pine-core';
 /**
  * Get source data based on price source
  *
@@ -20,13 +20,10 @@ export function pineSource(data, source = 'close') {
         case 'close':
             return data.close;
         case 'hl2':
-            // Use PinePrice utilities instead of manual calculations
             return PinePrice.hl2(data);
         case 'hlc3':
-            // Use PinePrice utilities instead of manual calculations
             return PinePrice.hlc3(data);
         case 'ohlc4':
-            // Use PinePrice utilities instead of manual calculations
             return PinePrice.ohlc4(data);
         default:
             return data.close;

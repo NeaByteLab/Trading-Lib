@@ -1,6 +1,4 @@
-export { bollingerBands } from './bollinger/bollinger-bands';
-export { donchianChannel } from './channels/donchian';
-export { keltnerChannel } from './channels/keltner';
-export { atr } from './range/atr';
-export { std } from './range/std';
+export * from './bollinger';
+export * from './channels';
+export * from './range';
 //# sourceMappingURL=index.d.ts.map

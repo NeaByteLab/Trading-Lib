@@ -14,7 +14,7 @@ export declare function pineSource(data: MarketData | number[], source?: string)
  * @param defaultLength - Default length value (default: 14)
  * @returns Validated length value
  */
-export declare function pineLength(length: number, defaultLength?: number): number;
+export declare function pineLength(length: number | undefined, defaultLength?: number): number;
 /**
  * Apply offset to array values
  *

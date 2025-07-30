@@ -1,4 +1,4 @@
-import { VolatilityIndicator } from '@base/volatility-indicator';
+import { VolatilityIndicator } from '@core/base/volatility-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
  * Average True Range (ATR) Indicator

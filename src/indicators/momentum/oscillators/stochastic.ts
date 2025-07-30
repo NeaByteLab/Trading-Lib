@@ -1,40 +1,37 @@
-import { ERROR_MESSAGES } from '@constants/indicator-constants'
-import { createVolatilityIndicator } from '@core/factories/indicator-factory'
+import { movingAverage } from '@calculations/moving-averages'
 import type { MarketData } from '@core/types/indicator-types'
-import { ArrayUtils } from '@utils/array-utils'
-import { calculateHighLowRange, calculateRangePercentage } from '@utils/calculation-utils'
-import { createIndicatorWrapper } from '@utils/indicator-utils'
+import { calculateStochastic } from '@utils/calculation-utils'
 
 /**
- * Calculate Stochastic Oscillator using centralized utilities
+ * Calculate Stochastic using centralized utilities
  *
- * @param data - Market data or price array
- * @param length - Calculation period (default: 14)
- * @returns %K values array
+ * @param data - Market data with high, low, close arrays
+ * @param kLength - K line period (default: 14)
+ * @param dLength - D line period (default: 3)
+ * @returns Stochastic K and D values
  */
-function calculateStochastic(data: MarketData | number[], length: number = 14): number[] {
-  if (Array.isArray(data)) {
-    throw new Error(ERROR_MESSAGES.MISSING_OHLC)
-  }
-  const kLength = length
-  return ArrayUtils.processWindow(data.close, kLength, (_, i) => {
-    const { highest, lowest } = calculateHighLowRange(data.high, data.low, i, kLength)
-    const currentClose = data.close[i]!
-    return calculateRangePercentage(currentClose, lowest, highest, 100)
-  })
+function calculateStochasticWrapper(data: MarketData, kLength: number = 14, dLength: number = 3): {
+  k: number[]
+  d: number[]
+} {
+  const k = calculateStochastic(data.close, data.high, data.low, kLength)
+  const d = movingAverage(k, dLength, 'sma')
+  return { k, d }
 }
 
-const Stochastic = createVolatilityIndicator('Stochastic', 'Stochastic Oscillator', calculateStochastic, 14)
+
 
 /**
  * Calculate Stochastic Oscillator values using wrapper function
  *
- * @param data - Market data or price array
- * @param kLength - %K period (default: 14)
- * @param dLength - %D period (default: 3)
- * @param source - Price source (default: 'close')
- * @returns %K and %D values
+ * @param data - Market data
+ * @param kLength - K line period (default: 14)
+ * @param dLength - D line period (default: 3)
+ * @returns Stochastic K and D values
  */
-export function stochastic(data: MarketData | number[], kLength?: number, dLength?: number, source?: string): number[] {
-  return createIndicatorWrapper(Stochastic, data, kLength, source, { dLength })
+export function stochastic(data: MarketData, kLength?: number, dLength?: number): {
+  k: number[]
+  d: number[]
+} {
+  return calculateStochasticWrapper(data, kLength || 14, dLength || 3)
 }

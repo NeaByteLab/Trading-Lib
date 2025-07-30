@@ -11,10 +11,20 @@ export declare abstract class BaseIndicator {
     /**
      * Validate input data and configuration
      *
-     * @param _data - Input data (unused in base implementation)
-     * @param _config - Configuration (unused in base implementation)
+     * @param _data - Input data
+     * @param _config - Configuration
      */
     validateInput(_data: MarketData | number[], _config?: IndicatorConfig): void;
+    /**
+     * Centralized length validation
+     * Eliminates duplication across all indicators
+     */
+    validateLength(length: number, minLength: number, maxLength?: number): void;
+    /**
+     * Centralized multiplier validation
+     * Eliminates duplication across volatility indicators
+     */
+    validateMultiplier(multiplier: number): void;
     /**
      * Get source data based on configuration
      */

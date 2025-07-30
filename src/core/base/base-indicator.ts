@@ -1,6 +1,7 @@
-import { ERROR_MESSAGES } from '@constants/indicator-constants'
+import { ERROR_MESSAGES } from '@core/constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
-import { PriceCalculations } from '@utils/calculation-utils'
+import { PriceCalculations } from '@core/utils/calculation-utils'
+import { validateIndicatorData } from '@core/utils/validation-utils'
 
 /**
  * Base class for all technical indicators
@@ -20,11 +21,34 @@ export abstract class BaseIndicator {
   /**
    * Validate input data and configuration
    *
-   * @param _data - Input data (unused in base implementation)
-   * @param _config - Configuration (unused in base implementation)
+   * @param _data - Input data
+   * @param _config - Configuration
    */
   public validateInput(_data: MarketData | number[], _config?: IndicatorConfig): void {
-    // Base implementation - override in subclasses for specific validation
+    validateIndicatorData(_data)
+  }
+
+  /**
+   * Centralized length validation
+   * Eliminates duplication across all indicators
+   */
+  public validateLength(length: number, minLength: number, maxLength?: number): void {
+    if (length < minLength) {
+      throw new Error(ERROR_MESSAGES.LENGTH_MIN_REQUIRED.replace('{minLength}', minLength.toString()))
+    }
+    if (maxLength && length > maxLength) {
+      throw new Error(ERROR_MESSAGES.LENGTH_MAX_EXCEEDED.replace('{maxLength}', maxLength.toString()))
+    }
+  }
+
+  /**
+   * Centralized multiplier validation
+   * Eliminates duplication across volatility indicators
+   */
+  public validateMultiplier(multiplier: number): void {
+    if (multiplier <= 0) {
+      throw new Error(ERROR_MESSAGES.INVALID_MULTIPLIER)
+    }
   }
 
   /**
@@ -64,6 +88,5 @@ export abstract class BaseIndicator {
    * @param _config - Indicator configuration
    * @returns Indicator calculation result
    */
-
   abstract calculate(_data: MarketData | number[], _config?: IndicatorConfig): IndicatorResult
 }

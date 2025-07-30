@@ -1,5 +1,4 @@
 import { BaseIndicator } from '@base/base-indicator';
-import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { validateIndicatorData } from '@utils/validation-utils';
 /**
  * Base class for oscillator indicators
@@ -24,12 +23,7 @@ export class OscillatorIndicator extends BaseIndicator {
     validateInput(data, config) {
         validateIndicatorData(data);
         const length = config?.length || this.defaultLength;
-        if (length < this.minLength) {
-            throw new Error(ERROR_MESSAGES.LENGTH_MIN_REQUIRED.replace('{minLength}', this.minLength.toString()));
-        }
-        if (this.maxLength && length > this.maxLength) {
-            throw new Error(ERROR_MESSAGES.LENGTH_MAX_EXCEEDED.replace('{maxLength}', this.maxLength.toString()));
-        }
+        this.validateLength(length, this.minLength, this.maxLength);
     }
     /**
      * Standard oscillator calculation wrapper

@@ -1,36 +1,7 @@
-import { VolatilityIndicator } from '@base/volatility-indicator';
-import { movingAverage } from '@calculations/moving-averages';
-import { ERROR_MESSAGES } from '@constants/indicator-constants';
-import { ArrayUtils } from '@utils/array-utils';
-import { MathUtils } from '@utils/math-utils';
-import { pineLength } from '@utils/pine-script-utils';
-/**
- * Calculate Average True Range (ATR)
- *
- * ATR = Average of True Range over n periods
- * True Range = max(High - Low, |High - Previous Close|, |Low - Previous Close|)
- *
- * @param high - High prices array
- * @param low - Low prices array
- * @param close - Close prices array
- * @param length - Calculation period
- * @returns ATR values array
- */
-function calculateATR(high, low, close, _length) {
-    return ArrayUtils.processArray(close, (_currentClose, i) => {
-        if (i === 0) {
-            return NaN;
-        }
-        const currentHigh = high[i];
-        const currentLow = low[i];
-        const previousClose = close[i - 1];
-        return MathUtils.max([
-            currentHigh - currentLow,
-            MathUtils.abs(currentHigh - previousClose),
-            MathUtils.abs(currentLow - previousClose)
-        ]);
-    });
-}
+import { VolatilityIndicator } from '@core/base/volatility-indicator';
+import { ERROR_MESSAGES } from '@core/constants/indicator-constants';
+import { calculateTrueRange, wildersSmoothing } from '@core/utils/calculation-utils';
+import { pineLength } from '@core/utils/pine-script-utils';
 /**
  * Average True Range (ATR) Indicator
  *
@@ -58,8 +29,8 @@ export class ATRIndicator extends VolatilityIndicator {
             throw new Error(ERROR_MESSAGES.MISSING_OHLC);
         }
         const length = pineLength(config?.length || 14, 14);
-        const trueRanges = calculateATR(data.high, data.low, data.close, length);
-        const atrValues = movingAverage(trueRanges, length, 'ema');
+        const trueRanges = calculateTrueRange(data.high, data.low, data.close);
+        const atrValues = wildersSmoothing(trueRanges, length);
         return {
             values: atrValues,
             metadata: {

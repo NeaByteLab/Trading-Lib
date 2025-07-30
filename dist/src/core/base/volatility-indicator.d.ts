@@ -1,4 +1,4 @@
-import { BaseIndicator } from '@base/base-indicator';
+import { BaseIndicator } from '@core/base/base-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
  * Base class for volatility indicators

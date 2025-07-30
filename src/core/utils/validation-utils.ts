@@ -57,16 +57,16 @@ export function validateLength(length: number, minLength: number = 1): void {
 }
 
 /**
- * Sanitize array by removing NaN values
+ * Sanitize array by removing NaN, null, and undefined values
  *
  * @param data - Array to sanitize
  * @returns Sanitized array
  */
-export function sanitizeArray(data: number[]): number[] {
+export function sanitizeArray(data: (number | null | undefined)[]): number[] {
   if (!Array.isArray(data)) {
     return []
   }
-  return data.filter(val => !isNaN(val))
+  return data.filter((val): val is number => val !== null && val !== undefined && !isNaN(val))
 }
 
 /**
@@ -89,7 +89,7 @@ export function validateIndicatorConfig(
 }
 
 /**
- * Validate indicator data
+ * Validate indicator data - generic validator for both MarketData and number[]
  */
 export function validateIndicatorData(data: MarketData | number[]): void {
   if (!data) {
@@ -104,6 +104,33 @@ export function validateIndicatorData(data: MarketData | number[]): void {
       throw new Error(ERROR_MESSAGES.EMPTY_DATA)
     }
   }
+}
+
+/**
+ * Validate MarketData specifically (requires OHLC)
+ */
+export function validateMarketDataOnly(data: MarketData | number[]): MarketData {
+  if (Array.isArray(data)) {
+    throw new Error(ERROR_MESSAGES.MISSING_OHLC)
+  }
+  if (!data || !Array.isArray(data.high) || !Array.isArray(data.low) ||
+      !Array.isArray(data.close) || !Array.isArray(data.open)) {
+    throw new Error(ERROR_MESSAGES.MISSING_OHLC)
+  }
+  return data
+}
+
+/**
+ * Validate number array specifically
+ */
+export function validateNumberArrayOnly(data: MarketData | number[]): number[] {
+  if (!Array.isArray(data)) {
+    throw new Error(ERROR_MESSAGES.ARRAY_REQUIRED)
+  }
+  if (data.length === 0) {
+    throw new Error(ERROR_MESSAGES.EMPTY_DATA)
+  }
+  return data
 }
 
 /**

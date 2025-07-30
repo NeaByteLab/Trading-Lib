@@ -1,66 +1,27 @@
-import { BaseIndicator } from '@base/base-indicator';
-import { DEFAULT_LENGTHS, ERROR_MESSAGES } from '@constants/indicator-constants';
-import { ArrayUtils } from '@utils/array-utils';
-import { PriceCalculations } from '@utils/calculation-utils';
+import { DEFAULT_LENGTHS } from '@constants/indicator-constants';
+import { createVolumeIndicator } from '@core/factories/indicator-factory';
+import { calculateVWAP } from '@utils/calculation-utils';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
-import { MathUtils } from '@utils/math-utils';
-import { pineLength } from '@utils/pine-script-utils';
+import { validateVolumeData } from '@utils/validation-utils';
 /**
- * VWAP (Volume Weighted Average Price) indicator
+ * Calculate Volume Weighted Average Price (VWAP)
  *
- * Calculates the average price weighted by volume.
- * Formula: VWAP = Σ(Price × Volume) / Σ(Volume)
+ * VWAP = Σ(Price × Volume) / Σ(Volume)
+ * Uses centralized calculation utilities for consistency.
  *
- * @example
- * ```typescript
- * const vwap = new VWAP()
- * const result = vwap.calculate(marketData, { length: 20 })
- * console.log(result.values) // VWAP values
- * ```
+ * @param data - Market data with OHLCV values
+ * @param length - Calculation period (default: 20)
+ * @returns VWAP values array
+ * @throws {Error} If market data is invalid or volume data is missing
  */
-export class VWAP extends BaseIndicator {
-    constructor() {
-        super('VWAP', 'Volume Weighted Average Price', 'volume');
+function calculateVWAPIndicator(data, length = 20) {
+    if (Array.isArray(data)) {
+        throw new Error('Market data required for VWAP calculation');
     }
-    calculate(data, config) {
-        this.validateInput(data, config);
-        if (Array.isArray(data)) {
-            throw new Error(ERROR_MESSAGES.MISSING_OHLC);
-        }
-        const length = pineLength(config?.length || DEFAULT_LENGTHS.VWAP, DEFAULT_LENGTHS.VWAP);
-        const values = this.calculateVWAP(data, length);
-        return {
-            values,
-            metadata: {
-                length,
-                source: 'hlc3'
-            }
-        };
-    }
-    calculateVWAP(data, length) {
-        const typicalPrices = PriceCalculations.typical(data);
-        return ArrayUtils.processWindow(typicalPrices, length, (window, i) => {
-            const validData = window.filter((_, j) => {
-                const actualIndex = i - length + 1 + j;
-                return !isNaN(window[j]) && data.volume?.[actualIndex] && data.volume[actualIndex] > 0;
-            });
-            if (validData.length === 0) {
-                return NaN;
-            }
-            const tpvValues = ArrayUtils.processArray(validData, (price, j) => {
-                const actualIndex = i - length + 1 + j;
-                return price * (data.volume?.[actualIndex] || 0);
-            });
-            const volumes = ArrayUtils.processArray(validData, (_, j) => {
-                const actualIndex = i - length + 1 + j;
-                return data.volume?.[actualIndex] || 0;
-            });
-            const cumulativeTPV = MathUtils.sum(tpvValues);
-            const cumulativeVolume = MathUtils.sum(volumes);
-            return cumulativeVolume === 0 ? NaN : cumulativeTPV / cumulativeVolume;
-        });
-    }
+    validateVolumeData(data);
+    return calculateVWAP(data, length);
 }
+const VWAPIndicator = createVolumeIndicator('VWAP', 'Volume Weighted Average Price', calculateVWAPIndicator, DEFAULT_LENGTHS.VWAP);
 /**
  * Calculate VWAP values using wrapper function
  *
@@ -70,5 +31,5 @@ export class VWAP extends BaseIndicator {
  * @returns VWAP values array
  */
 export function vwap(data, length, source) {
-    return createIndicatorWrapper(VWAP, data, length, source);
+    return createIndicatorWrapper(VWAPIndicator, data, length, source);
 }

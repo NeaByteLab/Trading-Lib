@@ -1,12 +1,11 @@
-import { BaseIndicator } from '@base/base-indicator'
-import { movingAverage } from '@calculations/moving-averages'
-import { ERROR_MESSAGES } from '@constants/indicator-constants'
-import { DEFAULT_LENGTHS, DEFAULT_MULTIPLIERS } from '@constants/indicator-constants'
+import { BaseIndicator } from '@core/base/base-indicator'
+import { movingAverage } from '@core/calculations/moving-averages'
+import { DEFAULT_LENGTHS, DEFAULT_MULTIPLIERS, ERROR_MESSAGES } from '@core/constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
+import { calculateKeltnerChannel } from '@core/utils/calculation-utils'
+import { createMultiResultIndicatorWrapper } from '@core/utils/indicator-utils'
+import { pineLength } from '@core/utils/pine-script-utils'
 import { atr } from '@indicators/volatility/range/atr'
-import { ArrayUtils } from '@utils/array-utils'
-import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils'
-import { pineLength } from '@utils/pine-script-utils'
 
 /**
  * Keltner Channel indicator
@@ -53,22 +52,10 @@ export class KeltnerChannel extends BaseIndicator {
     middle: number[]
     lower: number[]
   } {
-    const middle = movingAverage(data.close, length, 'ema')
+    const middle = movingAverage(data.close, length, 'sma')
     const atrValues = atr(data, length)
-    const atrMultiplied = ArrayUtils.processArray(atrValues, atr => atr * multiplier)
-    const upper = ArrayUtils.processArray(middle, (mid, i) => {
-      const atrVal = atrMultiplied[i]
-      return mid !== undefined && atrVal !== undefined && !isNaN(mid) && !isNaN(atrVal)
-        ? mid + atrVal
-        : NaN
-    })
-    const lower = ArrayUtils.processArray(middle, (mid, i) => {
-      const atrVal = atrMultiplied[i]
-      return mid !== undefined && atrVal !== undefined && !isNaN(mid) && !isNaN(atrVal)
-        ? mid - atrVal
-        : NaN
-    })
-    return { upper, middle, lower }
+    const result = calculateKeltnerChannel(data.close, atrValues, multiplier)
+    return { ...result, middle }
   }
 }
 

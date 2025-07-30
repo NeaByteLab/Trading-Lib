@@ -7,6 +7,7 @@ export const DEFAULT_LENGTHS = {
     EMA: 20,
     WMA: 20,
     HULL: 20,
+    RMA: 20,
     RSI: 14,
     MACD: 12,
     MACD_SIGNAL: 26,
@@ -42,7 +43,8 @@ export const DEFAULT_LENGTHS = {
     SHANNON: 20,
     SHANNON_BINS: 8,
     SAFEZONE: 20,
-    SAFEZONE_MULT: 2.0
+    SAFEZONE_MULT: 2.0,
+    DPO: 20
 };
 /**
  * Default multipliers for technical indicators
@@ -90,8 +92,13 @@ export const PINE_SOURCE_OPTIONS = [
 export const ERROR_MESSAGES = {
     ARRAY_LENGTH_MISMATCH: 'All data arrays must have the same length',
     ARRAY_REQUIRED: 'Data must be an array',
+    ATR_VALUES_REQUIRED: 'ATR values array is required',
+    CLOSE_ATR_LENGTH_MISMATCH: 'Close and ATR arrays must have the same length',
+    CLOSE_VOLUME_LENGTH_MISMATCH: 'Close and volume arrays must have the same length',
+    EMPTY_AFTER_NAN: 'Array cannot be empty after filtering NaN values',
     EMPTY_DATA: 'Data array cannot be empty',
     FAST_LENGTH_GREATER: 'Fast length must be less than slow length',
+    HIGH_LOW_LENGTH_MISMATCH: 'High and low arrays must have the same length',
     INDICATORS_REQUIRED: 'At least one indicator is required',
     INVALID_ALPHA: 'Alpha must be between 0 and 1',
     INVALID_DATA_FORMAT: 'Invalid market data format',
@@ -99,9 +106,11 @@ export const ERROR_MESSAGES = {
     INVALID_MOVING_AVERAGE_TYPE: 'Invalid moving average type',
     INVALID_MULTIPLIER: 'Multiplier must be positive',
     INVALID_PARAMETERS: 'Invalid parameters for calculation',
+    INVALID_PERCENTILE: 'Percentile must be between 0 and 100',
     INVALID_SIGMA: 'Sigma must be positive',
     INVALID_SOURCE: 'Invalid source parameter',
     INVALID_WINDOW_SIZE: 'Window size must be positive',
+    K_OUT_OF_BOUNDS: 'K must be between 0 and {maxIndex}',
     LENGTH_MAX_EXCEEDED: 'Length must not exceed {maxLength}',
     LENGTH_MIN_REQUIRED: 'Length must be at least {minLength}',
     MIN_LENGTH_REQUIRED: 'Data must have at least {minLength} elements',
@@ -109,6 +118,7 @@ export const ERROR_MESSAGES = {
     MISSING_OHLCV: 'OHLCV market data is required',
     MISSING_VOLUME: 'Volume data is required',
     NULL_UNDEFINED_DATA: 'Input data cannot be null or undefined',
+    OHLC_VOLUME_LENGTH_MISMATCH: 'All price and volume arrays must have the same length',
     VOLUME_REQUIRED: 'Volume data is required for volume-based calculations',
     VOLUME_WEIGHTED_REQUIRED: 'Volume data is required for volume-weighted calculations'
 };
