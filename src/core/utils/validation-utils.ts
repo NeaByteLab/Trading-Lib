@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { MarketData } from '@core/types/indicator-types'
 
 /**
@@ -9,7 +10,7 @@ import type { MarketData } from '@core/types/indicator-types'
 export function validateMarketData(data: MarketData): void {
   if (!data || !Array.isArray(data.high) || !Array.isArray(data.low) ||
       !Array.isArray(data.close) || !Array.isArray(data.open)) {
-    throw new Error('Invalid market data format')
+    throw new Error(ERROR_MESSAGES.MISSING_OHLC)
   }
 }
 
@@ -22,7 +23,7 @@ export function validateMarketData(data: MarketData): void {
 export function validateVolumeData(data: MarketData): void {
   validateMarketData(data)
   if (!data.volume || data.volume.length === 0) {
-    throw new Error('Volume data is required')
+    throw new Error(ERROR_MESSAGES.MISSING_VOLUME)
   }
 }
 
@@ -35,10 +36,10 @@ export function validateVolumeData(data: MarketData): void {
  */
 export function validateArray(data: number[], minLength: number = 1): void {
   if (!Array.isArray(data)) {
-    throw new Error('Data must be an array')
+    throw new Error(ERROR_MESSAGES.ARRAY_REQUIRED)
   }
   if (data.length < minLength) {
-    throw new Error(`Data must have at least ${minLength} elements`)
+    throw new Error(ERROR_MESSAGES.MIN_LENGTH_REQUIRED.replace('{minLength}', minLength.toString()))
   }
 }
 
@@ -51,7 +52,7 @@ export function validateArray(data: number[], minLength: number = 1): void {
  */
 export function validateLength(length: number, minLength: number = 1): void {
   if (!Number.isInteger(length) || length < minLength) {
-    throw new Error(`Length must be an integer greater than or equal to ${minLength}`)
+    throw new Error(ERROR_MESSAGES.INVALID_LENGTH)
   }
 }
 
@@ -83,23 +84,34 @@ export function validateIndicatorConfig(
     validateLength(config.length)
   }
   if (config?.source !== undefined && !allowedSources.includes(config.source)) {
-    throw new Error(`Invalid source parameter: ${config.source}`)
+    throw new Error(ERROR_MESSAGES.INVALID_SOURCE)
   }
 }
 
 /**
- * Validate OHLCV data object
+ * Validate indicator data
  */
-export function validateOHLCV(dataObj: Record<string, number>): boolean {
-  const highVal = dataObj['high']
-  const lowVal = dataObj['low']
-  const closeVal = dataObj['close']
-  const openVal = dataObj['open']
-  if (highVal === undefined || lowVal === undefined || closeVal === undefined || openVal === undefined) {
-    return false
+export function validateIndicatorData(data: MarketData | number[]): void {
+  if (!data) {
+    throw new Error(ERROR_MESSAGES.NULL_UNDEFINED_DATA)
   }
-  if (isNaN(highVal) || isNaN(lowVal) || isNaN(closeVal) || isNaN(openVal)) {
-    return false
+  if (Array.isArray(data)) {
+    if (data.length === 0) {
+      throw new Error(ERROR_MESSAGES.EMPTY_DATA)
+    }
+  } else {
+    if (!data.close || data.close.length === 0) {
+      throw new Error(ERROR_MESSAGES.EMPTY_DATA)
+    }
   }
-  return highVal >= lowVal && closeVal >= lowVal && closeVal <= highVal && openVal >= lowVal && openVal <= highVal
+}
+
+/**
+ * Validate and sanitize window
+ */
+export function validateAndSanitizeWindow(window: number[]): number[] {
+  if (!Array.isArray(window)) {
+    return []
+  }
+  return window.filter(val => !isNaN(val))
 }

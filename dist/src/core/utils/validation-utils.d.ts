@@ -48,7 +48,11 @@ export declare function validateIndicatorConfig(config?: {
     source?: string;
 }, allowedSources?: string[]): void;
 /**
- * Validate OHLCV data object
+ * Validate indicator data
  */
-export declare function validateOHLCV(dataObj: Record<string, number>): boolean;
+export declare function validateIndicatorData(data: MarketData | number[]): void;
+/**
+ * Validate and sanitize window
+ */
+export declare function validateAndSanitizeWindow(window: number[]): number[];
 //# sourceMappingURL=validation-utils.d.ts.map

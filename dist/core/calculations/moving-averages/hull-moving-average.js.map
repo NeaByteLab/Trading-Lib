@@ -1,1 +1,0 @@
-{"version":3,"file":"hull-moving-average.js","sourceRoot":"","sources":["../../../../src/core/calculations/moving-averages/hull-moving-average.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,SAAS,CAAA;AACvC,MAAM,UAAU,iBAAiB,CAAC,IAAc,EAAE,MAAc;IAC9D,OAAO,aAAa,CAAC,IAAI,EAAE,MAAM,EAAE,MAAM,CAAC,CAAA;AAC5C,CAAC"}

@@ -1,30 +1,30 @@
-import { BaseIndicator } from '@base/base-indicator';
+import { VolatilityIndicator } from '@base/volatility-indicator';
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Average True Range (ATR) indicator
+ * Average True Range (ATR) Indicator
  *
- * Measures market volatility by calculating the average of true ranges over a period.
- * Formula: ATR = Wilder's Smoothing(True Range) over period
+ * Measures market volatility by calculating the average of true range values.
+ * True range is the greatest of: current high-low, |current high - previous close|, |current low - previous close|.
+ * Higher ATR values indicate higher volatility.
  *
  * @example
  * ```typescript
- * const atr = new ATR()
+ * const atr = new ATRIndicator()
  * const result = atr.calculate(marketData, { length: 14 })
  * console.log(result.values) // ATR values
  * ```
  */
-export declare class ATR extends BaseIndicator {
+export declare class ATRIndicator extends VolatilityIndicator {
     constructor();
+    protected calculateVolatility(_data: number[], _length: number, _multiplier: number): number[];
     calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult;
-    private calculateATR;
 }
 /**
- * Calculate ATR values using wrapper function
+ * Calculate Average True Range (ATR) using wrapper function
  *
- * @param data - Market data
+ * @param data - Market data with high, low, close arrays
  * @param length - Calculation period (default: 14)
- * @param source - Price source (default: 'hlc3')
  * @returns ATR values array
  */
-export declare function atr(data: MarketData | number[], length?: number, source?: string): number[];
+export declare function atr(data: MarketData, length?: number): number[];
 //# sourceMappingURL=atr.d.ts.map

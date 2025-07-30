@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { PriceCalculations } from '@utils/calculation-utils'
 
@@ -48,7 +49,7 @@ export abstract class BaseIndicator {
       return PriceCalculations.ohlc4(data)
     case 'volume':
       if (!data.volume) {
-        throw new Error('Volume data is required for volume-based calculations')
+        throw new Error(ERROR_MESSAGES.VOLUME_REQUIRED)
       }
       return data.volume
     default:

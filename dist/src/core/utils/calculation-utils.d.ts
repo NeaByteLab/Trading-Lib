@@ -40,30 +40,6 @@ export declare const PriceCalculations: {
     }): number[];
 };
 /**
- * Combine multiple arrays with different lengths
- *
- * @param arrays - Arrays to combine
- * @returns Combined array
- */
-export declare function combineArrays(arrays: number[][]): number[];
-/**
- * Calculate price changes
- *
- * @param data - Source data array
- * @returns Array of price changes
- */
-export declare function calculatePriceChanges(data: number[]): number[];
-/**
- * Calculate gains and losses
- *
- * @param data - Source data array
- * @returns Object with gains and losses arrays
- */
-export declare function calculateGainsAndLosses(data: number[]): {
-    gains: number[];
-    losses: number[];
-};
-/**
  * Calculate mean of array
  *
  * @param values - Array of numbers
@@ -81,7 +57,7 @@ export declare function calculateVariance(values: number[]): number;
 /**
  * Calculate standard deviation
  *
- * @param values - Array of numbers
+ * @param values - Array of values
  * @returns Standard deviation
  */
 export declare function calculateStandardDeviation(values: number[]): number;

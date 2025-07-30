@@ -73,49 +73,6 @@ export const PineCore = {
 }
 
 /**
- * Pine Script Math Functions
- * Provides math functions that operate on arrays (Pine Script style)
- */
-export const PineMath = {
-  abs: MathUtils.abs,
-  min: MathUtils.rollingMin,
-  max: MathUtils.rollingMax,
-  sqrt: MathUtils.sqrt,
-  pow: MathUtils.pow,
-  log: MathUtils.log,
-  log10: MathUtils.log10,
-  sin: MathUtils.sin,
-  cos: MathUtils.cos,
-  tan: MathUtils.tan,
-  asin: MathUtils.asin,
-  acos: MathUtils.acos,
-  atan: MathUtils.atan,
-  floor: MathUtils.floor,
-  ceil: MathUtils.ceil,
-  sign: MathUtils.sign,
-  exp: MathUtils.exp,
-  mod: MathUtils.mod,
-  rem: MathUtils.rem,
-  factorial: MathUtils.factorial,
-  gcd: MathUtils.gcd,
-  lcm: MathUtils.lcm,
-  sum: MathUtils.sum,
-  average: MathUtils.average,
-  clamp: MathUtils.clamp,
-  round: MathUtils.round
-}
-
-/**
- * Pine Script Array Functions
- * Provides array manipulation functions (Pine Script style)
- */
-export const PineArray = {
-  highest: MathUtils.highest,
-  lowest: MathUtils.lowest,
-  change: MathUtils.change
-}
-
-/**
  * Pine Script Price Functions
  * Provides price calculation functions using centralized PriceCalculations
  */
@@ -123,22 +80,4 @@ export const PinePrice = {
   hl2: PriceCalculations.hl2,
   hlc3: PriceCalculations.typical,
   ohlc4: PriceCalculations.ohlc4
-}
-
-/**
- * Pine Script Calculation Functions
- * Provides advanced calculation functions
- */
-export const PineCalculations = {
-  calculateMean: CalculationUtils.calculateMean,
-  calculateVariance: CalculationUtils.calculateVariance,
-  calculateStandardDeviation: CalculationUtils.calculateStandardDeviation,
-  calculatePriceChanges: CalculationUtils.calculatePriceChanges,
-  calculateGainsAndLosses: CalculationUtils.calculateGainsAndLosses,
-  rollingWindow: CalculationUtils.rollingWindow,
-  exponentialSmoothing: CalculationUtils.exponentialSmoothing,
-  wildersSmoothing: CalculationUtils.wildersSmoothing,
-  safeDivision: CalculationUtils.safeDivision,
-  sanitizeArray,
-  shiftArray: CalculationUtils.shiftArray
 }

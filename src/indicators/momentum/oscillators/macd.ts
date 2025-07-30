@@ -1,6 +1,5 @@
 import { BaseIndicator } from '@base/base-indicator'
 import { movingAverage } from '@calculations/moving-averages'
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils'
@@ -28,9 +27,9 @@ export class MACD extends BaseIndicator {
   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
     this.validateInput(data, config)
     const source = pineSource(data, config?.source)
-    const fastLength = pineLength((config?.['fastLength'] as number) || DEFAULT_LENGTHS.MACD, DEFAULT_LENGTHS.MACD)
-    const slowLength = pineLength((config?.['slowLength'] as number) || DEFAULT_LENGTHS.MACD_SIGNAL, DEFAULT_LENGTHS.MACD_SIGNAL)
-    const signalLength = pineLength((config?.['signalLength'] as number) || DEFAULT_LENGTHS.MACD_HISTOGRAM, DEFAULT_LENGTHS.MACD_HISTOGRAM)
+    const fastLength = pineLength((config?.['fastLength'] as number) || 12, 12)
+    const slowLength = pineLength((config?.['slowLength'] as number) || 26, 26)
+    const signalLength = pineLength((config?.['signalLength'] as number) || 9, 9)
     const { macd, signal, histogram } = this.calculateMACD(source, fastLength, slowLength, signalLength)
     return {
       values: macd,

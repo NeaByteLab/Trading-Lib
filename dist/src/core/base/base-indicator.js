@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { PriceCalculations } from '@utils/calculation-utils';
 /**
  * Base class for all technical indicators
@@ -43,7 +44,7 @@ export class BaseIndicator {
                 return PriceCalculations.ohlc4(data);
             case 'volume':
                 if (!data.volume) {
-                    throw new Error('Volume data is required for volume-based calculations');
+                    throw new Error(ERROR_MESSAGES.VOLUME_REQUIRED);
                 }
                 return data.volume;
             default:

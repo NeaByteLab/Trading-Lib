@@ -1,3 +1,5 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
+import { ArrayUtils } from '@utils/array-utils';
 import { MathUtils } from '@utils/math-utils';
 /**
  * Strategy Builder
@@ -12,22 +14,21 @@ export class StrategyBuilder {
      * @returns Combined indicator result
      */
     static combineIndicators(indicators) {
-        if (indicators.length === 0) {
-            throw new Error('At least one indicator is required');
+        if (!indicators || indicators.length === 0) {
+            throw new Error(ERROR_MESSAGES.INDICATORS_REQUIRED);
         }
         const maxLength = MathUtils.max(indicators.map(ind => ind.values.length));
-        const combinedValues = [];
-        for (let i = 0; i < maxLength; i++) {
+        const combinedValues = ArrayUtils.processArray(Array.from({ length: maxLength }, (_, i) => i), (_, i) => {
             const validValues = indicators
                 .map(ind => ind.values[i])
                 .filter((val) => val !== undefined && !isNaN(val));
             if (validValues.length === 0) {
-                combinedValues.push(NaN);
+                return NaN;
             }
             else {
-                combinedValues.push(MathUtils.average(validValues));
+                return MathUtils.average(validValues);
             }
-        }
+        });
         return {
             values: combinedValues,
             metadata: {
@@ -46,37 +47,32 @@ export class StrategyBuilder {
      */
     static createCrossover(fastIndicator, slowIndicator) {
         const maxLength = MathUtils.max([fastIndicator.values.length, slowIndicator.values.length]);
-        const signals = [];
-        for (let i = 0; i < maxLength; i++) {
+        return ArrayUtils.processArray(Array.from({ length: maxLength }, (_, i) => i), (_, i) => {
             const fast = fastIndicator.values[i];
             const slow = slowIndicator.values[i];
             if (fast === undefined || slow === undefined || isNaN(fast) || isNaN(slow)) {
-                signals.push(NaN);
-                continue;
+                return NaN;
             }
             if (i === 0) {
-                signals.push(0);
-                continue;
+                return 0;
             }
             const prevFast = fastIndicator.values[i - 1];
             const prevSlow = slowIndicator.values[i - 1];
             if (prevFast === undefined || prevSlow === undefined || isNaN(prevFast) || isNaN(prevSlow)) {
-                signals.push(0);
-                continue;
+                return 0;
             }
             // Bullish crossover: fast crosses above slow
             if (prevFast <= prevSlow && fast > slow) {
-                signals.push(1);
+                return 1;
             }
             // Bearish crossover: fast crosses below slow
             else if (prevFast >= prevSlow && fast < slow) {
-                signals.push(-1);
+                return -1;
             }
             else {
-                signals.push(0);
+                return 0;
             }
-        }
-        return signals;
+        });
     }
     /**
      * Create a divergence strategy between price and indicator

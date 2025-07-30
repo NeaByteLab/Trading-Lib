@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { ArrayUtils } from '@utils/array-utils';
 import { MathUtils } from '@utils/math-utils';
 import { sanitizeArray } from '@utils/validation-utils';
@@ -12,13 +13,13 @@ import { sanitizeArray } from '@utils/validation-utils';
  */
 export function movingAverage(data, length, type = 'sma') {
     if (!data || data.length === 0) {
-        throw new Error('Data array cannot be empty');
+        throw new Error(ERROR_MESSAGES.EMPTY_DATA);
     }
     if (length <= 0) {
-        throw new Error('Length must be positive');
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }
     if (!['sma', 'ema', 'wma', 'hull'].includes(type)) {
-        throw new Error('Invalid moving average type');
+        throw new Error(ERROR_MESSAGES.INVALID_MOVING_AVERAGE_TYPE);
     }
     switch (type) {
         case 'ema':
@@ -61,30 +62,34 @@ function calculateSMA(data, length) {
  * @returns Array of EMA values
  */
 function calculateEMA(data, length) {
-    const alpha = 2 / (length + 1);
-    const result = [];
-    for (let i = 0; i < data.length; i++) {
-        if (i === 0) {
-            // First value should be the first data point
-            result.push(data[i]);
+    const smoothingFactor = 2 / (length + 1);
+    return ArrayUtils.processArray(data, (val, i) => {
+        if (i < length - 1) {
+            // First length-1 values should be NaN (not enough data)
+            return NaN;
         }
-        else if (i < length - 1) {
-            // Use simple average for initial values
-            const smaValues = data.slice(0, i + 1);
-            const validValues = smaValues.filter(val => !isNaN(val));
+        else if (i === length - 1) {
+            // First EMA value is SMA of first 'length' values
+            const window = data.slice(0, length);
+            const validValues = sanitizeArray(window);
             if (validValues.length === 0) {
-                result.push(NaN);
-                continue;
+                return NaN;
             }
-            const sma = MathUtils.average(validValues);
-            result.push(sma);
+            else {
+                return MathUtils.average(validValues);
+            }
         }
         else {
-            const ema = (data[i] * alpha) + (result[i - 1] * (1 - alpha));
-            result.push(ema);
+            // Subsequent values use EMA formula
+            const previousEMA = data[i - 1] ?? 0;
+            if (isNaN(previousEMA)) {
+                return NaN;
+            }
+            else {
+                return (val * smoothingFactor) + (previousEMA * (1 - smoothingFactor));
+            }
         }
-    }
-    return result;
+    });
 }
 /**
  * Calculate Weighted Moving Average (WMA)

@@ -12,11 +12,10 @@
  * const rsi = calculateRSI(data.close, 14)
  * ```
  */
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { ArrayUtils } from './array-utils';
 import { MathUtils } from './math-utils';
 import { sanitizeArray } from './validation-utils';
-const LENGTH_ERROR = 'Length must be positive';
-const EMPTY_ARRAY_ERROR = 'Array cannot be empty';
 /**
  * Price calculation utilities
  *
@@ -68,65 +67,6 @@ export const PriceCalculations = {
     }
 };
 /**
- * Combine multiple arrays with different lengths
- *
- * @param arrays - Arrays to combine
- * @returns Combined array
- */
-export function combineArrays(arrays) {
-    const maxLength = MathUtils.max(arrays.map(arr => arr.length));
-    const result = [];
-    for (let i = 0; i < maxLength; i++) {
-        const values = arrays.map(arr => arr[i]).filter(val => val !== undefined && !isNaN(val));
-        result.push(values.length > 0 ? MathUtils.average(values) : NaN);
-    }
-    return result;
-}
-/**
- * Calculate price changes
- *
- * @param data - Source data array
- * @returns Array of price changes
- */
-export function calculatePriceChanges(data) {
-    if (!data || data.length === 0) {
-        throw new Error(EMPTY_ARRAY_ERROR);
-    }
-    const result = [];
-    for (let i = 1; i < data.length; i++) {
-        const current = data[i];
-        const previous = data[i - 1];
-        result.push(isNaN(current) || isNaN(previous) ? NaN : current - previous);
-    }
-    return result;
-}
-/**
- * Calculate gains and losses
- *
- * @param data - Source data array
- * @returns Object with gains and losses arrays
- */
-export function calculateGainsAndLosses(data) {
-    const changes = calculatePriceChanges(data);
-    const gains = [];
-    const losses = [];
-    ArrayUtils.processArray(changes, (change) => {
-        if (isNaN(change)) {
-            gains.push(NaN);
-            losses.push(NaN);
-        }
-        else if (change > 0) {
-            gains.push(change);
-            losses.push(0);
-        }
-        else {
-            gains.push(0);
-            losses.push(MathUtils.abs(change));
-        }
-    });
-    return { gains, losses };
-}
-/**
  * Calculate mean of array
  *
  * @param values - Array of numbers
@@ -135,13 +75,12 @@ export function calculateGainsAndLosses(data) {
  */
 export function calculateMean(values) {
     if (!values || values.length === 0) {
-        throw new Error(EMPTY_ARRAY_ERROR);
+        throw new Error(ERROR_MESSAGES.EMPTY_DATA);
     }
     const validValues = sanitizeArray(values);
     if (validValues.length === 0) {
         return NaN;
     }
-    // Check if any value is NaN - return NaN if any NaN found
     if (values.some(val => isNaN(val))) {
         return NaN;
     }
@@ -163,17 +102,25 @@ export function calculateVariance(values) {
         return NaN;
     }
     const squaredDifferences = validValues.map(val => MathUtils.pow(val - mean, 2));
-    return MathUtils.average(squaredDifferences);
+    // Use population variance formula: Σ(x - μ)² / n
+    return MathUtils.sum(squaredDifferences) / validValues.length;
 }
 /**
  * Calculate standard deviation
  *
- * @param values - Array of numbers
+ * @param values - Array of values
  * @returns Standard deviation
  */
 export function calculateStandardDeviation(values) {
-    const variance = calculateVariance(values);
-    return isNaN(variance) ? NaN : MathUtils.sqrt(variance);
+    if (!values || values.length === 0) {
+        return NaN;
+    }
+    const validValues = sanitizeArray(values);
+    if (validValues.length === 0) {
+        return NaN;
+    }
+    const variance = calculateVariance(validValues);
+    return MathUtils.sqrt(variance);
 }
 /**
  * Create rolling window from array
@@ -183,11 +130,12 @@ export function calculateStandardDeviation(values) {
  * @returns Array of window arrays
  */
 export function rollingWindow(data, windowSize) {
-    const windows = [];
-    for (let i = 0; i <= data.length - windowSize; i++) {
-        windows.push(data.slice(i, i + windowSize));
-    }
-    return windows;
+    return ArrayUtils.processArray(data, (_, i) => {
+        if (i <= data.length - windowSize) {
+            return data.slice(i, i + windowSize);
+        }
+        return null;
+    }).filter((window) => window !== null);
 }
 /**
  * Calculate rolling statistic
@@ -240,19 +188,16 @@ export function calculateRollingStatistic(data, windowSize, statistic) {
  */
 export function exponentialSmoothing(data, alpha) {
     if (alpha < 0 || alpha > 1) {
-        throw new Error('Alpha must be between 0 and 1');
+        throw new Error(ERROR_MESSAGES.INVALID_ALPHA);
     }
-    const result = [];
-    for (let i = 0; i < data.length; i++) {
+    return ArrayUtils.processArray(data, (val, i) => {
         if (i === 0) {
-            result.push(data[i]);
+            return val;
         }
         else {
-            const smoothed = (alpha * data[i]) + ((1 - alpha) * result[i - 1]);
-            result.push(smoothed);
+            return (alpha * val) + ((1 - alpha) * (data[i - 1] ?? 0));
         }
-    }
-    return result;
+    });
 }
 /**
  * Apply Wilder's smoothing to data
@@ -263,10 +208,23 @@ export function exponentialSmoothing(data, alpha) {
  */
 export function wildersSmoothing(data, length) {
     if (length <= 0) {
-        throw new Error(LENGTH_ERROR);
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }
-    const alpha = 1 / length;
-    return exponentialSmoothing(data, alpha);
+    return ArrayUtils.processArray(data, (val, i) => {
+        if (i < length - 1) {
+            return NaN;
+        }
+        else if (i === length - 1) {
+            // First smoothed value is the average of first 'length' values
+            const sum = data.slice(0, length).reduce((acc, v) => acc + v, 0);
+            return sum / length;
+        }
+        else {
+            // Subsequent values use Wilder's smoothing formula
+            const prevSmoothed = data[i - 1] ?? 0;
+            return ((prevSmoothed * (length - 1)) + val) / length;
+        }
+    });
 }
 /**
  * Safe division with fallback
@@ -313,31 +271,43 @@ export function shiftArray(data, offset) {
  */
 export function calculateRSI(data, length) {
     if (length <= 0) {
-        throw new Error(LENGTH_ERROR);
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }
-    const { gains, losses } = calculateGainsAndLosses(data);
+    // Calculate price changes
+    const changes = ArrayUtils.processArray(data, (current, i) => {
+        if (i === 0) {
+            // First value has no previous value
+            return NaN;
+        }
+        const previous = data[i - 1];
+        return isNaN(current) || isNaN(previous) ? NaN : current - previous;
+    });
+    // Calculate gains and losses
+    const gains = ArrayUtils.processArray(changes, (change) => {
+        if (isNaN(change)) {
+            return NaN;
+        }
+        return change > 0 ? change : 0;
+    });
+    const losses = ArrayUtils.processArray(changes, (change) => {
+        if (isNaN(change)) {
+            return NaN;
+        }
+        return change < 0 ? MathUtils.abs(change) : 0;
+    });
     const avgGains = wildersSmoothing(gains, length);
     const avgLosses = wildersSmoothing(losses, length);
-    // Create result array with same length as input data
-    const result = [];
-    // Fill first element with NaN since we need at least 2 points for changes
-    result.push(NaN);
-    // Process the gains/losses arrays
-    for (let i = 0; i < avgGains.length; i++) {
-        const avgGain = avgGains[i];
+    return ArrayUtils.processArray(avgGains, (avgGain, i) => {
         const avgLoss = avgLosses[i];
         if (isNaN(avgGain) || isNaN(avgLoss)) {
-            result.push(NaN);
+            return NaN;
         }
-        else if (avgLoss === 0) {
-            result.push(100);
+        if (avgLoss === 0) {
+            return 100;
         }
-        else {
-            const rs = avgGain / avgLoss;
-            result.push(100 - (100 / (1 + rs)));
-        }
-    }
-    return result;
+        const rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
+    });
 }
 /**
  * Calculate CCI using centralized utilities
@@ -348,7 +318,7 @@ export function calculateRSI(data, length) {
  */
 export function calculateCCI(data, length) {
     if (length <= 0) {
-        throw new Error(LENGTH_ERROR);
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }
     const CCI_CONSTANT = 0.015;
     return ArrayUtils.processWindow(data, length, (window, _i) => {
@@ -356,7 +326,6 @@ export function calculateCCI(data, length) {
         if (validValues.length === 0) {
             return NaN;
         }
-        // Use the current price (last element in window) for CCI calculation
         const currentPrice = window[window.length - 1];
         const sma = calculateMean(validValues);
         const meanDeviation = calculateMean(validValues.map(val => MathUtils.abs(val - sma)));
@@ -372,7 +341,7 @@ export function calculateCCI(data, length) {
  */
 export function calculateCCIFromOHLC(data, length) {
     if (length <= 0) {
-        throw new Error(LENGTH_ERROR);
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }
     const typicalPrices = PriceCalculations.typical(data);
     return calculateCCI(typicalPrices, length);
@@ -404,7 +373,6 @@ export function calculateRangePercentage(value, min, max, multiplier = 100) {
 export function calculateHighLowRange(highData, lowData, currentIndex, windowSize) {
     const highSlice = ArrayUtils.getWindowSlice(highData, currentIndex, windowSize);
     const lowSlice = ArrayUtils.getWindowSlice(lowData, currentIndex, windowSize);
-    // Handle empty arrays gracefully
     if (highSlice.length === 0 || lowSlice.length === 0) {
         return { highest: NaN, lowest: NaN };
     }

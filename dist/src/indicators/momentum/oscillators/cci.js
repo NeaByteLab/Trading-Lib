@@ -1,44 +1,21 @@
-import { BaseIndicator } from '@base/base-indicator';
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
+import { createVolatilityIndicator } from '@core/factories/indicator-factory';
 import { calculateCCIFromOHLC } from '@utils/calculation-utils';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
-import { pineLength } from '@utils/pine-script-utils';
-const DEFAULT_LENGTHS = {
-    CCI: 20
-};
 /**
- * Commodity Channel Index (CCI) indicator
+ * Calculate CCI using centralized utilities
  *
- * A momentum oscillator that measures the current price level relative to an average price level.
- * Formula: CCI = (Typical Price - SMA) / (0.015 × Mean Deviation)
- *
- * @example
- * ```typescript
- * const cci = new CCI()
- * const result = cci.calculate(marketData, { length: 20 })
- * console.log(result.values) // CCI values
- * ```
+ * @param data - Market data or price array
+ * @param length - Calculation period (default: 20)
+ * @returns CCI values array
  */
-export class CCI extends BaseIndicator {
-    constructor() {
-        super('CCI', 'Commodity Channel Index', 'momentum');
+function calculateCCI(data, length = 20) {
+    if (Array.isArray(data)) {
+        throw new Error(ERROR_MESSAGES.MISSING_OHLC);
     }
-    calculate(data, config) {
-        this.validateInput(data, config);
-        if (Array.isArray(data)) {
-            throw new Error('CCI requires OHLC market data');
-        }
-        const length = pineLength(config?.length || DEFAULT_LENGTHS.CCI, DEFAULT_LENGTHS.CCI);
-        // Use the centralized CCI calculation utility
-        const values = calculateCCIFromOHLC(data, length);
-        return {
-            values,
-            metadata: {
-                length,
-                source: 'hlc3'
-            }
-        };
-    }
+    return calculateCCIFromOHLC(data, length);
 }
+const CCI = createVolatilityIndicator('CCI', 'Commodity Channel Index', calculateCCI, 20);
 /**
  * Calculate CCI values using wrapper function
  *

@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
 /**
  * Validate market data format
  *
@@ -7,7 +8,7 @@
 export function validateMarketData(data) {
     if (!data || !Array.isArray(data.high) || !Array.isArray(data.low) ||
         !Array.isArray(data.close) || !Array.isArray(data.open)) {
-        throw new Error('Invalid market data format');
+        throw new Error(ERROR_MESSAGES.MISSING_OHLC);
     }
 }
 /**
@@ -19,7 +20,7 @@ export function validateMarketData(data) {
 export function validateVolumeData(data) {
     validateMarketData(data);
     if (!data.volume || data.volume.length === 0) {
-        throw new Error('Volume data is required');
+        throw new Error(ERROR_MESSAGES.MISSING_VOLUME);
     }
 }
 /**
@@ -31,10 +32,10 @@ export function validateVolumeData(data) {
  */
 export function validateArray(data, minLength = 1) {
     if (!Array.isArray(data)) {
-        throw new Error('Data must be an array');
+        throw new Error(ERROR_MESSAGES.ARRAY_REQUIRED);
     }
     if (data.length < minLength) {
-        throw new Error(`Data must have at least ${minLength} elements`);
+        throw new Error(ERROR_MESSAGES.MIN_LENGTH_REQUIRED.replace('{minLength}', minLength.toString()));
     }
 }
 /**
@@ -46,7 +47,7 @@ export function validateArray(data, minLength = 1) {
  */
 export function validateLength(length, minLength = 1) {
     if (!Number.isInteger(length) || length < minLength) {
-        throw new Error(`Length must be an integer greater than or equal to ${minLength}`);
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
     }
 }
 /**
@@ -73,22 +74,33 @@ export function validateIndicatorConfig(config, allowedSources = ['open', 'high'
         validateLength(config.length);
     }
     if (config?.source !== undefined && !allowedSources.includes(config.source)) {
-        throw new Error(`Invalid source parameter: ${config.source}`);
+        throw new Error(ERROR_MESSAGES.INVALID_SOURCE);
     }
 }
 /**
- * Validate OHLCV data object
+ * Validate indicator data
  */
-export function validateOHLCV(dataObj) {
-    const highVal = dataObj['high'];
-    const lowVal = dataObj['low'];
-    const closeVal = dataObj['close'];
-    const openVal = dataObj['open'];
-    if (highVal === undefined || lowVal === undefined || closeVal === undefined || openVal === undefined) {
-        return false;
+export function validateIndicatorData(data) {
+    if (!data) {
+        throw new Error(ERROR_MESSAGES.NULL_UNDEFINED_DATA);
     }
-    if (isNaN(highVal) || isNaN(lowVal) || isNaN(closeVal) || isNaN(openVal)) {
-        return false;
+    if (Array.isArray(data)) {
+        if (data.length === 0) {
+            throw new Error(ERROR_MESSAGES.EMPTY_DATA);
+        }
     }
-    return highVal >= lowVal && closeVal >= lowVal && closeVal <= highVal && openVal >= lowVal && openVal <= highVal;
+    else {
+        if (!data.close || data.close.length === 0) {
+            throw new Error(ERROR_MESSAGES.EMPTY_DATA);
+        }
+    }
+}
+/**
+ * Validate and sanitize window
+ */
+export function validateAndSanitizeWindow(window) {
+    if (!Array.isArray(window)) {
+        return [];
+    }
+    return window.filter(val => !isNaN(val));
 }

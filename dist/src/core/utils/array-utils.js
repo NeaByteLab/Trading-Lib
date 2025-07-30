@@ -1,17 +1,9 @@
-import { MathUtils } from './math-utils';
-import { sanitizeArray } from './validation-utils';
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
+import { MathUtils } from '@utils/math-utils';
+import { validateAndSanitizeWindow } from '@utils/validation-utils';
 /**
  * Centralized array processing utilities
- *
- * Provides common array operations to eliminate code duplication.
- * All indicators should use these utilities instead of manual implementations.
- *
- * @example
- * ```typescript
- * import { ArrayUtils } from '@utils/array-utils'
- *
- * const result = ArrayUtils.processArray(data, (val, i) => val * 2)
- * ```
+ * Eliminates duplication across all indicators
  */
 export const ArrayUtils = {
     /**
@@ -22,14 +14,18 @@ export const ArrayUtils = {
      * @returns Processed array
      */
     processArray(data, processor) {
-        return data.map(processor);
+        const result = [];
+        for (let i = 0; i < data.length; i++) {
+            result.push(processor(data[i], i));
+        }
+        return result;
     },
     /**
-     * Process array with window-based calculation
+     * Process array with sliding window
      *
      * @param data - Input array
      * @param windowSize - Window size
-     * @param processor - Window processing function
+     * @param processor - Processing function
      * @returns Processed array
      */
     processWindow(data, windowSize, processor) {
@@ -39,22 +35,22 @@ export const ArrayUtils = {
                 result.push(NaN);
                 continue;
             }
-            const window = this.getWindowSlice(data, i, windowSize);
+            const window = data.slice(i - windowSize + 1, i + 1);
             result.push(processor(window, i));
         }
         return result;
     },
     /**
-     * Calculate rolling statistics
+     * Calculate rolling statistic
      *
      * @param data - Input array
      * @param windowSize - Window size
      * @param statistic - Statistic type
-     * @returns Array of statistics
+     * @returns Array of rolling statistics
      */
     rollingStatistic(data, windowSize, statistic) {
         return this.processWindow(data, windowSize, (window) => {
-            const validValues = sanitizeArray(window);
+            const validValues = validateAndSanitizeWindow(window);
             if (validValues.length === 0) {
                 return NaN;
             }
@@ -80,22 +76,16 @@ export const ArrayUtils = {
      * @returns Array of percentage changes
      */
     percentChange(data, period = 1) {
-        const result = [];
-        for (let i = 0; i < data.length; i++) {
+        return this.processArray(data, (current, i) => {
             if (i < period) {
-                result.push(NaN);
-                continue;
+                return NaN;
             }
-            const current = data[i];
             const previous = data[i - period];
             if (isNaN(current) || isNaN(previous) || previous === 0) {
-                result.push(NaN);
+                return NaN;
             }
-            else {
-                result.push(((current - previous) / previous) * 100);
-            }
-        }
-        return result;
+            return ((current - previous) / previous) * 100;
+        });
     },
     /**
      * Calculate momentum (price change)
@@ -105,22 +95,16 @@ export const ArrayUtils = {
      * @returns Array of momentum values
      */
     momentum(data, period = 1) {
-        const result = [];
-        for (let i = 0; i < data.length; i++) {
+        return this.processArray(data, (current, i) => {
             if (i < period) {
-                result.push(NaN);
-                continue;
+                return NaN;
             }
-            const current = data[i];
             const previous = data[i - period];
             if (isNaN(current) || isNaN(previous)) {
-                result.push(NaN);
+                return NaN;
             }
-            else {
-                result.push(current - previous);
-            }
-        }
-        return result;
+            return current - previous;
+        });
     },
     /**
      * Validate array data
@@ -131,10 +115,10 @@ export const ArrayUtils = {
      */
     validateArray(data, minLength = 1) {
         if (!Array.isArray(data)) {
-            throw new Error('Data must be an array');
+            throw new Error(ERROR_MESSAGES.ARRAY_REQUIRED);
         }
         if (data.length < minLength) {
-            throw new Error(`Data must have at least ${minLength} elements`);
+            throw new Error(ERROR_MESSAGES.MIN_LENGTH_REQUIRED.replace('{minLength}', minLength.toString()));
         }
     },
     /**
@@ -159,17 +143,13 @@ export const ArrayUtils = {
      * @returns Shifted array
      */
     shift(data, offset) {
-        const result = [];
-        for (let i = 0; i < data.length; i++) {
+        return this.processArray(data, (_, i) => {
             const sourceIndex = i - offset;
             if (sourceIndex >= 0 && sourceIndex < data.length) {
-                result.push(data[sourceIndex]);
+                return data[sourceIndex];
             }
-            else {
-                result.push(NaN);
-            }
-        }
-        return result;
+            return NaN;
+        });
     },
     /**
      * Get window slice for rolling calculations
@@ -181,5 +161,34 @@ export const ArrayUtils = {
      */
     getWindowSlice(data, currentIndex, windowSize) {
         return data.slice(currentIndex - windowSize + 1, currentIndex + 1);
+    },
+    /**
+     * Centralized window processing with validation
+     * Eliminates duplication in array processing patterns
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param processor - Processing function
+     * @returns Processed array
+     */
+    processValidWindow(data, windowSize, processor) {
+        return this.processWindow(data, windowSize, (window) => {
+            const validValues = window.filter(val => !isNaN(Number(val)));
+            return validValues.length > 0 ? processor(validValues) : NaN;
+        });
+    },
+    /**
+     * Centralized array validation and processing
+     * Eliminates duplication in validation patterns
+     *
+     * @param data - Input array
+     * @param processor - Processing function
+     * @param minLength - Minimum required length
+     * @returns Processed array
+     */
+    processValidArray(data, processor, minLength = 1) {
+        this.validateArray(data, minLength);
+        const validValues = data.filter(val => !isNaN(Number(val)));
+        return validValues.length > 0 ? processor(validValues) : NaN;
     }
 };

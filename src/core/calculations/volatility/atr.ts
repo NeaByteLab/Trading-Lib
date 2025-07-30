@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { MarketData } from '@core/types/indicator-types'
 import { wildersSmoothing } from '@utils/calculation-utils'
 
@@ -27,8 +28,8 @@ import { trueRange } from './true-range'
  * ```
  */
 export function atr(data: MarketData, length: number, smoothing: 'wilders' | 'sma' = 'wilders'): number[] {
-  if (!data || length <= 0) {
-    throw new Error('Invalid parameters for ATR calculation')
+  if (length <= 0) {
+    throw new Error(ERROR_MESSAGES.INVALID_PARAMETERS)
   }
   const trValues = trueRange(data)
 

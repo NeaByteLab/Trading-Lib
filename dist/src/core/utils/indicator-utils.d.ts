@@ -9,12 +9,4 @@ export declare function createIndicatorWrapper<T extends BaseIndicator>(Indicato
  * Unified indicator wrapper for multi-result indicators
  */
 export declare function createMultiResultIndicatorWrapper<T extends BaseIndicator>(IndicatorClass: new () => T, data: MarketData | number[], length?: number, source?: string, additionalConfig?: Partial<IndicatorConfig>): IndicatorResult;
-/**
- * Unified validation for all indicators
- */
-export declare function validateIndicatorInput(data: MarketData | number[], config?: IndicatorConfig): void;
-/**
- * Unified source data extraction using centralized PriceCalculations
- */
-export declare function extractSourceData(data: MarketData | number[], source?: string): number[];
 //# sourceMappingURL=indicator-utils.d.ts.map

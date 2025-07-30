@@ -1,6 +1,6 @@
 import { BaseIndicator } from '@base/base-indicator'
 import { trueRange } from '@calculations/volatility/true-range'
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants'
+import { DEFAULT_LENGTHS , ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils'
@@ -30,7 +30,7 @@ export class ADX extends BaseIndicator {
   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
     this.validateInput(data, config)
     if (Array.isArray(data)) {
-      throw new Error('ADX requires OHLC market data')
+      throw new Error(ERROR_MESSAGES.MISSING_OHLC)
     }
     const length = pineLength(config?.length || DEFAULT_LENGTHS.ADX, DEFAULT_LENGTHS.ADX)
     const { adx, plusDI, minusDI } = this.calculateADX(data, length)

@@ -1,5 +1,6 @@
 import { BaseIndicator } from '@base/base-indicator';
 import { movingAverage } from '@calculations/moving-averages';
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
 import { pineLength, pineSource } from '@utils/pine-script-utils';
 /**
@@ -24,7 +25,7 @@ export function createMovingAverageIndicator(name, description, type, defaultLen
             const source = pineSource(data, config?.source);
             const length = pineLength(config?.length || defaultLength, defaultLength);
             if (length <= 0) {
-                throw new Error(`Invalid length parameter: ${length}. Must be greater than 0.`);
+                throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
             }
             const values = movingAverage(source, length, type);
             return {
@@ -40,7 +41,7 @@ export function createMovingAverageIndicator(name, description, type, defaultLen
         class: MovingAverageIndicator,
         function: (_data, _length, _source) => {
             if (_length !== undefined && _length <= 0) {
-                throw new Error(`Invalid length parameter: ${_length}. Must be greater than 0.`);
+                throw new Error(ERROR_MESSAGES.INVALID_LENGTH);
             }
             return createIndicatorWrapper(MovingAverageIndicator, _data, _length, _source);
         }
@@ -116,5 +117,21 @@ export function createVolatilityIndicator(name, description, calculator, default
  * ```
  */
 export function createVolumeIndicator(name, description, calculator, defaultLength) {
-    return createGenericIndicator(name, description, 'volume', calculator, defaultLength);
+    return class extends BaseIndicator {
+        constructor() {
+            super(name, description, 'volume');
+        }
+        calculate(data, config) {
+            this.validateInput(data, config);
+            const length = pineLength(config?.length || defaultLength, defaultLength);
+            const values = calculator(data, length);
+            return {
+                values,
+                metadata: {
+                    length,
+                    source: config?.source || 'close'
+                }
+            };
+        }
+    };
 }

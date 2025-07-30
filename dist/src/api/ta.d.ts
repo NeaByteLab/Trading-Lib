@@ -72,17 +72,41 @@ export declare const ta: {
     ema: (data: number[], length: number) => number[];
     wma: (data: number[], length: number) => number[];
     hull: (data: number[], length: number) => number[];
+    alma: (data: number[], length?: number, sigma?: number) => number[];
+    wilders: (data: number[], length?: number) => number[];
     rsi: (data: number[], length?: number) => number[];
     cci: (data: number[], length?: number) => number[];
+    apo: (data: number[], fastLength?: number, slowLength?: number) => number[];
+    accel: (data: MarketData, fastLength?: number, slowLength?: number) => number[];
+    ao: (data: MarketData, fastLength?: number, slowLength?: number) => number[];
+    aroon: (data: MarketData, length?: number) => number[];
     macd: (data: number[], fastLength?: number, slowLength?: number, signalLength?: number) => {
         macd: number[];
         signal: number[];
         histogram: number[];
     };
+    shannon: (data: number[], length?: number, bins?: number) => number[];
+    safezone: (data: number[], length?: number, multiplier?: number) => {
+        upper: number[];
+        middle: number[];
+        lower: number[];
+    };
+    ad: (data: MarketData) => number[];
+    amihud: (data: MarketData, length?: number) => number[];
     bbands: (data: number[], length?: number, multiplier?: number) => {
         upper: number[];
         middle: number[];
         lower: number[];
+    };
+    std: (data: number[], length?: number) => number[];
+    woodie: (data: MarketData) => {
+        pp: number[];
+        r1: number[];
+        r2: number[];
+        r3: number[];
+        s1: number[];
+        s2: number[];
+        s3: number[];
     };
 };
 //# sourceMappingURL=ta.d.ts.map

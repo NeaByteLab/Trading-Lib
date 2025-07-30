@@ -52,6 +52,13 @@ export declare const MathUtils: {
      */
     log10(value: number): number;
     /**
+     * Calculate base-2 logarithm
+     *
+     * @param value - Input value
+     * @returns Base-2 logarithm
+     */
+    log2(value: number): number;
+    /**
      * Calculate sine
      *
      * @param value - Input value in radians
@@ -94,7 +101,7 @@ export declare const MathUtils: {
      */
     atan(value: number): number;
     /**
-     * Calculate floor
+     * Calculate floor value
      *
      * @param value - Input value
      * @returns Floor value

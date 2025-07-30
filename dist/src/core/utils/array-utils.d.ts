@@ -1,15 +1,6 @@
 /**
  * Centralized array processing utilities
- *
- * Provides common array operations to eliminate code duplication.
- * All indicators should use these utilities instead of manual implementations.
- *
- * @example
- * ```typescript
- * import { ArrayUtils } from '@utils/array-utils'
- *
- * const result = ArrayUtils.processArray(data, (val, i) => val * 2)
- * ```
+ * Eliminates duplication across all indicators
  */
 export declare const ArrayUtils: {
     /**
@@ -21,21 +12,21 @@ export declare const ArrayUtils: {
      */
     processArray<T, R>(data: T[], processor: (value: T, index: number) => R): R[];
     /**
-     * Process array with window-based calculation
+     * Process array with sliding window
      *
      * @param data - Input array
      * @param windowSize - Window size
-     * @param processor - Window processing function
+     * @param processor - Processing function
      * @returns Processed array
      */
     processWindow<T, R>(data: T[], windowSize: number, processor: (window: T[], index: number) => R): R[];
     /**
-     * Calculate rolling statistics
+     * Calculate rolling statistic
      *
      * @param data - Input array
      * @param windowSize - Window size
      * @param statistic - Statistic type
-     * @returns Array of statistics
+     * @returns Array of rolling statistics
      */
     rollingStatistic(data: number[], windowSize: number, statistic: "min" | "max" | "mean" | "sum"): number[];
     /**
@@ -87,5 +78,25 @@ export declare const ArrayUtils: {
      * @returns Window slice
      */
     getWindowSlice<T>(data: T[], currentIndex: number, windowSize: number): T[];
+    /**
+     * Centralized window processing with validation
+     * Eliminates duplication in array processing patterns
+     *
+     * @param data - Input array
+     * @param windowSize - Window size
+     * @param processor - Processing function
+     * @returns Processed array
+     */
+    processValidWindow<T, R>(data: T[], windowSize: number, processor: (validWindow: T[]) => R): (R | number)[];
+    /**
+     * Centralized array validation and processing
+     * Eliminates duplication in validation patterns
+     *
+     * @param data - Input array
+     * @param processor - Processing function
+     * @param minLength - Minimum required length
+     * @returns Processed array
+     */
+    processValidArray<T, R>(data: T[], processor: (validData: T[]) => R, minLength?: number): R | number;
 };
 //# sourceMappingURL=array-utils.d.ts.map

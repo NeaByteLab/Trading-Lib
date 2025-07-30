@@ -1,4 +1,6 @@
-export { sma, SMA } from './sma'
-export { ema, EMA } from './ema'
-export { wma, WMA } from './wma'
-export { hull, Hull } from './hull'
+// Moving Averages
+export { sma } from './sma'
+export { ema } from './ema'
+export { wma } from './wma'
+export { hull } from './hull'
+export { alma } from './alma'

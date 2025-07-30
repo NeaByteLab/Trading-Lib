@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
 import { PriceCalculations } from '@utils/calculation-utils'
@@ -28,8 +29,8 @@ import { validateVolumeData } from '@utils/validation-utils'
 export function volumeWeightedAveragePrice(data: MarketData): number[] {
   validateVolumeData(data)
 
-  if (!data.volume) {
-    throw new Error('Volume data is required for volume-weighted calculations')
+  if (!data.volume || data.volume.length === 0) {
+    throw new Error(ERROR_MESSAGES.VOLUME_WEIGHTED_REQUIRED)
   }
 
   return ArrayUtils.processArray(data.close, (_, i) => {

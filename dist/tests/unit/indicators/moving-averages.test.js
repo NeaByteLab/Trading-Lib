@@ -13,17 +13,11 @@ describe('Moving Averages', () => {
     };
     const expectFirstValueNaN = (result) => expect(result[0]).toBeNaN();
     const expectSecondValueNaN = (result) => expect(result[1]).toBeNaN();
-    const expectFirstValueEqualsTestData = (result) => expect(result[0]).toBe(testData[0]);
     const expectThirdValueNotNaN = (result) => expect(result[2]).not.toBeNaN();
     const expectFourthValueNotNaN = (result) => expect(result[3]).not.toBeNaN();
     const expectFifthValueNotNaN = (result) => expect(result[4]).not.toBeNaN();
     const expectFifthValueEqualsThree = (result) => expect(result[4]).toBe(3);
     const expectSixthValueNotNaN = (result) => expect(result[5]).not.toBeNaN();
-    const expectAllButFirstNotNaN = (result) => {
-        for (let i = 1; i < result.length; i++) {
-            expect(result[i]).not.toBeNaN();
-        }
-    };
     beforeAll(() => {
         testData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         marketData = loadTestData();
@@ -54,20 +48,24 @@ describe('Moving Averages', () => {
             const result = movingAverage(testData, 3, 'ema');
             expectArrayResult(result);
             expectResultLength(result);
-            // First value should be the first data point
-            expectFirstValueEqualsTestData(result);
+            // First two values should be NaN (not enough data for EMA)
+            expectFirstValueNaN(result);
+            expectSecondValueNaN(result);
+            // Third value should be the first EMA value (SMA of first 3 values)
+            expect(result[2]).toBe(2);
             // Subsequent values should be EMA calculations
-            expect(result[1]).not.toBeNaN();
-            expectThirdValueNotNaN(result);
+            expectFourthValueNotNaN(result);
         });
         it('should handle different periods', () => {
             const result = movingAverage(testData, 5, 'ema');
             expectArrayResult(result);
             expectResultLength(result);
-            // First value should be the first data point
-            expectFirstValueEqualsTestData(result);
+            // First 4 values should be NaN (not enough data)
+            expectFirstFourNaN(result);
+            // Fifth value should be the first EMA value
+            expect(result[4]).toBe(3);
             // All subsequent values should be calculated
-            expectAllButFirstNotNaN(result);
+            expectSixthValueNotNaN(result);
         });
     });
     describe('WMA (Weighted Moving Average)', () => {
@@ -125,8 +123,14 @@ describe('Moving Averages', () => {
             const result = movingAverage(closePrices, 20, 'ema');
             expectArrayResult(result);
             expect(result.length).toBe(closePrices.length);
-            // First value should be the first close price
-            expect(result[0]).toBe(closePrices[0]);
+            // First 19 values should be NaN (not enough data for EMA with length 20)
+            for (let i = 0; i < 19; i++) {
+                expect(result[i]).toBeNaN();
+            }
+            // 20th value should be the first EMA value (SMA of first 20 values)
+            expect(result[19]).not.toBeNaN();
+            // Later values should be calculated
+            expect(result[20]).not.toBeNaN();
         });
         it('should calculate WMA with real data', () => {
             const closePrices = marketData.close;

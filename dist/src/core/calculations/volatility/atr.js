@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { wildersSmoothing } from '@utils/calculation-utils';
 import { trueRange } from './true-range';
 /**
@@ -24,8 +25,8 @@ import { trueRange } from './true-range';
  * ```
  */
 export function atr(data, length, smoothing = 'wilders') {
-    if (!data || length <= 0) {
-        throw new Error('Invalid parameters for ATR calculation');
+    if (length <= 0) {
+        throw new Error(ERROR_MESSAGES.INVALID_PARAMETERS);
     }
     const trValues = trueRange(data);
     if (smoothing === 'wilders') {

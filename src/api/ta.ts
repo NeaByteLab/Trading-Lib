@@ -1,6 +1,19 @@
 // Import Pine Script core functions
 import { movingAverage } from '@calculations/moving-averages'
 import type { MarketData } from '@core/types/indicator-types'
+import { aroonOscillator } from '@indicators/momentum/directional/aroon-oscillator'
+import { acceleratorOscillator , awesomeOscillator } from '@indicators/momentum/oscillators/ao'
+import { apo } from '@indicators/momentum/oscillators/apo'
+import { macd } from '@indicators/momentum/oscillators/macd'
+import { safezone } from '@indicators/momentum/oscillators/safezone'
+import { shannon } from '@indicators/momentum/oscillators/shannon'
+import { alma } from '@indicators/trend/moving-averages/alma'
+import { wilders } from '@indicators/trend/moving-averages/wilders'
+import { woodie } from '@indicators/trend/pivots/woodie'
+import { bollingerBands } from '@indicators/volatility/bollinger/bollinger-bands'
+import { std } from '@indicators/volatility/range/std'
+import { accumulationDistribution } from '@indicators/volume/flow/ad'
+import { amihudIlliquidity } from '@indicators/volume/flow/amihud'
 import { ArrayUtils } from '@utils/array-utils'
 import * as CalculationUtils from '@utils/calculation-utils'
 import { MathUtils } from '@utils/math-utils'
@@ -84,37 +97,34 @@ export const ta = {
   ema: (data: number[], length: number) => movingAverage(data, length, 'ema'),
   wma: (data: number[], length: number) => movingAverage(data, length, 'wma'),
   hull: (data: number[], length: number) => movingAverage(data, length, 'hull'),
+  alma: (data: number[], length: number = 9, sigma: number = 6) => alma(data, length, sigma),
+  wilders: (data: number[], length: number = 14) => wilders(data, length),
 
   // Momentum Indicators
   rsi: (data: number[], length: number = 14) => CalculationUtils.calculateRSI(data, length),
   cci: (data: number[], length: number = 20) => CalculationUtils.calculateCCI(data, length),
+  apo: (data: number[], fastLength: number = 12, slowLength: number = 26) => apo(data, fastLength, slowLength),
+  accel: (data: MarketData, fastLength: number = 5, slowLength: number = 34) => acceleratorOscillator(data, fastLength, slowLength),
+  ao: (data: MarketData, fastLength: number = 5, slowLength: number = 34) => awesomeOscillator(data, fastLength, slowLength),
+  aroon: (data: MarketData, length: number = 14) => aroonOscillator(data, length),
   macd: (data: number[], fastLength: number = 12, slowLength: number = 26, signalLength: number = 9) => {
-    const fastEMA = movingAverage(data, fastLength, 'ema')
-    const slowEMA = movingAverage(data, slowLength, 'ema')
-    const macdLine = ArrayUtils.processArray(fastEMA, (fast, i) => {
-      const slow = slowEMA[i]
-      return fast !== undefined && slow !== undefined && !isNaN(fast) && !isNaN(slow) ? fast - slow : NaN
-    })
-    const signal = movingAverage(macdLine, signalLength, 'ema')
-    const histogram = ArrayUtils.processArray(macdLine, (macdVal, i) => {
-      const signalVal = signal[i]
-      return macdVal !== undefined && signalVal !== undefined && !isNaN(macdVal) && !isNaN(signalVal) ? macdVal - signalVal : NaN
-    })
-    return { macd: macdLine, signal, histogram }
+    const result = macd(data, fastLength, slowLength, signalLength)
+    return { macd: result.macd, signal: result.signal, histogram: result.histogram }
   },
+  shannon: (data: number[], length: number = 20, bins: number = 8) => shannon(data, length, bins),
+  safezone: (data: number[], length: number = 20, multiplier: number = 2.0) => safezone(data, length, multiplier),
+
+  // Volume Indicators
+  ad: (data: MarketData) => accumulationDistribution(data),
+  amihud: (data: MarketData, length: number = 20) => amihudIlliquidity(data, length),
 
   // Volatility Indicators
   bbands: (data: number[], length: number = 20, multiplier: number = 2) => {
-    const middle = movingAverage(data, length, 'sma')
-    const stdDev = ArrayUtils.processWindow(data, length, (window) => CalculationUtils.calculateStandardDeviation(window))
-    const upper = ArrayUtils.processArray(middle, (middleVal, i) => {
-      const stdDevVal = stdDev[i]
-      return middleVal !== undefined && stdDevVal !== undefined && !isNaN(middleVal) && !isNaN(stdDevVal) ? middleVal + (multiplier * stdDevVal) : NaN
-    })
-    const lower = ArrayUtils.processArray(middle, (middleVal, i) => {
-      const stdDevVal = stdDev[i]
-      return middleVal !== undefined && stdDevVal !== undefined && !isNaN(middleVal) && !isNaN(stdDevVal) ? middleVal - (multiplier * stdDevVal) : NaN
-    })
-    return { upper, middle, lower }
-  }
+    const result = bollingerBands(data, length, multiplier)
+    return { upper: result.upper, middle: result.middle, lower: result.lower }
+  },
+  std: (data: number[], length: number = 20) => std(data, length),
+
+  // Pivot Points
+  woodie: (data: MarketData) => woodie(data)
 }

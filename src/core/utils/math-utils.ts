@@ -4,23 +4,11 @@
  * Provides centralized mathematical operations following Pine Script conventions.
  * All indicators should use these utilities instead of manual implementations.
  */
+import { ERROR_MESSAGES } from '@constants/indicator-constants'
+
 import { sanitizeArray } from './validation-utils'
 
 const EMPTY_ARRAY_ERROR = 'Array cannot be empty'
-
-/**
- * Validate array and get sanitized values
- *
- * @param array - Input array
- * @returns Sanitized array values
- * @throws {Error} If array is empty
- */
-function validateAndSanitize(array: number[]): number[] {
-  if (!array || array.length === 0) {
-    throw new Error(EMPTY_ARRAY_ERROR)
-  }
-  return sanitizeArray(array)
-}
 
 /**
  * Create rolling window with validation
@@ -40,7 +28,7 @@ function createRollingWindow(
     throw new Error(EMPTY_ARRAY_ERROR)
   }
   if (windowSize <= 0) {
-    throw new Error('Window size must be positive')
+    throw new Error(ERROR_MESSAGES.INVALID_WINDOW_SIZE)
   }
   const result: number[] = []
   for (let i = 0; i < array.length; i++) {
@@ -138,6 +126,16 @@ export const MathUtils = {
   },
 
   /**
+   * Calculate base-2 logarithm
+   *
+   * @param value - Input value
+   * @returns Base-2 logarithm
+   */
+  log2(value: number): number {
+    return Math.log2(value)
+  },
+
+  /**
    * Calculate sine
    *
    * @param value - Input value in radians
@@ -198,7 +196,7 @@ export const MathUtils = {
   },
 
   /**
-   * Calculate floor
+   * Calculate floor value
    *
    * @param value - Input value
    * @returns Floor value
@@ -316,8 +314,8 @@ export const MathUtils = {
    * @throws {Error} If array is empty
    */
   sum(array: number[]): number {
-    const validValues = validateAndSanitize(array)
-    return validValues.length > 0 ? validValues.reduce((a, b) => a + b, 0) : 0
+    const validValues = sanitizeArray(array)
+    return validValues.length > 0 ? validValues.reduce((a: number, b: number) => a + b, 0) : 0
   },
 
   /**
@@ -328,8 +326,11 @@ export const MathUtils = {
    * @throws {Error} If array is empty
    */
   average(array: number[]): number {
-    const validValues = validateAndSanitize(array)
-    return validValues.length > 0 ? validValues.reduce((a, b) => a + b, 0) / validValues.length : NaN
+    if (!array || array.length === 0) {
+      throw new Error(EMPTY_ARRAY_ERROR)
+    }
+    const validValues = sanitizeArray(array)
+    return validValues.length > 0 ? validValues.reduce((a: number, b: number) => a + b, 0) / validValues.length : NaN
   },
 
   /**

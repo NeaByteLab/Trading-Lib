@@ -1,5 +1,5 @@
 import { BaseIndicator } from '@base/base-indicator'
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants'
+import { DEFAULT_LENGTHS , ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
 import { PriceCalculations } from '@utils/calculation-utils'
@@ -28,7 +28,7 @@ export class VWAP extends BaseIndicator {
   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
     this.validateInput(data, config)
     if (Array.isArray(data)) {
-      throw new Error('VWAP requires OHLC market data')
+      throw new Error(ERROR_MESSAGES.MISSING_OHLC)
     }
     const length = pineLength(config?.length || DEFAULT_LENGTHS.VWAP, DEFAULT_LENGTHS.VWAP)
     const values = this.calculateVWAP(data, length)
@@ -42,7 +42,6 @@ export class VWAP extends BaseIndicator {
   }
 
   private calculateVWAP(data: MarketData, length: number): number[] {
-    // Use centralized PriceCalculations utility instead of manual calculation
     const typicalPrices = PriceCalculations.typical(data)
 
     return ArrayUtils.processWindow(typicalPrices, length, (window, i) => {
@@ -55,12 +54,12 @@ export class VWAP extends BaseIndicator {
         return NaN
       }
 
-      const tpvValues = validData.map((price, j) => {
+      const tpvValues = ArrayUtils.processArray(validData, (price, j) => {
         const actualIndex = i - length + 1 + j
         return price * (data.volume?.[actualIndex] || 0)
       })
 
-      const volumes = validData.map((_, j) => {
+      const volumes = ArrayUtils.processArray(validData, (_, j) => {
         const actualIndex = i - length + 1 + j
         return data.volume?.[actualIndex] || 0
       })

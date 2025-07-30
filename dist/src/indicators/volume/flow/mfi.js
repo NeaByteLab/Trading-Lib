@@ -1,47 +1,21 @@
-import { BaseIndicator } from '@base/base-indicator';
 import { moneyFlowIndex } from '@calculations/volume/money-flow';
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants';
+import { ERROR_MESSAGES } from '@constants/indicator-constants';
+import { createVolumeIndicator } from '@core/factories/indicator-factory';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
-import { pineLength } from '@utils/pine-script-utils';
 /**
- * Money Flow Index (MFI) indicator
+ * Calculate MFI using centralized utilities
  *
- * A volume-weighted oscillator that measures buying and selling pressure.
- * Formula: MFI = 100 - (100 / (1 + Money Ratio))
- *
- * @example
- * ```typescript
- * const mfi = new MFI()
- * const result = mfi.calculate(marketData, { length: 14 })
- * console.log(result.values) // MFI values (0-100)
- * ```
+ * @param data - Market data or price array
+ * @param length - Calculation period (default: 14)
+ * @returns MFI values array
  */
-export class MFI extends BaseIndicator {
-    constructor() {
-        super('MFI', 'Money Flow Index', 'volume');
+function calculateMFI(data, length = 14) {
+    if (Array.isArray(data)) {
+        throw new Error(ERROR_MESSAGES.MISSING_OHLCV);
     }
-    calculate(data, config) {
-        this.validateInput(data, config);
-        if (Array.isArray(data)) {
-            throw new Error('MFI requires OHLCV market data');
-        }
-        if (!data.volume) {
-            throw new Error('Volume data is required for MFI calculation');
-        }
-        const length = pineLength(config?.length || DEFAULT_LENGTHS.MFI, DEFAULT_LENGTHS.MFI);
-        const values = this.calculateMFI(data, length);
-        return {
-            values,
-            metadata: {
-                length,
-                source: 'hlc3'
-            }
-        };
-    }
-    calculateMFI(data, length) {
-        return moneyFlowIndex(data, length);
-    }
+    return moneyFlowIndex(data, length);
 }
+const MFI = createVolumeIndicator('MFI', 'Money Flow Index', calculateMFI, 14);
 /**
  * Calculate MFI values using wrapper function
  *

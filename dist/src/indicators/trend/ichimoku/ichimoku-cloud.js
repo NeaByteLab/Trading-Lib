@@ -1,5 +1,5 @@
 import { BaseIndicator } from '@base/base-indicator';
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants';
+import { DEFAULT_LENGTHS, ERROR_MESSAGES } from '@constants/indicator-constants';
 import { ArrayUtils } from '@utils/array-utils';
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils';
 import { PineCore } from '@utils/pine-core';
@@ -39,7 +39,7 @@ export class IchimokuCloud extends BaseIndicator {
     calculate(data, config) {
         this.validateInput(data, config);
         if (Array.isArray(data)) {
-            throw new Error('Ichimoku Cloud requires OHLC market data');
+            throw new Error(ERROR_MESSAGES.MISSING_OHLC);
         }
         const tenkanPeriod = pineLength(config?.['tenkanPeriod'] || DEFAULT_LENGTHS.ICHIMOKU_TENKAN, DEFAULT_LENGTHS.ICHIMOKU_TENKAN);
         const kijunPeriod = pineLength(config?.['kijunPeriod'] || DEFAULT_LENGTHS.ICHIMOKU_KIJUN, DEFAULT_LENGTHS.ICHIMOKU_KIJUN);

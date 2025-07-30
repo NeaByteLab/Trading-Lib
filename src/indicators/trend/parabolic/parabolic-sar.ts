@@ -1,5 +1,5 @@
 import { BaseIndicator } from '@base/base-indicator'
-import { DEFAULT_MULTIPLIERS } from '@constants/indicator-constants'
+import { DEFAULT_MULTIPLIERS , ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
 import { createIndicatorWrapper } from '@utils/indicator-utils'
@@ -31,7 +31,7 @@ export class ParabolicSAR extends BaseIndicator {
     const maximum = (config?.['maximum'] as number) || 0.2
 
     if (Array.isArray(data)) {
-      throw new Error('Parabolic SAR requires OHLC market data')
+      throw new Error(ERROR_MESSAGES.MISSING_OHLC)
     }
 
     const sar = this.calculateParabolicSAR(data, acceleration, maximum)

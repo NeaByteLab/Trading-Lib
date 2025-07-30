@@ -137,18 +137,21 @@ function isValidArray(arr, length) {
     return Array.isArray(arr) && arr.length === length;
 }
 function isValidValue(val) {
-    return val !== undefined && !isNaN(val);
+    return val !== undefined && !isNaN(val) && isFinite(val);
 }
 function isValidVolume(val) {
-    return val === undefined || (!isNaN(val) && val > 0);
+    return val === undefined || (!isNaN(val) && val >= 0);
 }
 export function validateTestData(data, length) {
     if (!data ||
         !isValidArray(data.open, length) ||
         !isValidArray(data.high, length) ||
         !isValidArray(data.low, length) ||
-        !isValidArray(data.close, length) ||
-        (data.volume && !isValidArray(data.volume, length))) {
+        !isValidArray(data.close, length)) {
+        return false;
+    }
+    // Volume is optional, so don't require it
+    if (data.volume && !isValidArray(data.volume, length)) {
         return false;
     }
     for (let i = 0; i < length; i++) {
@@ -163,6 +166,7 @@ export function validateTestData(data, length) {
         if (!isValidVolume(volume)) {
             return false;
         }
+        // Basic OHLC validation
         if (high < low) {
             return false;
         }

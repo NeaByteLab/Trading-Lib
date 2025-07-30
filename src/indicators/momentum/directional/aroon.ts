@@ -1,4 +1,5 @@
 import { BaseIndicator } from '@base/base-indicator'
+import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { ArrayUtils } from '@utils/array-utils'
 import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils'
@@ -27,7 +28,7 @@ export class Aroon extends BaseIndicator {
   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
     this.validateInput(data, config)
     if (Array.isArray(data)) {
-      throw new Error('Aroon requires OHLC market data')
+      throw new Error(ERROR_MESSAGES.MISSING_OHLC)
     }
     const length = pineLength(config?.length || 14, 14)
     const { up, down } = this.calculateAroon(data, length)

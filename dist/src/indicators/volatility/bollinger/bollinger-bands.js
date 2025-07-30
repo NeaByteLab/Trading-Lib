@@ -1,65 +1,88 @@
-import { BaseIndicator } from '@base/base-indicator';
-import { movingAverage } from '@calculations/moving-averages';
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants';
+import { VolatilityIndicator } from '@base/volatility-indicator';
 import { ArrayUtils } from '@utils/array-utils';
-import { calculateStandardDeviation } from '@utils/calculation-utils';
+import { calculateMean, calculateStandardDeviation } from '@utils/calculation-utils';
+import { createMultiResultIndicatorWrapper } from '@utils/indicator-utils';
 import { pineLength, pineSource } from '@utils/pine-script-utils';
 /**
- * Bollinger Bands indicator
+ * Calculate Bollinger Bands using centralized utilities
  *
- * Calculates upper, middle, and lower bands based on moving average and standard deviation.
- * Formula: Upper = SMA + (multiplier × standard deviation), Lower = SMA - (multiplier × standard deviation)
+ * @param data - Source data array
+ * @param length - Calculation period
+ * @param multiplier - Standard deviation multiplier
+ * @returns Bollinger Bands values object
+ */
+function calculateBollingerBands(data, length, multiplier) {
+    const result = {
+        upper: [],
+        middle: [],
+        lower: []
+    };
+    return ArrayUtils.processValidWindow(data, length, (window) => {
+        const validValues = window.filter(val => !isNaN(val));
+        if (validValues.length === 0) {
+            return {
+                upper: NaN,
+                middle: NaN,
+                lower: NaN
+            };
+        }
+        const ma = calculateMean(validValues);
+        const stdDev = calculateStandardDeviation(validValues);
+        const bandDistance = stdDev * multiplier;
+        return {
+            upper: ma + bandDistance,
+            middle: ma,
+            lower: ma - bandDistance
+        };
+    }).reduce((acc, curr) => {
+        if (typeof curr === 'object' && curr !== null) {
+            acc.upper.push(curr.upper);
+            acc.middle.push(curr.middle);
+            acc.lower.push(curr.lower);
+        }
+        return acc;
+    }, result);
+}
+/**
+ * Bollinger Bands Indicator
+ *
+ * Creates volatility bands around a moving average using standard deviation.
+ * Upper band = MA + (StdDev × Multiplier), Lower band = MA - (StdDev × Multiplier)
+ * Helps identify overbought/oversold conditions and volatility expansion/contraction.
  *
  * @example
  * ```typescript
- * const bb = new BollingerBands()
- * const result = bb.calculate(marketData, { length: 20, multiplier: 2 })
+ * const bollinger = new BollingerBandsIndicator()
+ * const result = bollinger.calculate(marketData, { length: 20, multiplier: 2 })
  * console.log(result.values) // Middle band (SMA)
  * console.log(result.metadata.upper) // Upper band
  * console.log(result.metadata.lower) // Lower band
  * ```
  */
-export class BollingerBands extends BaseIndicator {
+export class BollingerBandsIndicator extends VolatilityIndicator {
     constructor() {
-        super('BollingerBands', 'Bollinger Bands', 'volatility');
+        super('BollingerBandsIndicator', 'Bollinger Bands', 20, 2.0, 1);
+    }
+    calculateVolatility(data, length, multiplier) {
+        const { middle } = calculateBollingerBands(data, length, multiplier);
+        return middle;
     }
     calculate(data, config) {
         this.validateInput(data, config);
         const source = pineSource(data, config?.source);
-        const length = pineLength(config?.length || DEFAULT_LENGTHS.BOLLINGER, DEFAULT_LENGTHS.BOLLINGER);
-        const multiplier = config?.['multiplier'] || 2;
-        const { upper, middle, lower } = this.calculateBollingerBands(source, length, multiplier);
+        const length = pineLength(config?.length || 20, 20);
+        const multiplier = config?.['multiplier'] || 2.0;
+        const { upper, middle, lower } = calculateBollingerBands(source, length, multiplier);
         return {
             values: middle,
             metadata: {
                 length,
-                source: config?.source || 'close',
                 multiplier,
+                source: config?.source || 'close',
                 upper,
                 lower
             }
         };
-    }
-    calculateBollingerBands(data, length, multiplier) {
-        const middle = movingAverage(data, length, 'sma');
-        const stdDev = ArrayUtils.processWindow(data, length, (window) => {
-            return calculateStandardDeviation(window);
-        });
-        const upper = ArrayUtils.processArray(middle, (middleVal, i) => {
-            const stdDevVal = stdDev[i];
-            if (isNaN(middleVal) || stdDevVal === undefined || isNaN(stdDevVal)) {
-                return NaN;
-            }
-            return middleVal + (multiplier * stdDevVal);
-        });
-        const lower = ArrayUtils.processArray(middle, (middleVal, i) => {
-            const stdDevVal = stdDev[i];
-            if (isNaN(middleVal) || stdDevVal === undefined || isNaN(stdDevVal)) {
-                return NaN;
-            }
-            return middleVal - (multiplier * stdDevVal);
-        });
-        return { upper, middle, lower };
     }
 }
 /**
@@ -67,26 +90,17 @@ export class BollingerBands extends BaseIndicator {
  *
  * @param data - Market data or price array
  * @param length - Calculation period (default: 20)
- * @param multiplier - Standard deviation multiplier (default: 2)
+ * @param multiplier - Standard deviation multiplier (default: 2.0)
  * @param source - Price source (default: 'close')
- * @returns Bollinger Bands result with upper, middle, and lower bands
+ * @returns Bollinger Bands with upper, middle, and lower bands
  */
-export function bollingerBands(data, length, multiplier, source) {
-    const bb = new BollingerBands();
-    const config = {};
-    if (length !== undefined) {
-        config.length = length;
-    }
-    if (source !== undefined) {
-        config.source = source;
-    }
-    if (multiplier !== undefined) {
-        config['multiplier'] = multiplier;
-    }
-    const result = bb.calculate(data, config);
+export function bollinger(data, length, multiplier, source) {
+    const result = createMultiResultIndicatorWrapper(BollingerBandsIndicator, data, length, source, { multiplier });
     return {
         upper: result.metadata['upper'],
         middle: result.values,
         lower: result.metadata['lower']
     };
 }
+// Export alias for backward compatibility
+export const bollingerBands = bollinger;

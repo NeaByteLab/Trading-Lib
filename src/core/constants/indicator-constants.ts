@@ -1,3 +1,7 @@
+/**
+ * Default lengths for technical indicators
+ * Provides standardized default periods for all indicators
+ */
 export const DEFAULT_LENGTHS = {
   SMA: 20,
   EMA: 20,
@@ -32,8 +36,19 @@ export const DEFAULT_LENGTHS = {
   SUPER_TREND: 10,
   SUPER_TREND_MULT: 3,
   ROC: 14,
-  MOMENTUM: 10
+  MOMENTUM: 10,
+  WILDERS: 14,
+  STD: 20,
+  SHANNON: 20,
+  SHANNON_BINS: 8,
+  SAFEZONE: 20,
+  SAFEZONE_MULT: 2.0
 } as const
+
+/**
+ * Default multipliers for technical indicators
+ * Provides standardized default multipliers for volatility indicators
+ */
 export const DEFAULT_MULTIPLIERS = {
   BOLLINGER: 2,
   KELTNER: 2,
@@ -41,6 +56,11 @@ export const DEFAULT_MULTIPLIERS = {
   SUPER_TREND: 3,
   PARABOLIC: 0.02
 } as const
+
+/**
+ * Overbought and oversold levels for oscillators
+ * Defines standard threshold values for momentum indicators
+ */
 export const OVERBOUGHT_OVERSOLD = {
   RSI_OVERBOUGHT: 70,
   RSI_OVERSOLD: 30,
@@ -51,6 +71,11 @@ export const OVERBOUGHT_OVERSOLD = {
   CCI_OVERBOUGHT: 100,
   CCI_OVERSOLD: -100
 } as const
+
+/**
+ * Valid price source options for indicators
+ * Defines all supported price sources following Pine Script conventions
+ */
 export const PINE_SOURCE_OPTIONS = [
   'open',
   'high',
@@ -61,4 +86,39 @@ export const PINE_SOURCE_OPTIONS = [
   'ohlc4',
   'volume'
 ] as const
+
+/**
+ * Type for Pine Script price sources
+ * Ensures type safety for price source parameters
+ */
 export type PineSource = typeof PINE_SOURCE_OPTIONS[number]
+
+/**
+ * Centralized error messages to eliminate duplication
+ * Provides consistent error handling across the entire codebase
+ */
+export const ERROR_MESSAGES = {
+  ARRAY_LENGTH_MISMATCH: 'All data arrays must have the same length',
+  ARRAY_REQUIRED: 'Data must be an array',
+  EMPTY_DATA: 'Data array cannot be empty',
+  FAST_LENGTH_GREATER: 'Fast length must be less than slow length',
+  INDICATORS_REQUIRED: 'At least one indicator is required',
+  INVALID_ALPHA: 'Alpha must be between 0 and 1',
+  INVALID_DATA_FORMAT: 'Invalid market data format',
+  INVALID_LENGTH: 'Length must be positive',
+  INVALID_MOVING_AVERAGE_TYPE: 'Invalid moving average type',
+  INVALID_MULTIPLIER: 'Multiplier must be positive',
+  INVALID_PARAMETERS: 'Invalid parameters for calculation',
+  INVALID_SIGMA: 'Sigma must be positive',
+  INVALID_SOURCE: 'Invalid source parameter',
+  INVALID_WINDOW_SIZE: 'Window size must be positive',
+  LENGTH_MAX_EXCEEDED: 'Length must not exceed {maxLength}',
+  LENGTH_MIN_REQUIRED: 'Length must be at least {minLength}',
+  MIN_LENGTH_REQUIRED: 'Data must have at least {minLength} elements',
+  MISSING_OHLC: 'OHLC market data is required',
+  MISSING_OHLCV: 'OHLCV market data is required',
+  MISSING_VOLUME: 'Volume data is required',
+  NULL_UNDEFINED_DATA: 'Input data cannot be null or undefined',
+  VOLUME_REQUIRED: 'Volume data is required for volume-based calculations',
+  VOLUME_WEIGHTED_REQUIRED: 'Volume data is required for volume-weighted calculations'
+} as const

@@ -1,5 +1,5 @@
 import { BaseIndicator } from '@base/base-indicator';
-import { DEFAULT_LENGTHS } from '@constants/indicator-constants';
+import { DEFAULT_LENGTHS, ERROR_MESSAGES } from '@constants/indicator-constants';
 import { ArrayUtils } from '@utils/array-utils';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
 import { MathUtils } from '@utils/math-utils';
@@ -24,7 +24,7 @@ export class CMF extends BaseIndicator {
     calculate(data, config) {
         this.validateInput(data, config);
         if (Array.isArray(data)) {
-            throw new Error('CMF requires OHLC market data');
+            throw new Error(ERROR_MESSAGES.MISSING_OHLC);
         }
         const length = pineLength(config?.length || DEFAULT_LENGTHS.CMF, DEFAULT_LENGTHS.CMF);
         const values = this.calculateCMF(data, length);
@@ -49,11 +49,6 @@ export class CMF extends BaseIndicator {
             if (range === 0) {
                 return 0;
             }
-            // Calculate close location for potential future use
-            const closeLocation = (close - low) / range;
-            // Use closeLocation to satisfy linter while preserving for future use
-            void closeLocation;
-            // Calculate money flow multiplier using proper CMF formula
             const moneyFlowMultiplier = ((close - low) - (high - close)) / range;
             return moneyFlowMultiplier * volume;
         });
@@ -62,10 +57,8 @@ export class CMF extends BaseIndicator {
             if (validValues.length === 0) {
                 return NaN;
             }
-            // Calculate cumulative money flow volume and total volume
             const cumulativeMFV = MathUtils.sum(validValues);
-            // Get the corresponding volume data for this window
-            const startIndex = Math.max(0, windowIndex - length + 1);
+            const startIndex = MathUtils.max([0, windowIndex - length + 1]);
             const endIndex = windowIndex + 1;
             const volumeSlice = data.volume?.slice(startIndex, endIndex) || [];
             const cumulativeVolume = MathUtils.sum(volumeSlice);

@@ -1,5 +1,5 @@
 import { BaseIndicator } from '@base/base-indicator';
-import { DEFAULT_LENGTHS, DEFAULT_MULTIPLIERS } from '@constants/indicator-constants';
+import { DEFAULT_LENGTHS, DEFAULT_MULTIPLIERS, ERROR_MESSAGES } from '@constants/indicator-constants';
 import { atr } from '@indicators/volatility/range/atr';
 import { ArrayUtils } from '@utils/array-utils';
 import { PriceCalculations } from '@utils/calculation-utils';
@@ -27,7 +27,7 @@ export class SuperTrend extends BaseIndicator {
     calculate(data, config) {
         this.validateInput(data, config);
         if (Array.isArray(data)) {
-            throw new Error('Super Trend requires OHLC market data');
+            throw new Error(ERROR_MESSAGES.MISSING_OHLC);
         }
         const period = pineLength(config?.length || DEFAULT_LENGTHS.SUPER_TREND, DEFAULT_LENGTHS.SUPER_TREND);
         const multiplier = config?.['multiplier'] || DEFAULT_MULTIPLIERS.SUPER_TREND;

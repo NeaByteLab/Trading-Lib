@@ -38,21 +38,6 @@ describe('Calculation Utils', () => {
             expect(stdDev).toBeCloseTo(1.41, 2);
         });
     });
-    describe('Price Change Functions', () => {
-        it('should calculate price changes', () => {
-            const result = CalculationUtils.calculatePriceChanges(testData);
-            expect(Array.isArray(result)).toBe(true);
-            expect(result.length).toBe(testData.length - 1);
-            expect(result[0]).toBe(1);
-        });
-        it('should calculate gains and losses', () => {
-            const result = CalculationUtils.calculateGainsAndLosses(testData);
-            expect(result).toHaveProperty('gains');
-            expect(result).toHaveProperty('losses');
-            expect(Array.isArray(result.gains)).toBe(true);
-            expect(Array.isArray(result.losses)).toBe(true);
-        });
-    });
     describe('Rolling Window Functions', () => {
         it('should create rolling windows', () => {
             const result = CalculationUtils.rollingWindow(testData, 3);

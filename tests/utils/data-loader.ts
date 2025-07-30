@@ -152,11 +152,11 @@ function isValidArray(arr: number[] | undefined, length: number): boolean {
 }
 
 function isValidValue(val: number | undefined): boolean {
-  return val !== undefined && !isNaN(val)
+  return val !== undefined && !isNaN(val) && isFinite(val)
 }
 
 function isValidVolume(val: number | undefined): boolean {
-  return val === undefined || (!isNaN(val) && val > 0)
+  return val === undefined || (!isNaN(val) && val >= 0)
 }
 
 export function validateTestData(data: MarketData, length: number): boolean {
@@ -164,8 +164,12 @@ export function validateTestData(data: MarketData, length: number): boolean {
     !isValidArray(data.open, length) ||
     !isValidArray(data.high, length) ||
     !isValidArray(data.low, length) ||
-    !isValidArray(data.close, length) ||
-    (data.volume && !isValidArray(data.volume, length))) {
+    !isValidArray(data.close, length)) {
+    return false
+  }
+
+  // Volume is optional, so don't require it
+  if (data.volume && !isValidArray(data.volume, length)) {
     return false
   }
 
@@ -182,6 +186,7 @@ export function validateTestData(data: MarketData, length: number): boolean {
     if (!isValidVolume(volume)) {
       return false
     }
+    // Basic OHLC validation
     if (high! < low!) {
       return false
     }

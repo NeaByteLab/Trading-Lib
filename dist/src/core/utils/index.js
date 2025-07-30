@@ -13,6 +13,6 @@ export * from './pine-script-utils';
 export * from './validation-utils';
 export * from './indicator-utils';
 // Re-export main Pine Script interface for easy access
-export { PineCore, PineMath, PineArray, PinePrice } from './pine-core';
+export { PineCore, PinePrice } from './pine-core';
 // Re-export new centralized utilities for easy access
 export { calculateRangePercentage, calculateHighLowRange } from './calculation-utils';

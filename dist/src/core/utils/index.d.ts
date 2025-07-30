@@ -11,6 +11,6 @@ export * from './pine-core';
 export * from './pine-script-utils';
 export * from './validation-utils';
 export * from './indicator-utils';
-export { PineCore, PineMath, PineArray, PinePrice } from './pine-core';
+export { PineCore, PinePrice } from './pine-core';
 export { calculateRangePercentage, calculateHighLowRange } from './calculation-utils';
 //# sourceMappingURL=index.d.ts.map

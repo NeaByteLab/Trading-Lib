@@ -1,5 +1,6 @@
 import { BaseIndicator } from '@base/base-indicator'
 import { movingAverage } from '@calculations/moving-averages'
+import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types'
 import { createIndicatorWrapper } from '@utils/indicator-utils'
 import { pineLength, pineSource } from '@utils/pine-script-utils'
@@ -32,7 +33,7 @@ export function createMovingAverageIndicator(
       const source = pineSource(data, config?.source)
       const length = pineLength(config?.length || defaultLength, defaultLength)
       if (length <= 0) {
-        throw new Error(`Invalid length parameter: ${length}. Must be greater than 0.`)
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH)
       }
       const values = movingAverage(source, length, type)
       return {
@@ -48,7 +49,7 @@ export function createMovingAverageIndicator(
     class: MovingAverageIndicator,
     function: (_data: MarketData | number[], _length?: number, _source?: string): number[] => {
       if (_length !== undefined && _length <= 0) {
-        throw new Error(`Invalid length parameter: ${_length}. Must be greater than 0.`)
+        throw new Error(ERROR_MESSAGES.INVALID_LENGTH)
       }
       return createIndicatorWrapper(MovingAverageIndicator, _data, _length, _source)
     }
@@ -150,5 +151,22 @@ export function createVolumeIndicator(
   calculator: (_data: MarketData | number[], _length: number) => number[],
   defaultLength: number
 ) {
-  return createGenericIndicator(name, description, 'volume', calculator, defaultLength)
+  return class extends BaseIndicator {
+    constructor() {
+      super(name, description, 'volume')
+    }
+
+    calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
+      this.validateInput(data, config)
+      const length = pineLength(config?.length || defaultLength, defaultLength)
+      const values = calculator(data, length)
+      return {
+        values,
+        metadata: {
+          length,
+          source: config?.source || 'close'
+        }
+      }
+    }
+  }
 }
