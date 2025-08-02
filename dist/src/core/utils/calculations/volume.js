@@ -3,12 +3,19 @@ import { ArrayUtils } from '@core/utils/array-utils';
 import { calculateHLC3, PriceCalculations } from '@core/utils/calculations/price-calculations';
 import { MathUtils } from '@core/utils/math-utils';
 /**
- * Calculate On Balance Volume (OBV) using centralized utilities
+ * On Balance Volume (OBV) - volume-based momentum indicator
+ * Formula: OBV = Previous OBV + Volume (if Close > Previous Close) - Volume (if Close < Previous Close)
  *
  * @param close - Close prices array
  * @param volume - Volume array
  * @returns OBV values array
  * @throws {Error} If data is empty or missing volume
+ *
+ * @example
+ * ```typescript
+ * const obv = calculateOBV(data.close, data.volume)
+ * // Returns: [1000, 1500, 1200, ..., 2500, 2800, ...]
+ * ```
  */
 export function calculateOBV(close, volume) {
     if (!close || close.length === 0) {
@@ -41,7 +48,8 @@ export function calculateOBV(close, volume) {
     });
 }
 /**
- * Calculate Accumulation Distribution using centralized utilities
+ * Accumulation Distribution - volume-based indicator measuring buying/selling pressure
+ * Formula: AD = Previous AD + Money Flow Volume where Money Flow Volume = Money Flow Multiplier × Volume
  *
  * @param high - High prices array
  * @param low - Low prices array
@@ -49,6 +57,12 @@ export function calculateOBV(close, volume) {
  * @param volume - Volume array
  * @returns Accumulation Distribution values array
  * @throws {Error} If data is empty or missing required fields
+ *
+ * @example
+ * ```typescript
+ * const ad = calculateAccumulationDistribution(data.high, data.low, data.close, data.volume)
+ * // Returns: [0, 500, 1200, ..., 2500, 3200, ...]
+ * ```
  */
 export function calculateAccumulationDistribution(high, low, close, volume) {
     if (!close || close.length === 0) {
@@ -76,11 +90,18 @@ export function calculateAccumulationDistribution(high, low, close, volume) {
     });
 }
 /**
- * Calculate VWAP (Volume Weighted Average Price) using centralized logic
+ * Volume Weighted Average Price (VWAP) - average price weighted by volume
+ * Formula: VWAP = Σ(Price × Volume) / Σ(Volume)
  *
  * @param data - Market data with OHLCV
  * @param length - Calculation period
  * @returns VWAP values array
+ *
+ * @example
+ * ```typescript
+ * const vwap = calculateVWAP(data, 20)
+ * // Returns: [NaN, NaN, ..., 45.2, 45.8, ...]
+ * ```
  */
 export function calculateVWAP(data, length) {
     const typicalPrices = PriceCalculations.typical(data);
@@ -186,6 +207,47 @@ export function calculatePositiveVolumeIndex(close, volume) {
         }
     }
     return pvi;
+}
+/**
+ * Calculate Negative Volume Index (NVI)
+ *
+ * NVI measures price changes only on days when volume decreases.
+ * Formula: NVI = Previous NVI * (1 + Percent Change / 100) if Volume < Previous Volume
+ *
+ * @param close - Close prices array
+ * @param volume - Volume array
+ * @returns NVI values array
+ * @throws {Error} If data is empty or missing required fields
+ */
+export function calculateNegativeVolumeIndex(close, volume) {
+    if (!close || close.length === 0) {
+        throw new Error(ERROR_MESSAGES.EMPTY_DATA);
+    }
+    if (!volume || volume.length === 0) {
+        throw new Error(ERROR_MESSAGES.MISSING_VOLUME);
+    }
+    if (close.length !== volume.length) {
+        throw new Error(ERROR_MESSAGES.CLOSE_VOLUME_LENGTH_MISMATCH);
+    }
+    const nvi = [];
+    for (let i = 0; i < close.length; i++) {
+        if (i === 0) {
+            nvi.push(1000);
+        }
+        else {
+            const prevClose = close[i - 1];
+            const currentVolume = volume[i];
+            const prevVolume = volume[i - 1];
+            if (currentVolume < prevVolume) {
+                const percentChange = ((close[i] - prevClose) / prevClose) * 100;
+                nvi.push(nvi[i - 1] * (1 + percentChange / 100));
+            }
+            else {
+                nvi.push(nvi[i - 1]);
+            }
+        }
+    }
+    return nvi;
 }
 /**
  * Calculate Twiggs Money Flow

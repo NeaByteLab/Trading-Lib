@@ -19,12 +19,25 @@ function calculateOBVWrapper(data, _length = 1) {
 }
 const OBV = createVolumeIndicator('OBV', 'On Balance Volume', calculateOBVWrapper, 1);
 /**
- * Calculate OBV values using wrapper function
+ * Calculate On Balance Volume (OBV)
  *
- * @param data - Market data or price array
+ * OBV measures buying and selling pressure by adding volume on up days and subtracting on down days.
+ * Formula: OBV = Previous OBV + (Current Volume × Price Direction)
+ * Price Direction = +1 if Close > Previous Close, -1 if Close < Previous Close, 0 if equal
+ *
+ * @param data - Market data with OHLCV values
  * @param length - Calculation period (default: 1)
  * @param source - Price source (default: 'close')
- * @returns OBV values array
+ * @returns Array of OBV values
+ * @throws {Error} If market data is invalid or volume data is missing
+ *
+ * @example
+ * ```typescript
+ * import { ta } from '@api/ta'
+ *
+ * const obv = ta.obv(marketData)
+ * // Returns: [1000000, 1050000, 1020000, 1080000, ...]
+ * ```
  */
 export function obv(data, length, source) {
     return createIndicatorWrapper(OBV, data, length, source);

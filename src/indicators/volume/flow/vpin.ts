@@ -7,15 +7,24 @@ import { validateVolumeData } from '@utils/validation-utils'
 /**
  * Calculate VPIN (Volume-synchronized Probability of Informed Trading)
  *
- * VPIN = |Buy Volume - Sell Volume| / Total Volume
- * Uses volume imbalance to detect informed trading
- * Based on Easley, O'Hara, and Yang (2012) methodology
+ * VPIN measures the probability of informed trading using volume imbalance.
+ * Formula: VPIN = |Buy Volume - Sell Volume| / Total Volume
+ * Based on Easley, O'Hara, and Yang (2012) methodology.
  *
- * @param data - Market data with OHLCV
+ * @param data - Market data with OHLCV values
  * @param length - Calculation period (default: 50)
  * @param buckets - Number of volume buckets (default: 50)
- * @returns VPIN values array
+ * @param source - Price source (default: 'volume')
+ * @returns Array of VPIN values (0-1)
  * @throws {Error} If market data is invalid or volume data is missing
+ *
+ * @example
+ * ```typescript
+ * import { ta } from '@api/ta'
+ *
+ * const vpin = ta.vpin(marketData, 50, 50)
+ * // Returns: [0.15, 0.25, 0.10, 0.30, ...]
+ * ```
  */
 function calculateVPINIndicator(data: MarketData | number[], length: number = 50, buckets: number = 50): number[] {
   if (Array.isArray(data)) {

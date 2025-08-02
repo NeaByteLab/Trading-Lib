@@ -1,13 +1,13 @@
 # 📈 Trading-Lib
 
-A comprehensive TypeScript trading indicators library with 125+ technical analysis indicators.
+A comprehensive TypeScript trading indicators library with 127+ technical analysis indicators.
 
-> **🚧 Development Status**: This project is actively under development. See [CHECKLIST.md](./CHECKLIST.md) for the complete list of indicators and implementation status.
+> **🚧 Development Status**: This project is actively under development with 127+ indicators implemented. See [CHECKLIST.md](./CHECKLIST.md) for the complete list of indicators and implementation status.
 
 ## ✨ Features
 
 - **TypeScript Support** - Full type safety and IntelliSense
-- **120+ Technical Indicators** - Complete suite of trading indicators
+- **127+ Technical Indicators** - Complete suite of trading indicators
 - **Pine Script-like API** - Familiar syntax for TradingView users
 - **Modular Architecture** - Easy to extend and customize
 - **Zero Dependencies** - Lightweight and fast

@@ -11,6 +11,7 @@ export * from './pine-core';
 export * from './pine-script-utils';
 export * from './validation-utils';
 export * from './indicator-utils';
+export * from './chunking-utils';
 export { PineCore, PinePrice } from './pine-core';
 export { calculateRangePercentage, calculateHighLowRange, calculateEMADifference, calculateWilliamsR, calculateShannonEntropy, calculateTrueRange, calculateBalanceOfPower, calculateLogReturns, calculateMomentum, calculateROC, calculatePPO, calculateTRIX, calculateTSI, calculateTwiggsMomentum, calculatePricePercentageChange, calculatePriceComparison, calculatePriceDifferential, calculatePriceRatio } from './calculation-utils';
 //# sourceMappingURL=index.d.ts.map

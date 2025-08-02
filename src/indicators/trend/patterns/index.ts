@@ -1,1 +1,6 @@
+export { candlestickPatterns } from './candlestick-patterns'
+export { chandelierExits } from './chandelier-exits'
+export { chartPatterns } from './chart-patterns'
 export { elliottWave } from './elliott-wave'
+export { harmonicPatterns } from './harmonic-patterns'
+export { heikinAshi } from './heikin-ashi'

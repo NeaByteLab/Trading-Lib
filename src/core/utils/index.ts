@@ -12,6 +12,7 @@ export * from './pine-core'
 export * from './pine-script-utils'
 export * from './validation-utils'
 export * from './indicator-utils'
+export * from './chunking-utils'
 // Re-export main Pine Script interface for easy access
 export { PineCore, PinePrice } from './pine-core'
 // Re-export new centralized utilities for easy access

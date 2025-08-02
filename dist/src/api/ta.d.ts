@@ -91,6 +91,7 @@ export declare const ta: {
     alma: (data: number[], length?: number, sigma?: number) => number[];
     dema: (data: number[], length?: number) => number[];
     displaced: (data: number[], length?: number, displacement?: number, maType?: "sma" | "ema" | "wma" | "hull") => number[];
+    frama: (data: number[] | MarketData, length?: number) => number[];
     ema: (data: number[], length: number) => number[];
     hull: (data: number[], length: number) => number[];
     kama: (data: number[], length?: number, fastPeriod?: number, slowPeriod?: number) => number[];
@@ -110,6 +111,7 @@ export declare const ta: {
         ribbon: number[][];
         primary: number[];
     };
+    zlema: (data: number[], length?: number, _displacement?: number) => number[];
     /**
      * Momentum oscillator indicators for overbought/oversold conditions
      */
@@ -134,6 +136,13 @@ export declare const ta: {
         bullPower: number[];
         bearPower: number[];
     };
+    fisherTransform: (data: number[] | MarketData, length?: number) => number[];
+    forceIndex: (data: MarketData, length?: number) => {
+        values: number[];
+        rawForceIndex: number[];
+        smoothedForceIndex: number[];
+    };
+    hurst: (data: number[], length?: number) => number[];
     macd: (data: number[], fastLength?: number, slowLength?: number, signalLength?: number) => {
         macd: number[];
         signal: number[];
@@ -160,6 +169,7 @@ export declare const ta: {
     tsi: (data: number[], firstLength?: number, secondLength?: number) => number[];
     twiggs: (data: number[], length?: number, lookback?: number) => number[];
     twiggsMomentum: (data: number[], length?: number, lookback?: number) => number[];
+    ultimateOscillator: (data: MarketData, shortPeriod?: number, mediumPeriod?: number, longPeriod?: number) => number[];
     /**
      * Directional movement indicators for trend strength
      */
@@ -183,6 +193,7 @@ export declare const ta: {
     kyle: (data: MarketData) => number[];
     mfi: (data: MarketData, length?: number) => number[];
     obv: (data: MarketData) => number[];
+    nvi: (data: MarketData) => number[];
     pvi: (data: MarketData) => number[];
     pvt: (data: MarketData) => number[];
     twiggsMF: (data: MarketData, length?: number) => number[];
@@ -211,6 +222,7 @@ export declare const ta: {
         lower: number[];
     };
     chaikinVol: (data: MarketData, length?: number) => number[];
+    garmanKlassVol: (data: MarketData, length?: number) => number[];
     bbandsAdaptive: (data: number[], length?: number, multiplier?: number) => {
         upper: number[];
         middle: number[];
@@ -229,9 +241,50 @@ export declare const ta: {
     };
     std: (data: number[], length?: number) => number[];
     twiggsVol: (data: MarketData, length?: number, lookback?: number) => number[];
+    yangZhangVol: (data: MarketData, length?: number) => number[];
     /**
      * Trend-following indicators for market direction analysis
      */
+    candlestickPatterns: (data: MarketData, sensitivity?: number) => number[];
+    chandelierExits: (data: MarketData, atrPeriod?: number, multiplier?: number) => {
+        longExit: number[];
+        shortExit: number[];
+    };
+    chartPatterns: (data: MarketData, windowSize?: number, sensitivity?: number) => number[];
+    fibonacciExpansion: (data: MarketData, swingPeriod?: number, levels?: (1.272 | 1.618 | 2 | 2.618 | 3.618)[]) => {
+        levels: number[];
+        swingHighs: number[];
+        swingLows: number[];
+        level1272: number[];
+        level1618: number[];
+        level200: number[];
+        level2618: number[];
+        level3618: number[];
+    };
+    fibonacciLevel: (data: MarketData, startIndex?: number, endIndex?: number, levelType?: "retracement" | "extension" | "projection", customLevels?: number[]) => {
+        values: number[];
+        highPrice: number;
+        lowPrice: number;
+        range: number;
+        calculatedLevels: number[];
+    };
+    fibonacciRetracements: (data: MarketData, swingPeriod?: number, levels?: (0 | 0.236 | 0.382 | 0.5 | 0.618 | 0.786 | 1)[]) => {
+        levels: number[];
+        swingHighs: number[];
+        swingLows: number[];
+        level0: number[];
+        level236: number[];
+        level382: number[];
+        level500: number[];
+        level618: number[];
+        level786: number[];
+        level100: number[];
+    };
+    fibonacciTimeZones: (data: MarketData, startIndex?: number, levels?: (1 | 2 | 3 | 5 | 8 | 13 | 21 | 34 | 55 | 89)[]) => {
+        values: number[];
+        timeZonePoints: number[];
+        currentZone: number[];
+    };
     ichimoku: (data: MarketData, tenkanPeriod?: number, kijunPeriod?: number, senkouBPeriod?: number, displacement?: number) => {
         tenkan: number[];
         kijun: number[];
@@ -291,6 +344,10 @@ export declare const ta: {
         lower: number[];
     };
     typical: (data: MarketData) => number[];
+    zigZag: (data: MarketData, length?: number, deviation?: number) => {
+        values: number[];
+        swings: import("@indicators/trend/overlays/zig-zag").ZigZagPoint[];
+    };
     camarilla: (data: MarketData) => {
         pp: number[];
         r1: number[];

@@ -5,7 +5,20 @@ import { validateIndicatorData } from '@core/utils/validation-utils'
 
 /**
  * Base class for all technical indicators
- * Provides common functionality and validation
+ * Provides common functionality and validation for consistent indicator implementation
+ *
+ * @example
+ * ```typescript
+ * class MyIndicator extends BaseIndicator {
+ *   constructor() {
+ *     super('MyIndicator', 'My Custom Indicator', 'momentum')
+ *   }
+ *
+ *   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
+ *     // Implementation here
+ *   }
+ * }
+ * ```
  */
 export abstract class BaseIndicator {
   public name: string
@@ -20,9 +33,10 @@ export abstract class BaseIndicator {
 
   /**
    * Validate input data and configuration
+   * Ensures data integrity before calculation
    *
-   * @param _data - Input data
-   * @param _config - Configuration
+   * @param _data - Input data to validate
+   * @param _config - Configuration parameters
    */
   public validateInput(_data: MarketData | number[], _config?: IndicatorConfig): void {
     validateIndicatorData(_data)
@@ -31,6 +45,10 @@ export abstract class BaseIndicator {
   /**
    * Centralized length validation
    * Eliminates duplication across all indicators
+   *
+   * @param length - Length parameter to validate
+   * @param minLength - Minimum allowed length
+   * @param maxLength - Maximum allowed length (optional)
    */
   public validateLength(length: number, minLength: number, maxLength?: number): void {
     if (length < minLength) {
@@ -44,6 +62,8 @@ export abstract class BaseIndicator {
   /**
    * Centralized multiplier validation
    * Eliminates duplication across volatility indicators
+   *
+   * @param multiplier - Multiplier value to validate
    */
   public validateMultiplier(multiplier: number): void {
     if (multiplier <= 0) {
@@ -53,6 +73,11 @@ export abstract class BaseIndicator {
 
   /**
    * Get source data based on configuration
+   * Maps price source strings to actual data arrays
+   *
+   * @param data - Market data object
+   * @param source - Price source identifier
+   * @returns Array of price values
    */
   public getSourceData(data: MarketData, source?: string): number[] {
     switch (source) {
@@ -83,6 +108,7 @@ export abstract class BaseIndicator {
 
   /**
    * Calculate indicator values
+   * Abstract method that must be implemented by all indicators
    *
    * @param _data - Market data or price array
    * @param _config - Indicator configuration

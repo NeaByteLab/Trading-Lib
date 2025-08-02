@@ -17,6 +17,8 @@ import { coppock } from '@indicators/momentum/oscillators/coppock';
 import { dpo } from '@indicators/momentum/oscillators/dpo';
 import { elderRayIndex } from '@indicators/momentum/oscillators/elder-ray';
 import { easeOfMovement } from '@indicators/momentum/oscillators/eom';
+import { fisherTransform } from '@indicators/momentum/oscillators/fisher-transform';
+import { hurstExponent } from '@indicators/momentum/oscillators/hurst-exponent';
 import { klinger } from '@indicators/momentum/oscillators/klinger';
 import { kst } from '@indicators/momentum/oscillators/kst';
 import { macd } from '@indicators/momentum/oscillators/macd';
@@ -33,11 +35,17 @@ import { stochastic } from '@indicators/momentum/oscillators/stochastic';
 import { trix } from '@indicators/momentum/oscillators/trix';
 import { tsi } from '@indicators/momentum/oscillators/tsi';
 import { twiggsMomentum } from '@indicators/momentum/oscillators/twiggs-momentum';
+import { ultimateOscillator } from '@indicators/momentum/oscillators/ultimate-oscillator';
 import { williamsR } from '@indicators/momentum/oscillators/williams';
+import { fibonacciExpansion } from '@indicators/trend/fibonacci/fibonacci-expansion';
+import { fibonacciLevel } from '@indicators/trend/fibonacci/fibonacci-level';
+import { fibonacciRetracements } from '@indicators/trend/fibonacci/fibonacci-retracements';
+import { fibonacciTimeZones } from '@indicators/trend/fibonacci/fibonacci-time-zones';
 import { ichimokuCloud } from '@indicators/trend/ichimoku/ichimoku-cloud';
 import { alma } from '@indicators/trend/moving-averages/alma';
 import { dema } from '@indicators/trend/moving-averages/dema';
 import { displaced } from '@indicators/trend/moving-averages/displaced';
+import { frama } from '@indicators/trend/moving-averages/frama';
 import { kama } from '@indicators/trend/moving-averages/kama';
 import { multipleMovingAverages } from '@indicators/trend/moving-averages/mma';
 import { t3 } from '@indicators/trend/moving-averages/t3';
@@ -45,6 +53,7 @@ import { tema } from '@indicators/trend/moving-averages/tema';
 import { trima } from '@indicators/trend/moving-averages/trima';
 import { vidya } from '@indicators/trend/moving-averages/vidya';
 import { wilders } from '@indicators/trend/moving-averages/wilders';
+import { zlema } from '@indicators/trend/moving-averages/zlema';
 import { comparePrices } from '@indicators/trend/overlays/compare-prices';
 import { priceComparison } from '@indicators/trend/overlays/price-comparison';
 import { priceDifferential } from '@indicators/trend/overlays/price-differential';
@@ -52,7 +61,11 @@ import { priceEnvelope } from '@indicators/trend/overlays/price-envelope';
 import { priceRatio } from '@indicators/trend/overlays/price-ratio';
 import { movingAverageRibbon } from '@indicators/trend/overlays/rib';
 import { typicalPrice } from '@indicators/trend/overlays/typical-price';
+import { zigZag } from '@indicators/trend/overlays/zig-zag';
 import { parabolicSAR } from '@indicators/trend/parabolic/parabolic-sar';
+import { candlestickPatterns } from '@indicators/trend/patterns/candlestick-patterns';
+import { chandelierExits } from '@indicators/trend/patterns/chandelier-exits';
+import { chartPatterns } from '@indicators/trend/patterns/chart-patterns';
 import { camarilla } from '@indicators/trend/pivots/camarilla';
 import { demarkPivots } from '@indicators/trend/pivots/demark';
 import { percentageBands } from '@indicators/trend/pivots/percentage-bands';
@@ -67,8 +80,10 @@ import { keltnerChannel } from '@indicators/volatility/channels/keltner';
 import { priceChannels } from '@indicators/volatility/channels/price-channels';
 import { atr } from '@indicators/volatility/range/atr';
 import { chaikinVolatility } from '@indicators/volatility/range/chaikin-volatility';
+import { garmanKlassVolatility } from '@indicators/volatility/range/garman-klass-volatility';
 import { std } from '@indicators/volatility/range/std';
 import { twiggsVolatility } from '@indicators/volatility/range/twiggs-volatility';
+import { yangZhangVolatility } from '@indicators/volatility/range/yang-zhang-volatility';
 import { accumulationDistribution } from '@indicators/volume/flow/ad';
 import { amihudIlliquidity } from '@indicators/volume/flow/amihud';
 import { cmf } from '@indicators/volume/flow/cmf';
@@ -79,6 +94,8 @@ import { priceVolumeTrend } from '@indicators/volume/flow/pvt';
 import { twiggsMoneyFlow } from '@indicators/volume/flow/twiggsmf';
 import { vortex } from '@indicators/volume/flow/vortex';
 import { vpin } from '@indicators/volume/flow/vpin';
+import { forceIndex } from '@indicators/volume/momentum/force-index';
+import { negativeVolumeIndex } from '@indicators/volume/momentum/negative-volume-index';
 import { positiveVolumeIndex } from '@indicators/volume/momentum/pvi';
 import { vroc } from '@indicators/volume/momentum/vroc';
 import { vama } from '@indicators/volume/weighted/vama';
@@ -183,6 +200,7 @@ export const ta = {
     alma: (data, length = 9, sigma = 6) => alma(data, length, sigma),
     dema: (data, length = 20) => dema(data, length),
     displaced: (data, length = 20, displacement = 0, maType = 'sma') => displaced(data, length, displacement, maType),
+    frama: (data, length = 16) => frama(data, length),
     ema: (data, length) => movingAverage(data, length, 'ema'),
     hull: (data, length) => movingAverage(data, length, 'hull'),
     kama: (data, length = 10, fastPeriod = 2, slowPeriod = 30) => kama(data, length, fastPeriod, slowPeriod),
@@ -196,6 +214,7 @@ export const ta = {
     wma: (data, length) => movingAverage(data, length, 'wma'),
     mma: (data, config) => multipleMovingAverages(data, config),
     ribbon: (data, periods, maType, source) => movingAverageRibbon(data, periods, maType, source),
+    zlema: (data, length = 20, _displacement = 0) => zlema(data, length),
     // ===== MOMENTUM OSCILLATORS =====
     /**
      * Momentum oscillator indicators for overbought/oversold conditions
@@ -221,6 +240,9 @@ export const ta = {
     coppock: (data, roc1Length = 14, roc2Length = 11, wmaLength = 10) => coppock(data, roc1Length, roc2Length, wmaLength),
     eom: (data, length = 14) => easeOfMovement(data, length),
     elderRay: (data, length = 13) => elderRayIndex(data, length),
+    fisherTransform: (data, length = 10) => fisherTransform(data, length),
+    forceIndex: (data, length = 13) => forceIndex(data, length),
+    hurst: (data, length = 20) => hurstExponent(data, length),
     macd: (data, fastLength = 12, slowLength = 26, signalLength = 9) => {
         const result = macd(data, fastLength, slowLength, signalLength);
         return { macd: result.macd, signal: result.signal, histogram: result.histogram };
@@ -242,6 +264,7 @@ export const ta = {
     tsi: (data, firstLength = 25, secondLength = 13) => tsi(data, firstLength, secondLength),
     twiggs: (data, length = 20, lookback = 10) => twiggsMomentum(data, length, lookback),
     twiggsMomentum: (data, length = 20, lookback = 10) => twiggsMomentum(data, length, lookback),
+    ultimateOscillator: (data, shortPeriod = 7, mediumPeriod = 14, longPeriod = 28) => ultimateOscillator(data, shortPeriod, mediumPeriod, longPeriod),
     // ===== DIRECTIONAL INDICATORS =====
     /**
      * Directional movement indicators for trend strength
@@ -260,6 +283,7 @@ export const ta = {
     kyle: (data) => kylesLambda(data),
     mfi: (data, length = 14) => mfi(data, length),
     obv: (data) => obv(data),
+    nvi: (data) => negativeVolumeIndex(data),
     pvi: (data) => positiveVolumeIndex(data),
     pvt: (data) => priceVolumeTrend(data),
     twiggsMF: (data, length = 21) => twiggsMoneyFlow(data, length),
@@ -281,6 +305,7 @@ export const ta = {
         return { upper: result.upper, middle: result.middle, lower: result.lower };
     },
     chaikinVol: (data, length = 10) => chaikinVolatility(data, length),
+    garmanKlassVol: (data, length = 20) => garmanKlassVolatility(data, length),
     bbandsAdaptive: (data, length = 20, multiplier = 2) => {
         const result = bollingerBands(data, length, multiplier, 'close', 'ema');
         return { upper: result.upper, middle: result.middle, lower: result.lower };
@@ -290,10 +315,21 @@ export const ta = {
     keltner: (data, length = 20, multiplier = 2) => keltnerChannel(data, length, multiplier),
     std: (data, length = 20) => std(data, length),
     twiggsVol: (data, length = 20, lookback = 10) => twiggsVolatility(data, length, lookback),
+    yangZhangVol: (data, length = 20) => yangZhangVolatility(data, length),
     // ===== TREND INDICATORS =====
     /**
      * Trend-following indicators for market direction analysis
      */
+    candlestickPatterns: (data, sensitivity = 0.1) => candlestickPatterns(data, sensitivity),
+    chandelierExits: (data, atrPeriod = 14, multiplier = 3) => {
+        const result = chandelierExits(data, atrPeriod, multiplier);
+        return { longExit: result.longExit, shortExit: result.shortExit };
+    },
+    chartPatterns: (data, windowSize = 5, sensitivity = 0.1) => chartPatterns(data, windowSize, sensitivity),
+    fibonacciExpansion: (data, swingPeriod, levels) => fibonacciExpansion(data, swingPeriod, levels),
+    fibonacciLevel: (data, startIndex, endIndex, levelType, customLevels) => fibonacciLevel(data, startIndex, endIndex, levelType, customLevels),
+    fibonacciRetracements: (data, swingPeriod, levels) => fibonacciRetracements(data, swingPeriod, levels),
+    fibonacciTimeZones: (data, startIndex, levels) => fibonacciTimeZones(data, startIndex, levels),
     ichimoku: (data, tenkanPeriod = 9, kijunPeriod = 26, senkouBPeriod = 52, displacement = 26) => ichimokuCloud(data, tenkanPeriod, kijunPeriod, senkouBPeriod, displacement),
     psar: (data, acceleration = 0.02, maximum = 0.2) => parabolicSAR(data, acceleration, maximum),
     supertrend: (data, length = 10, multiplier = 3) => {
@@ -331,6 +367,7 @@ export const ta = {
         return { upper: result.upper, middle: result.middle, lower: result.lower };
     },
     typical: (data) => typicalPrice(data),
+    zigZag: (data, length = 14, deviation = 3) => zigZag(data, length, deviation),
     camarilla: (data) => {
         const result = camarilla(data);
         return { pp: result.pp, r1: result.r1, r2: result.r2, r3: result.r3, s1: result.s1, s2: result.s2, s3: result.s3 };

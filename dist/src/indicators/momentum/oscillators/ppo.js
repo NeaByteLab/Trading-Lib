@@ -4,13 +4,20 @@ import { ERROR_MESSAGES } from '@constants/indicator-constants';
 import { ArrayUtils } from '@utils/array-utils';
 import { calculatePPO } from '@utils/calculation-utils';
 /**
- * Calculate PPO with signal and histogram
+ * Percentage Price Oscillator (PPO) - momentum indicator showing price momentum
+ * Formula: PPO = ((Fast EMA - Slow EMA) / Slow EMA) × 100
  *
  * @param data - Market data or price array
  * @param fastLength - Fast EMA period (default: 12)
  * @param slowLength - Slow EMA period (default: 26)
  * @param signalLength - Signal line period (default: 9)
  * @returns Object with PPO, signal, and histogram values
+ *
+ * @example
+ * ```typescript
+ * const ppo = ta.ppo(data.close, 12, 26, 9)
+ * // Returns: { ppo: [...], signal: [...], histogram: [...] }
+ * ```
  */
 function calculatePPOWithSignal(data, fastLength = 12, slowLength = 26, signalLength = 9) {
     // Validate input data
@@ -76,20 +83,28 @@ class PPOIndicator extends BaseIndicator {
 }
 const PPO = new PPOIndicator();
 /**
- * Calculate Percentage Price Oscillator (PPO) values
+ * Percentage Price Oscillator (PPO) - momentum indicator showing price momentum
+ * Formula: PPO = ((Fast EMA - Slow EMA) / Slow EMA) × 100
  *
  * @param data - Market data or price array
  * @param fastLength - Fast EMA period (default: 12)
  * @param slowLength - Slow EMA period (default: 26)
  * @param signalLength - Signal line period (default: 9)
  * @returns Object with PPO, signal, and histogram values
+ *
+ * @example
+ * ```typescript
+ * const ppo = ta.ppo(data.close, 12, 26, 9)
+ * // Returns: { ppo: [...], signal: [...], histogram: [...] }
+ * ```
  */
 export function percentagePriceOscillator(data, fastLength = 12, slowLength = 26, signalLength = 9) {
     const source = Array.isArray(data) ? data : data.close;
     return calculatePPOWithSignal(source, fastLength, slowLength, signalLength);
 }
 /**
- * Calculate PPO values using wrapper function
+ * Percentage Price Oscillator (PPO) - momentum indicator showing price momentum
+ * Formula: PPO = ((Fast EMA - Slow EMA) / Slow EMA) × 100
  *
  * @param data - Market data or price array
  * @param fastLength - Fast EMA period (default: 12)
@@ -97,6 +112,12 @@ export function percentagePriceOscillator(data, fastLength = 12, slowLength = 26
  * @param signalLength - Signal line period (default: 9)
  * @param source - Price source (default: 'close')
  * @returns PPO values array
+ *
+ * @example
+ * ```typescript
+ * const ppo = ta.ppo(data.close, 12, 26, 9)
+ * // Returns: [0.5, 0.8, ..., 2.1, 1.9, ...]
+ * ```
  */
 export function ppo(data, fastLength, slowLength, signalLength, source) {
     const config = {

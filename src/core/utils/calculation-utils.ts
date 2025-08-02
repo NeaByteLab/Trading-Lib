@@ -23,11 +23,18 @@ import { MathUtils } from '@core/utils/math-utils'
 
 /**
  * Safe division with numerical stability
+ * Prevents division by zero and handles edge cases
  *
  * @param numerator - Numerator value
  * @param denominator - Denominator value
- * @param fallback - Fallback value if division by zero
+ * @param fallback - Fallback value if division by zero (default: 0)
  * @returns Division result or fallback
+ *
+ * @example
+ * ```typescript
+ * const result = safeDivision(10, 2) // Returns: 5
+ * const zero = safeDivision(10, 0) // Returns: 0
+ * ```
  */
 export function safeDivision(numerator: number, denominator: number, fallback: number = 0): number {
   if (denominator === 0 || isNaN(denominator) || !isFinite(denominator)) {
@@ -42,10 +49,17 @@ export function safeDivision(numerator: number, denominator: number, fallback: n
 
 /**
  * Fill NaN values with specified value
+ * Ensures array contains only finite numbers
  *
  * @param data - Source array
  * @param fillValue - Value to fill NaN with
  * @returns Array with filled values
+ *
+ * @example
+ * ```typescript
+ * const filled = fillNaN([1, NaN, 3, NaN], 0)
+ * // Returns: [1, 0, 3, 0]
+ * ```
  */
 export function fillNaN(data: number[], fillValue: number): number[] {
   return ArrayUtils.processArray(data, (value) => {
@@ -55,10 +69,17 @@ export function fillNaN(data: number[], fillValue: number): number[] {
 
 /**
  * Shift array by specified amount
+ * Moves elements forward or backward in array
  *
  * @param data - Source array
- * @param offset - Shift amount
+ * @param offset - Shift amount (positive = right, negative = left)
  * @returns Shifted array
+ *
+ * @example
+ * ```typescript
+ * const shifted = shiftArray([1, 2, 3, 4], 2)
+ * // Returns: [NaN, NaN, 1, 2]
+ * ```
  */
 export function shiftArray(data: number[], offset: number): number[] {
   return ArrayUtils.shift(data, offset)
@@ -66,12 +87,19 @@ export function shiftArray(data: number[], offset: number): number[] {
 
 /**
  * Calculate range percentage
+ * Maps value to percentage within specified range
  *
  * @param value - Current value
  * @param min - Minimum value
  * @param max - Maximum value
  * @param multiplier - Multiplier for percentage (default: 100)
  * @returns Range percentage
+ *
+ * @example
+ * ```typescript
+ * const percent = calculateRangePercentage(75, 0, 100)
+ * // Returns: 75
+ * ```
  */
 export function calculateRangePercentage(value: number, min: number, max: number, multiplier: number = 100): number {
   if (max === min) {
@@ -82,10 +110,17 @@ export function calculateRangePercentage(value: number, min: number, max: number
 
 /**
  * Calculate Price Percentage Change using centralized utilities
+ * Computes percentage change between two prices
  *
  * @param current - Current price
  * @param previous - Previous price
  * @returns Percentage change
+ *
+ * @example
+ * ```typescript
+ * const change = calculatePricePercentageChange(110, 100)
+ * // Returns: 10
+ * ```
  */
 export function calculatePricePercentageChange(current: number, previous: number): number {
   if (previous === 0) {

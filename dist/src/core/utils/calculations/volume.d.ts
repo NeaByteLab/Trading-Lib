@@ -1,15 +1,23 @@
 import type { MarketData } from '@core/types/indicator-types';
 /**
- * Calculate On Balance Volume (OBV) using centralized utilities
+ * On Balance Volume (OBV) - volume-based momentum indicator
+ * Formula: OBV = Previous OBV + Volume (if Close > Previous Close) - Volume (if Close < Previous Close)
  *
  * @param close - Close prices array
  * @param volume - Volume array
  * @returns OBV values array
  * @throws {Error} If data is empty or missing volume
+ *
+ * @example
+ * ```typescript
+ * const obv = calculateOBV(data.close, data.volume)
+ * // Returns: [1000, 1500, 1200, ..., 2500, 2800, ...]
+ * ```
  */
 export declare function calculateOBV(close: number[], volume: number[]): number[];
 /**
- * Calculate Accumulation Distribution using centralized utilities
+ * Accumulation Distribution - volume-based indicator measuring buying/selling pressure
+ * Formula: AD = Previous AD + Money Flow Volume where Money Flow Volume = Money Flow Multiplier × Volume
  *
  * @param high - High prices array
  * @param low - Low prices array
@@ -17,14 +25,27 @@ export declare function calculateOBV(close: number[], volume: number[]): number[
  * @param volume - Volume array
  * @returns Accumulation Distribution values array
  * @throws {Error} If data is empty or missing required fields
+ *
+ * @example
+ * ```typescript
+ * const ad = calculateAccumulationDistribution(data.high, data.low, data.close, data.volume)
+ * // Returns: [0, 500, 1200, ..., 2500, 3200, ...]
+ * ```
  */
 export declare function calculateAccumulationDistribution(high: number[], low: number[], close: number[], volume: number[]): number[];
 /**
- * Calculate VWAP (Volume Weighted Average Price) using centralized logic
+ * Volume Weighted Average Price (VWAP) - average price weighted by volume
+ * Formula: VWAP = Σ(Price × Volume) / Σ(Volume)
  *
  * @param data - Market data with OHLCV
  * @param length - Calculation period
  * @returns VWAP values array
+ *
+ * @example
+ * ```typescript
+ * const vwap = calculateVWAP(data, 20)
+ * // Returns: [NaN, NaN, ..., 45.2, 45.8, ...]
+ * ```
  */
 export declare function calculateVWAP(data: MarketData, length: number): number[];
 /**
@@ -51,6 +72,18 @@ export declare function calculatePriceVolumeTrend(close: number[], volume: numbe
  * @throws {Error} If data is empty or missing required fields
  */
 export declare function calculatePositiveVolumeIndex(close: number[], volume: number[]): number[];
+/**
+ * Calculate Negative Volume Index (NVI)
+ *
+ * NVI measures price changes only on days when volume decreases.
+ * Formula: NVI = Previous NVI * (1 + Percent Change / 100) if Volume < Previous Volume
+ *
+ * @param close - Close prices array
+ * @param volume - Volume array
+ * @returns NVI values array
+ * @throws {Error} If data is empty or missing required fields
+ */
+export declare function calculateNegativeVolumeIndex(close: number[], volume: number[]): number[];
 /**
  * Calculate Twiggs Money Flow
  *

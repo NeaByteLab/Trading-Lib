@@ -1,3 +1,4 @@
+export * from './fibonacci';
 export * from './ichimoku';
 export * from './moving-averages';
 export * from './overlays';

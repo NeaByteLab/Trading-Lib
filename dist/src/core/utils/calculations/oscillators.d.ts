@@ -1,26 +1,47 @@
 import type { MarketData } from '@core/types/indicator-types';
 /**
- * Calculate RSI using centralized utilities with numerical stability
+ * Relative Strength Index - measures momentum and overbought/oversold conditions
+ * Formula: RSI = 100 - (100 / (1 + RS)) where RS = Average Gain / Average Loss
  *
  * @param data - Source data array
  * @param length - RSI period
  * @returns RSI values array
+ *
+ * @example
+ * ```typescript
+ * const rsi = calculateRSI(data.close, 14)
+ * // Returns: [NaN, NaN, ..., 65.2, 67.8, ...]
+ * ```
  */
 export declare function calculateRSI(data: number[], length: number): number[];
 /**
- * Calculate CCI using centralized utilities with numerical stability
+ * Commodity Channel Index - measures cyclical trends and overbought/oversold conditions
+ * Formula: CCI = (Typical Price - SMA) / (0.015 × Mean Deviation)
  *
  * @param data - Source data array (should be typical prices HLC3)
  * @param length - CCI period
  * @returns CCI values array
+ *
+ * @example
+ * ```typescript
+ * const cci = calculateCCI(data.hlc3, 20)
+ * // Returns: [NaN, NaN, ..., 125.6, -89.3, ...]
+ * ```
  */
 export declare function calculateCCI(data: number[], length: number): number[];
 /**
- * Calculate CCI from OHLC data using typical prices
+ * Commodity Channel Index from OHLC data - measures cyclical trends
+ * Formula: CCI = (Typical Price - SMA) / (0.015 × Mean Deviation)
  *
  * @param data - Market data with high, low, close arrays
  * @param length - CCI period
  * @returns CCI values array
+ *
+ * @example
+ * ```typescript
+ * const cci = calculateCCIFromOHLC(data, 20)
+ * // Returns: [NaN, NaN, ..., 125.6, -89.3, ...]
+ * ```
  */
 export declare function calculateCCIFromOHLC(data: {
     high: number[];
@@ -28,17 +49,25 @@ export declare function calculateCCIFromOHLC(data: {
     close: number[];
 }, length: number): number[];
 /**
- * Calculate Williams %R using centralized utilities
+ * Williams %R - momentum oscillator measuring overbought/oversold levels
+ * Formula: %R = ((Highest High - Close) / (Highest High - Lowest Low)) × -100
  *
  * @param close - Close prices array
  * @param high - High prices array
  * @param low - Low prices array
  * @param length - Lookback period
  * @returns Williams %R values array
+ *
+ * @example
+ * ```typescript
+ * const williams = calculateWilliamsR(data.close, data.high, data.low, 14)
+ * // Returns: [NaN, NaN, ..., -25.6, -18.9, ...]
+ * ```
  */
 export declare function calculateWilliamsR(close: number[], high: number[], low: number[], length: number): number[];
 /**
- * Calculate Stochastic Oscillator using centralized utilities
+ * Stochastic Oscillator - momentum indicator measuring price position within range
+ * Formula: %K = ((Current Close - Lowest Low) / (Highest High - Lowest Low)) × 100
  *
  * @param data - Source data array
  * @param high - High prices array
@@ -46,6 +75,12 @@ export declare function calculateWilliamsR(close: number[], high: number[], low:
  * @param length - Calculation period
  * @returns Stochastic values array
  * @throws {Error} If data is empty or length is invalid
+ *
+ * @example
+ * ```typescript
+ * const stoch = calculateStochastic(data.close, data.high, data.low, 14)
+ * // Returns: [NaN, NaN, ..., 65.2, 72.8, ...]
+ * ```
  */
 export declare function calculateStochastic(data: number[], high: number[], low: number[], length: number): number[];
 /**

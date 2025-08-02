@@ -18,6 +18,8 @@ import { coppock } from '@indicators/momentum/oscillators/coppock'
 import { dpo } from '@indicators/momentum/oscillators/dpo'
 import { elderRayIndex } from '@indicators/momentum/oscillators/elder-ray'
 import { easeOfMovement } from '@indicators/momentum/oscillators/eom'
+import { fisherTransform } from '@indicators/momentum/oscillators/fisher-transform'
+import { hurstExponent } from '@indicators/momentum/oscillators/hurst-exponent'
 import { klinger } from '@indicators/momentum/oscillators/klinger'
 import { kst } from '@indicators/momentum/oscillators/kst'
 import { macd } from '@indicators/momentum/oscillators/macd'
@@ -34,11 +36,17 @@ import { stochastic } from '@indicators/momentum/oscillators/stochastic'
 import { trix } from '@indicators/momentum/oscillators/trix'
 import { tsi } from '@indicators/momentum/oscillators/tsi'
 import { twiggsMomentum } from '@indicators/momentum/oscillators/twiggs-momentum'
+import { ultimateOscillator } from '@indicators/momentum/oscillators/ultimate-oscillator'
 import { williamsR } from '@indicators/momentum/oscillators/williams'
+import { fibonacciExpansion } from '@indicators/trend/fibonacci/fibonacci-expansion'
+import { fibonacciLevel } from '@indicators/trend/fibonacci/fibonacci-level'
+import { fibonacciRetracements } from '@indicators/trend/fibonacci/fibonacci-retracements'
+import { fibonacciTimeZones } from '@indicators/trend/fibonacci/fibonacci-time-zones'
 import { ichimokuCloud } from '@indicators/trend/ichimoku/ichimoku-cloud'
 import { alma } from '@indicators/trend/moving-averages/alma'
 import { dema } from '@indicators/trend/moving-averages/dema'
 import { displaced } from '@indicators/trend/moving-averages/displaced'
+import { frama } from '@indicators/trend/moving-averages/frama'
 import { kama } from '@indicators/trend/moving-averages/kama'
 import { multipleMovingAverages } from '@indicators/trend/moving-averages/mma'
 import { t3 } from '@indicators/trend/moving-averages/t3'
@@ -46,6 +54,7 @@ import { tema } from '@indicators/trend/moving-averages/tema'
 import { trima } from '@indicators/trend/moving-averages/trima'
 import { vidya } from '@indicators/trend/moving-averages/vidya'
 import { wilders } from '@indicators/trend/moving-averages/wilders'
+import { zlema } from '@indicators/trend/moving-averages/zlema'
 import { comparePrices } from '@indicators/trend/overlays/compare-prices'
 import { priceComparison } from '@indicators/trend/overlays/price-comparison'
 import { priceDifferential } from '@indicators/trend/overlays/price-differential'
@@ -53,7 +62,11 @@ import { priceEnvelope } from '@indicators/trend/overlays/price-envelope'
 import { priceRatio } from '@indicators/trend/overlays/price-ratio'
 import { movingAverageRibbon } from '@indicators/trend/overlays/rib'
 import { typicalPrice } from '@indicators/trend/overlays/typical-price'
+import { zigZag } from '@indicators/trend/overlays/zig-zag'
 import { parabolicSAR } from '@indicators/trend/parabolic/parabolic-sar'
+import { candlestickPatterns } from '@indicators/trend/patterns/candlestick-patterns'
+import { chandelierExits } from '@indicators/trend/patterns/chandelier-exits'
+import { chartPatterns } from '@indicators/trend/patterns/chart-patterns'
 import { camarilla } from '@indicators/trend/pivots/camarilla'
 import { demarkPivots } from '@indicators/trend/pivots/demark'
 import { percentageBands } from '@indicators/trend/pivots/percentage-bands'
@@ -68,8 +81,10 @@ import { keltnerChannel } from '@indicators/volatility/channels/keltner'
 import { priceChannels } from '@indicators/volatility/channels/price-channels'
 import { atr } from '@indicators/volatility/range/atr'
 import { chaikinVolatility } from '@indicators/volatility/range/chaikin-volatility'
+import { garmanKlassVolatility } from '@indicators/volatility/range/garman-klass-volatility'
 import { std } from '@indicators/volatility/range/std'
 import { twiggsVolatility } from '@indicators/volatility/range/twiggs-volatility'
+import { yangZhangVolatility } from '@indicators/volatility/range/yang-zhang-volatility'
 import { accumulationDistribution } from '@indicators/volume/flow/ad'
 import { amihudIlliquidity } from '@indicators/volume/flow/amihud'
 import { cmf } from '@indicators/volume/flow/cmf'
@@ -80,6 +95,8 @@ import { priceVolumeTrend } from '@indicators/volume/flow/pvt'
 import { twiggsMoneyFlow } from '@indicators/volume/flow/twiggsmf'
 import { vortex } from '@indicators/volume/flow/vortex'
 import { vpin } from '@indicators/volume/flow/vpin'
+import { forceIndex } from '@indicators/volume/momentum/force-index'
+import { negativeVolumeIndex } from '@indicators/volume/momentum/negative-volume-index'
 import { positiveVolumeIndex } from '@indicators/volume/momentum/pvi'
 import { vroc } from '@indicators/volume/momentum/vroc'
 import { vama } from '@indicators/volume/weighted/vama'
@@ -189,6 +206,7 @@ export const ta = {
   alma: (data: number[], length: number = 9, sigma: number = 6) => alma(data, length, sigma),
   dema: (data: number[], length: number = 20) => dema(data, length),
   displaced: (data: number[], length: number = 20, displacement: number = 0, maType: 'sma' | 'ema' | 'wma' | 'hull' = 'sma') => displaced(data, length, displacement, maType),
+  frama: (data: number[] | MarketData, length: number = 16) => frama(data, length),
   ema: (data: number[], length: number) => movingAverage(data, length, 'ema'),
   hull: (data: number[], length: number) => movingAverage(data, length, 'hull'),
   kama: (data: number[], length: number = 10, fastPeriod: number = 2, slowPeriod: number = 30) => kama(data, length, fastPeriod, slowPeriod),
@@ -202,6 +220,7 @@ export const ta = {
   wma: (data: number[], length: number) => movingAverage(data, length, 'wma'),
   mma: (data: MarketData | number[], config?: { length?: number, source?: string }) => multipleMovingAverages(data, config),
   ribbon: (data: MarketData | number[], periods?: number[], maType?: 'sma' | 'ema' | 'wma' | 'hull', source?: string) => movingAverageRibbon(data, periods, maType, source),
+  zlema: (data: number[], length: number = 20, _displacement: number = 0) => zlema(data, length),
 
   // ===== MOMENTUM OSCILLATORS =====
   /**
@@ -228,6 +247,9 @@ export const ta = {
   coppock: (data: MarketData | number[], roc1Length: number = 14, roc2Length: number = 11, wmaLength: number = 10) => coppock(data, roc1Length, roc2Length, wmaLength),
   eom: (data: MarketData, length: number = 14) => easeOfMovement(data, length),
   elderRay: (data: MarketData, length: number = 13) => elderRayIndex(data, length),
+  fisherTransform: (data: number[] | MarketData, length: number = 10) => fisherTransform(data, length),
+  forceIndex: (data: MarketData, length: number = 13) => forceIndex(data, length),
+  hurst: (data: number[], length: number = 20) => hurstExponent(data, length),
   macd: (data: number[], fastLength: number = 12, slowLength: number = 26, signalLength: number = 9) => {
     const result = macd(data, fastLength, slowLength, signalLength)
     return { macd: result.macd, signal: result.signal, histogram: result.histogram }
@@ -249,6 +271,7 @@ export const ta = {
   tsi: (data: number[], firstLength: number = 25, secondLength: number = 13) => tsi(data, firstLength, secondLength),
   twiggs: (data: number[], length: number = 20, lookback: number = 10) => twiggsMomentum(data, length, lookback),
   twiggsMomentum: (data: number[], length: number = 20, lookback: number = 10) => twiggsMomentum(data, length, lookback),
+  ultimateOscillator: (data: MarketData, shortPeriod: number = 7, mediumPeriod: number = 14, longPeriod: number = 28) => ultimateOscillator(data, shortPeriod, mediumPeriod, longPeriod),
 
   // ===== DIRECTIONAL INDICATORS =====
   /**
@@ -269,6 +292,7 @@ export const ta = {
   kyle: (data: MarketData) => kylesLambda(data),
   mfi: (data: MarketData, length: number = 14) => mfi(data, length),
   obv: (data: MarketData) => obv(data),
+  nvi: (data: MarketData) => negativeVolumeIndex(data),
   pvi: (data: MarketData) => positiveVolumeIndex(data),
   pvt: (data: MarketData) => priceVolumeTrend(data),
   twiggsMF: (data: MarketData, length: number = 21) => twiggsMoneyFlow(data, length),
@@ -291,6 +315,7 @@ export const ta = {
     return { upper: result.upper, middle: result.middle, lower: result.lower }
   },
   chaikinVol: (data: MarketData, length: number = 10) => chaikinVolatility(data, length),
+  garmanKlassVol: (data: MarketData, length: number = 20) => garmanKlassVolatility(data, length),
   bbandsAdaptive: (data: number[], length: number = 20, multiplier: number = 2) => {
     const result = bollingerBands(data, length, multiplier, 'close', 'ema')
     return { upper: result.upper, middle: result.middle, lower: result.lower }
@@ -300,11 +325,22 @@ export const ta = {
   keltner: (data: MarketData, length: number = 20, multiplier: number = 2) => keltnerChannel(data, length, multiplier),
   std: (data: number[], length: number = 20) => std(data, length),
   twiggsVol: (data: MarketData, length: number = 20, lookback: number = 10) => twiggsVolatility(data, length, lookback),
+  yangZhangVol: (data: MarketData, length: number = 20) => yangZhangVolatility(data, length),
 
   // ===== TREND INDICATORS =====
   /**
    * Trend-following indicators for market direction analysis
    */
+  candlestickPatterns: (data: MarketData, sensitivity: number = 0.1) => candlestickPatterns(data, sensitivity),
+  chandelierExits: (data: MarketData, atrPeriod: number = 14, multiplier: number = 3) => {
+    const result = chandelierExits(data, atrPeriod, multiplier)
+    return { longExit: result.longExit, shortExit: result.shortExit }
+  },
+  chartPatterns: (data: MarketData, windowSize: number = 5, sensitivity: number = 0.1) => chartPatterns(data, windowSize, sensitivity),
+  fibonacciExpansion: (data: MarketData, swingPeriod?: number, levels?: (1.272 | 1.618 | 2.0 | 2.618 | 3.618)[]) => fibonacciExpansion(data, swingPeriod, levels),
+  fibonacciLevel: (data: MarketData, startIndex?: number, endIndex?: number, levelType?: 'retracement' | 'extension' | 'projection', customLevels?: number[]) => fibonacciLevel(data, startIndex, endIndex, levelType, customLevels),
+  fibonacciRetracements: (data: MarketData, swingPeriod?: number, levels?: (0 | 0.236 | 0.382 | 0.5 | 0.618 | 0.786 | 1)[]) => fibonacciRetracements(data, swingPeriod, levels),
+  fibonacciTimeZones: (data: MarketData, startIndex?: number, levels?: (1 | 2 | 3 | 5 | 8 | 13 | 21 | 34 | 55 | 89)[]) => fibonacciTimeZones(data, startIndex, levels),
   ichimoku: (data: MarketData, tenkanPeriod: number = 9, kijunPeriod: number = 26, senkouBPeriod: number = 52, displacement: number = 26) => ichimokuCloud(data, tenkanPeriod, kijunPeriod, senkouBPeriod, displacement),
   psar: (data: MarketData, acceleration: number = 0.02, maximum: number = 0.2) => parabolicSAR(data, acceleration, maximum),
   supertrend: (data: MarketData, length: number = 10, multiplier: number = 3) => {
@@ -343,6 +379,7 @@ export const ta = {
     return { upper: result.upper, middle: result.middle, lower: result.lower }
   },
   typical: (data: MarketData) => typicalPrice(data),
+  zigZag: (data: MarketData, length: number = 14, deviation: number = 3) => zigZag(data, length, deviation),
   camarilla: (data: MarketData) => {
     const result = camarilla(data)
     return { pp: result.pp, r1: result.r1, r2: result.r2, r3: result.r3, s1: result.s1, s2: result.s2, s3: result.s3 }

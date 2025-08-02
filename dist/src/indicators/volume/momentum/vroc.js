@@ -6,13 +6,22 @@ import { validateVolumeData } from '@utils/validation-utils';
 /**
  * Calculate Volume Rate of Change (VROC)
  *
- * VROC = ((Current Volume - Volume n periods ago) / Volume n periods ago) × 100
- * Uses centralized calculation utilities for consistency.
+ * VROC measures the rate of change in volume over a specified period.
+ * Formula: VROC = ((Current Volume - Volume n periods ago) / Volume n periods ago) × 100
  *
- * @param data - Market data with volume
+ * @param data - Market data with OHLCV values
  * @param length - Lookback period (default: 14)
- * @returns VROC values array
+ * @param source - Price source (default: 'volume')
+ * @returns Array of VROC values
  * @throws {Error} If market data is invalid or volume data is missing
+ *
+ * @example
+ * ```typescript
+ * import { ta } from '@api/ta'
+ *
+ * const vroc = ta.vroc(marketData, 14)
+ * // Returns: [0, 20, -10, 30, ...]
+ * ```
  */
 function calculateVROCIndicator(data, length = 14) {
     if (Array.isArray(data)) {

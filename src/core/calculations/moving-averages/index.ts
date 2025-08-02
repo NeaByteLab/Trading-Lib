@@ -123,7 +123,7 @@ function findFirstEMA(data: number[], length: number): { index: number; value: n
  * @returns Array of WMA values
  */
 function calculateWMA(data: number[], length: number): number[] {
-  const result = ArrayUtils.processWindow(data, length, (window) => {
+  return ArrayUtils.processWindow(data, length, (window) => {
     const validValues = sanitizeArray(window)
     if (validValues.length === 0) {
       return NaN
@@ -134,13 +134,6 @@ function calculateWMA(data: number[], length: number): number[] {
     const result = weightSum === 0 ? NaN : weightedSum / weightSum
     return isFinite(result) ? result : NaN
   })
-
-  // Pad the result to match the input data length
-  const padding = data.length - result.length
-  if (padding > 0) {
-    return Array(padding).fill(NaN).concat(result)
-  }
-  return result
 }
 
 /**

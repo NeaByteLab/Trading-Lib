@@ -4,13 +4,21 @@ import { MathUtils } from '@core/utils/math-utils'
 import { sanitizeArray } from '@core/utils/validation-utils'
 
 /**
- * Calculate moving average using specified type
+ * Moving Average - calculates various types of moving averages
+ * Formula: SMA = Σ(Price) / n, EMA = Price × α + Previous EMA × (1 - α)
  *
  * @param data - Source data array
  * @param length - Moving average period
  * @param type - Moving average type (default: 'sma')
  * @returns Array of moving average values
  * @throws {Error} If data is empty or length is invalid
+ *
+ * @example
+ * ```typescript
+ * const sma = movingAverage(data.close, 20, 'sma')
+ * const ema = movingAverage(data.close, 20, 'ema')
+ * // Returns: [NaN, NaN, ..., 45.2, 45.8, ...]
+ * ```
  */
 export function movingAverage(data: number[], length: number, type: 'sma' | 'ema' | 'wma' | 'hull' | 'rma' = 'sma'): number[] {
   if (!data || data.length === 0) {
@@ -37,14 +45,18 @@ export function movingAverage(data: number[], length: number, type: 'sma' | 'ema
 }
 
 /**
- * Calculate Simple Moving Average (SMA) with numerical stability
- *
- * Uses centralized window processing utilities.
+ * Simple Moving Average (SMA) - arithmetic mean of prices over period
  * Formula: SMA = Σ(Price) / n
  *
  * @param data - Source data array
  * @param length - SMA period
  * @returns Array of SMA values
+ *
+ * @example
+ * ```typescript
+ * const sma = calculateSMA(data.close, 20)
+ * // Returns: [NaN, NaN, ..., 45.2, 45.8, ...]
+ * ```
  */
 function calculateSMA(data: number[], length: number): number[] {
   return ArrayUtils.processWindow(data, length, (window) => {
@@ -57,26 +69,36 @@ function calculateSMA(data: number[], length: number): number[] {
 }
 
 /**
- * Calculate Exponential Moving Average (EMA)
- *
- * Uses centralized calculation utilities.
+ * Exponential Moving Average (EMA) - weighted average with exponential decay
  * Formula: EMA = Price × α + Previous EMA × (1 - α) where α = 2/(Length + 1)
  *
  * @param data - Source data array
  * @param length - EMA period
  * @returns Array of EMA values
+ *
+ * @example
+ * ```typescript
+ * const ema = calculateEMA(data.close, 20)
+ * // Returns: [NaN, NaN, ..., 45.2, 45.8, ...]
+ * ```
  */
 function calculateEMA(data: number[], length: number): number[] {
   const smoothingFactor = 2 / (length + 1)
   const result: number[] = []
+
   const firstEMA = findFirstEMA(data, length)
   if (firstEMA === null) {
     return Array(data.length).fill(NaN)
   }
+
+  // Fill initial NaN values
   for (let i = 0; i < firstEMA.index; i++) {
     result.push(NaN)
   }
+
   result.push(firstEMA.value)
+
+  // Optimized: Use direct calculation instead of array operations
   for (let i = firstEMA.index + 1; i < data.length; i++) {
     const previousEMA = result[i - 1]!
     const currentValue = data[i]!
@@ -84,10 +106,11 @@ function calculateEMA(data: number[], length: number): number[] {
     if (isNaN(previousEMA) || isNaN(currentValue) || !isFinite(previousEMA) || !isFinite(currentValue)) {
       result.push(NaN)
     } else {
-      const currentEMA = (currentValue * smoothingFactor) + (previousEMA * (1 - smoothingFactor))
-      result.push(isFinite(currentEMA) ? currentEMA : NaN)
+      const ema = (currentValue * smoothingFactor) + (previousEMA * (1 - smoothingFactor))
+      result.push(isFinite(ema) ? ema : NaN)
     }
   }
+
   return result
 }
 
@@ -127,9 +150,18 @@ function calculateWMA(data: number[], length: number): number[] {
     if (validValues.length === 0) {
       return NaN
     }
-    const weights = ArrayUtils.processArray(validValues, (_, i) => i + 1)
-    const weightedSum = MathUtils.sum(validValues.map((val, i) => val * weights[i]!))
-    const weightSum = MathUtils.sum(weights)
+
+    // Optimized WMA calculation using direct formula
+    // WMA = Σ(Price[i] × i) / Σ(i) where i goes from 1 to length
+    let weightedSum = 0
+    let weightSum = 0
+
+    for (let i = 0; i < validValues.length; i++) {
+      const weight = i + 1
+      weightedSum += validValues[i]! * weight
+      weightSum += weight
+    }
+
     const result = weightSum === 0 ? NaN : weightedSum / weightSum
     return isFinite(result) ? result : NaN
   })
@@ -164,15 +196,11 @@ function calculateHMA(data: number[], length: number): number[] {
   const wma1 = calculateWMA(data, halfLength)
   const wma2 = calculateWMA(data, length)
 
-  // Ensure both arrays have the same length as the input data
-  const paddedWma1 = wma1.length === data.length ? wma1 : Array(data.length - wma1.length).fill(NaN).concat(wma1)
-  const paddedWma2 = wma2.length === data.length ? wma2 : Array(data.length - wma2.length).fill(NaN).concat(wma2)
-
-  // Calculate 2 * WMA(n/2) - WMA(n)
-  const diff = []
+  // Optimized: Calculate difference directly without padding arrays
+  const diff: number[] = []
   for (let i = 0; i < data.length; i++) {
-    const wma1Val = paddedWma1[i]
-    const wma2Val = paddedWma2[i]
+    const wma1Val = wma1[i]
+    const wma2Val = wma2[i]
 
     if (wma1Val !== undefined && wma2Val !== undefined &&
         !isNaN(wma1Val) && !isNaN(wma2Val) &&
@@ -426,16 +454,35 @@ export function calculateKAMA(data: number[], length: number, fastPeriod: number
   if (slowPeriod <= 0 || slowPeriod <= fastPeriod) {
     throw new Error('Slow period must be positive and greater than fast period')
   }
+
   const result: number[] = []
-  result.push(data[0]!)
+
+  // Initialize with first value
+  if (data[0] !== undefined && isFinite(data[0])) {
+    result.push(data[0])
+  } else {
+    result.push(NaN)
+  }
+
+  // Optimized: Use pre-calculated smoothing constants
+  const fastSC = 2 / (fastPeriod + 1)
+  const slowSC = 2 / (slowPeriod + 1)
+
   for (let i = 1; i < data.length; i++) {
     const er = calculateEfficiencyRatio(data, i, length)
-    const fastSC = 2 / (fastPeriod + 1)
-    const slowSC = 2 / (slowPeriod + 1)
     const sc = MathUtils.pow(er * (fastSC - slowSC) + slowSC, 2)
-    const currentKAMA = result[i - 1]! + sc * (data[i]! - result[i - 1]!)
-    result.push(isFinite(currentKAMA) ? currentKAMA : result[i - 1]!)
+
+    const previousKAMA = result[i - 1]!
+    const currentPrice = data[i]!
+
+    if (isFinite(previousKAMA) && isFinite(currentPrice)) {
+      const currentKAMA = previousKAMA + sc * (currentPrice - previousKAMA)
+      result.push(isFinite(currentKAMA) ? currentKAMA : previousKAMA)
+    } else {
+      result.push(previousKAMA)
+    }
   }
+
   return result
 }
 
@@ -454,12 +501,20 @@ function calculateEfficiencyRatio(data: number[], index: number, length: number)
   if (index < length) {
     return 0
   }
+
   const directionalMovement = MathUtils.abs(data[index]! - data[index - length]!)
   let totalMovement = 0
-  // Fix: Use length-1 for total movement calculation (correct algorithm)
+
+  // Optimized: Use single loop for total movement calculation
   for (let i = 0; i < length - 1; i++) {
-    totalMovement += MathUtils.abs(data[index - i]! - data[index - i - 1]!)
+    const currentPrice = data[index - i]!
+    const previousPrice = data[index - i - 1]!
+    if (currentPrice !== undefined && previousPrice !== undefined &&
+        isFinite(currentPrice) && isFinite(previousPrice)) {
+      totalMovement += MathUtils.abs(currentPrice - previousPrice)
+    }
   }
+
   if (totalMovement === 0) {
     return 0
   }
@@ -478,7 +533,12 @@ function calculateCMOForVIDYA(changes: number[], currentIndex: number, cmoLength
   let gains = 0
   let losses = 0
   let validCount = 0
-  for (let j = Math.max(0, currentIndex - cmoLength + 1); j <= currentIndex; j++) {
+
+  // Optimized: Use bounds checking and early exit
+  const startIndex = Math.max(0, currentIndex - cmoLength + 1)
+  const endIndex = currentIndex
+
+  for (let j = startIndex; j <= endIndex; j++) {
     const change = changes[j]
     if (change !== undefined && !isNaN(change) && isFinite(change)) {
       if (change > 0) {
@@ -489,9 +549,11 @@ function calculateCMOForVIDYA(changes: number[], currentIndex: number, cmoLength
       validCount++
     }
   }
+
   if (validCount === 0) {
     return 0
   }
+
   const total = gains + losses
   return total === 0 ? 0 : (gains - losses) / total
 }

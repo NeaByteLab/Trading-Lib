@@ -4,11 +4,18 @@ import { MathUtils } from '@core/utils/math-utils'
 import { sanitizeArray } from '@core/utils/validation-utils'
 
 /**
- * Calculate mean with numerical stability
+ * Arithmetic Mean - calculates the average of a set of values
+ * Formula: Mean = Σ(Values) / n
  *
  * @param values - Array of values
  * @returns Mean value
  * @throws {Error} If values array is empty
+ *
+ * @example
+ * ```typescript
+ * const mean = calculateMean([1, 2, 3, 4, 5])
+ * // Returns: 3
+ * ```
  */
 export function calculateMean(values: number[]): number {
   if (!values || values.length === 0) {
@@ -22,11 +29,18 @@ export function calculateMean(values: number[]): number {
 }
 
 /**
- * Calculate variance with numerical stability using two-pass algorithm
+ * Variance - measures the spread of values around the mean
+ * Formula: Variance = Σ((Value - Mean)²) / (n - 1)
  *
  * @param values - Array of values
  * @returns Variance value
  * @throws {Error} If values array is empty
+ *
+ * @example
+ * ```typescript
+ * const variance = calculateVariance([1, 2, 3, 4, 5])
+ * // Returns: 2.5
+ * ```
  */
 export function calculateVariance(values: number[]): number {
   if (!values || values.length === 0) {
@@ -49,11 +63,18 @@ export function calculateVariance(values: number[]): number {
 }
 
 /**
- * Calculate standard deviation with numerical stability
+ * Standard Deviation - measures the dispersion of values around the mean
+ * Formula: Standard Deviation = √(Variance)
  *
  * @param values - Array of values
  * @returns Standard deviation value
  * @throws {Error} If values array is empty
+ *
+ * @example
+ * ```typescript
+ * const std = calculateStandardDeviation([1, 2, 3, 4, 5])
+ * // Returns: 1.5811388300841898
+ * ```
  */
 export function calculateStandardDeviation(values: number[]): number {
   if (!values || values.length === 0) {

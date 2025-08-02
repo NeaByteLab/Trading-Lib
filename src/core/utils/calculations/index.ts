@@ -40,6 +40,7 @@ export {
   calculateVWAP,
   calculatePriceVolumeTrend,
   calculatePositiveVolumeIndex,
+  calculateNegativeVolumeIndex,
   calculateTwiggsMoneyFlow,
   calculateAmihudIlliquidity,
   calculateCumulativeVolume,

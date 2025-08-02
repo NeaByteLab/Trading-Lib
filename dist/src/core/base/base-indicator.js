@@ -3,7 +3,20 @@ import { PriceCalculations } from '@core/utils/calculation-utils';
 import { validateIndicatorData } from '@core/utils/validation-utils';
 /**
  * Base class for all technical indicators
- * Provides common functionality and validation
+ * Provides common functionality and validation for consistent indicator implementation
+ *
+ * @example
+ * ```typescript
+ * class MyIndicator extends BaseIndicator {
+ *   constructor() {
+ *     super('MyIndicator', 'My Custom Indicator', 'momentum')
+ *   }
+ *
+ *   calculate(data: MarketData | number[], config?: IndicatorConfig): IndicatorResult {
+ *     // Implementation here
+ *   }
+ * }
+ * ```
  */
 export class BaseIndicator {
     name;
@@ -16,9 +29,10 @@ export class BaseIndicator {
     }
     /**
      * Validate input data and configuration
+     * Ensures data integrity before calculation
      *
-     * @param _data - Input data
-     * @param _config - Configuration
+     * @param _data - Input data to validate
+     * @param _config - Configuration parameters
      */
     validateInput(_data, _config) {
         validateIndicatorData(_data);
@@ -26,6 +40,10 @@ export class BaseIndicator {
     /**
      * Centralized length validation
      * Eliminates duplication across all indicators
+     *
+     * @param length - Length parameter to validate
+     * @param minLength - Minimum allowed length
+     * @param maxLength - Maximum allowed length (optional)
      */
     validateLength(length, minLength, maxLength) {
         if (length < minLength) {
@@ -38,6 +56,8 @@ export class BaseIndicator {
     /**
      * Centralized multiplier validation
      * Eliminates duplication across volatility indicators
+     *
+     * @param multiplier - Multiplier value to validate
      */
     validateMultiplier(multiplier) {
         if (multiplier <= 0) {
@@ -46,6 +66,11 @@ export class BaseIndicator {
     }
     /**
      * Get source data based on configuration
+     * Maps price source strings to actual data arrays
+     *
+     * @param data - Market data object
+     * @param source - Price source identifier
+     * @returns Array of price values
      */
     getSourceData(data, source) {
         switch (source) {

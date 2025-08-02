@@ -4,11 +4,18 @@ import { movingAverage } from '@core/utils/calculations/moving-averages'
 import { MathUtils } from '@core/utils/math-utils'
 
 /**
- * Calculate Momentum using centralized utilities
+ * Momentum - measures price momentum over specified period
+ * Formula: Momentum = Current Price - Price n periods ago
  *
  * @param data - Source data array
  * @param length - Lookback period
  * @returns Momentum values array
+ *
+ * @example
+ * ```typescript
+ * const momentum = calculateMomentum(data.close, 10)
+ * // Returns: [NaN, NaN, ..., 2.5, 1.8, ...]
+ * ```
  */
 export function calculateMomentum(data: number[], length: number): number[] {
   return ArrayUtils.processArray(data, (current, i) => {
@@ -21,11 +28,18 @@ export function calculateMomentum(data: number[], length: number): number[] {
 }
 
 /**
- * Calculate Rate of Change (ROC) using centralized utilities
+ * Rate of Change (ROC) - measures the speed and magnitude of price changes
+ * Formula: ROC = ((Current Price - Price n periods ago) / Price n periods ago) × 100
  *
  * @param data - Source data array
  * @param length - Lookback period
  * @returns ROC values array
+ *
+ * @example
+ * ```typescript
+ * const roc = calculateROC(data.close, 10)
+ * // Returns: [NaN, NaN, ..., 5.2, -2.1, ...]
+ * ```
  */
 export function calculateROC(data: number[], length: number): number[] {
   return ArrayUtils.processArray(data, (current, i) => {
@@ -41,12 +55,19 @@ export function calculateROC(data: number[], length: number): number[] {
 }
 
 /**
- * Calculate Percentage Price Oscillator (PPO) using centralized utilities
+ * Percentage Price Oscillator (PPO) - momentum indicator showing price momentum
+ * Formula: PPO = ((Fast EMA - Slow EMA) / Slow EMA) × 100
  *
  * @param data - Source data array
  * @param fastLength - Fast EMA period
  * @param slowLength - Slow EMA period
  * @returns PPO values array
+ *
+ * @example
+ * ```typescript
+ * const ppo = calculatePPO(data.close, 12, 26)
+ * // Returns: [NaN, NaN, ..., 0.5, 0.8, ...]
+ * ```
  */
 export function calculatePPO(data: number[], fastLength: number, slowLength: number): number[] {
   if (fastLength >= slowLength) {

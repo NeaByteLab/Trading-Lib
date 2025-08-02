@@ -1,14 +1,20 @@
 import type { IndicatorConfig, IndicatorResult, MarketData } from '@core/types/indicator-types';
 /**
- * Moving Average Indicator Factory
+ * Create Moving Average Indicator Factory
  *
- * Centralized factory for creating moving average indicators.
- * Eliminates code duplication across SMA, EMA, WMA, and Hull indicators.
+ * Factory function that creates moving average indicators with consistent behavior.
+ * Supports SMA, EMA, WMA, and Hull moving average types.
+ *
+ * @param name - Indicator name
+ * @param description - Indicator description
+ * @param type - Moving average type ('sma' | 'ema' | 'wma' | 'hull')
+ * @param defaultLength - Default calculation period
+ * @returns Object with indicator class and function
  *
  * @example
  * ```typescript
- * const sma = createMovingAverageIndicator('SMA', 'Simple Moving Average', 'sma', 20)
- * const ema = createMovingAverageIndicator('EMA', 'Exponential Moving Average', 'ema', 20)
+ * const smaIndicator = createMovingAverageIndicator('SMA', 'Simple Moving Average', 'sma', 20)
+ * const smaValues = smaIndicator.function(data, 20, 'close')
  * ```
  */
 export declare function createMovingAverageIndicator(name: string, description: string, type: 'sma' | 'ema' | 'wma' | 'hull', defaultLength: number): {
@@ -27,15 +33,20 @@ export declare function createMovingAverageIndicator(name: string, description: 
     function: (_data: MarketData | number[], _length?: number, _source?: string) => number[];
 };
 /**
- * Pivot Indicator Factory
+ * Create Pivot Indicator Factory
  *
- * Centralized factory for creating pivot point indicators.
- * Eliminates code duplication across standard, Camarilla, Woodie, and DeMark pivots.
+ * Factory function that creates pivot point indicators with consistent behavior.
+ * Supports standard, Camarilla, Woodie, and DeMark pivot calculations.
+ *
+ * @param name - Indicator name
+ * @param description - Indicator description
+ * @param calculator - Pivot calculation function
+ * @returns Pivot indicator class
  *
  * @example
  * ```typescript
- * const standardPivots = createPivotIndicator('Standard Pivots', calculatePivotPoints)
- * const camarillaPivots = createPivotIndicator('Camarilla Pivots', calculateCamarillaPivots)
+ * const standardPivots = createPivotIndicator('Standard Pivots', 'Standard Pivot Points', calculatePivotPoints)
+ * const camarillaPivots = createPivotIndicator('Camarilla Pivots', 'Camarilla Pivot Points', calculateCamarillaPivots)
  * ```
  */
 export declare function createPivotIndicator(name: string, description: string, calculator: (high: number[], low: number[], close: number[]) => {
@@ -59,15 +70,20 @@ export declare function createPivotIndicator(name: string, description: string, 
     };
 };
 /**
- * Price Comparison Indicator Factory
+ * Create Price Comparison Indicator Factory
  *
- * Centralized factory for creating price comparison indicators.
- * Eliminates code duplication across price ratio, differential, and comparison indicators.
+ * Factory function that creates price comparison indicators.
+ * Supports ratio, performance, and correlation calculations between price series.
+ *
+ * @param name - Indicator name
+ * @param description - Indicator description
+ * @param calculator - Price comparison calculation function
+ * @returns Price comparison indicator class
  *
  * @example
  * ```typescript
- * const priceRatio = createPriceComparisonIndicator('Price Ratio', calculatePriceRatio)
- * const priceDiff = createPriceComparisonIndicator('Price Differential', calculatePriceDifferential)
+ * const priceRatio = createPriceComparisonIndicator('Price Ratio', 'Price Ratio Indicator', calculatePriceRatio)
+ * const result = priceRatio.calculate(data, { length: 20 })
  * ```
  */
 export declare function createPriceComparisonIndicator(name: string, description: string, calculator: (price1: number[], price2: number[], basePrice?: number) => number[] | {
@@ -87,15 +103,21 @@ export declare function createPriceComparisonIndicator(name: string, description
     };
 };
 /**
- * Oscillator Indicator Factory
+ * Create Oscillator Indicator Factory
  *
- * Centralized factory for creating oscillator indicators.
- * Eliminates code duplication across RSI, CCI, ROC, and other oscillators.
+ * Factory function that creates oscillator indicators with consistent behavior.
+ * Supports RSI, CCI, Williams %R, and other momentum oscillators.
+ *
+ * @param name - Indicator name
+ * @param description - Indicator description
+ * @param calculator - Oscillator calculation function
+ * @param defaultLength - Default calculation period
+ * @returns Oscillator indicator class
  *
  * @example
  * ```typescript
- * const rsi = createOscillatorIndicator('RSI', 'Relative Strength Index', calculateRSI, 14)
- * const cci = createOscillatorIndicator('CCI', 'Commodity Channel Index', calculateCCI, 20)
+ * const rsiIndicator = createOscillatorIndicator('RSI', 'Relative Strength Index', calculateRSI, 14)
+ * const rsiValues = rsiIndicator.calculate(data, { length: 14 })
  * ```
  */
 export declare function createOscillatorIndicator(name: string, description: string, calculator: (data: number[], length: number) => number[], defaultLength: number): {
@@ -111,15 +133,21 @@ export declare function createOscillatorIndicator(name: string, description: str
     };
 };
 /**
- * Volatility Indicator Factory
+ * Create Volatility Indicator Factory
  *
- * Centralized factory for creating volatility indicators.
- * Eliminates code duplication across ATR, Bollinger Bands, and other volatility indicators.
+ * Factory function that creates volatility indicators with consistent behavior.
+ * Supports ATR, Bollinger Bands, Keltner Channels, and other volatility measures.
+ *
+ * @param name - Indicator name
+ * @param description - Indicator description
+ * @param calculator - Volatility calculation function
+ * @param defaultLength - Default calculation period
+ * @returns Volatility indicator class
  *
  * @example
  * ```typescript
- * const atr = createVolatilityIndicator('ATR', 'Average True Range', calculateATR, 14)
- * const std = createVolatilityIndicator('STD', 'Standard Deviation', calculateStd, 20)
+ * const atrIndicator = createVolatilityIndicator('ATR', 'Average True Range', calculateATR, 14)
+ * const atrValues = atrIndicator.calculate(data, { length: 14 })
  * ```
  */
 export declare function createVolatilityIndicator(name: string, description: string, calculator: (_data: MarketData | number[], _length: number) => number[], defaultLength: number): {
@@ -135,15 +163,21 @@ export declare function createVolatilityIndicator(name: string, description: str
     };
 };
 /**
- * Volume Indicator Factory
+ * Create Volume Indicator Factory
  *
- * Centralized factory for creating volume indicators.
- * Eliminates code duplication across OBV, MFI, CMF, and other volume indicators.
+ * Factory function that creates volume indicators with consistent behavior.
+ * Supports OBV, MFI, VWAP, and other volume-based indicators.
+ *
+ * @param name - Indicator name
+ * @param description - Indicator description
+ * @param calculator - Volume calculation function
+ * @param defaultLength - Default calculation period
+ * @returns Volume indicator class
  *
  * @example
  * ```typescript
- * const obv = createVolumeIndicator('OBV', 'On Balance Volume', calculateOBV, 1)
- * const mfi = createVolumeIndicator('MFI', 'Money Flow Index', calculateMFI, 14)
+ * const obvIndicator = createVolumeIndicator('OBV', 'On Balance Volume', calculateOBV, 1)
+ * const obvValues = obvIndicator.calculate(data, { length: 1 })
  * ```
  */
 export declare function createVolumeIndicator(name: string, description: string, calculator: (_data: MarketData | number[], _length: number) => number[], defaultLength: number): {

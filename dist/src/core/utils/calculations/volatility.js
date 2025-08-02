@@ -4,12 +4,19 @@ import { MathUtils } from '@core/utils/math-utils';
 import { sanitizeArray } from '@core/utils/validation-utils';
 import { calculateMean, calculateStandardDeviation, calculateVariance } from './statistical';
 /**
- * Calculate True Range using centralized utilities
+ * True Range - measures market volatility including gaps
+ * Formula: TR = max(High - Low, |High - Previous Close|, |Low - Previous Close|)
  *
  * @param high - High prices array
  * @param low - Low prices array
  * @param close - Close prices array
  * @returns True Range values array
+ *
+ * @example
+ * ```typescript
+ * const tr = calculateTrueRange(data.high, data.low, data.close)
+ * // Returns: [NaN, 2.5, 1.8, ..., 3.2, 2.9, ...]
+ * ```
  */
 export function calculateTrueRange(high, low, close) {
     return ArrayUtils.processArray(close, (_currentClose, i) => {
@@ -27,12 +34,19 @@ export function calculateTrueRange(high, low, close) {
     });
 }
 /**
- * Calculate bands (upper, middle, lower) using standard deviation
+ * Bollinger Bands - volatility indicator with standard deviation bands
+ * Formula: Upper = SMA + (Multiplier × StdDev), Lower = SMA - (Multiplier × StdDev)
  *
  * @param data - Source data array
  * @param length - Calculation period
  * @param multiplier - Standard deviation multiplier
  * @returns Bands object with upper, middle, and lower arrays
+ *
+ * @example
+ * ```typescript
+ * const bands = calculateBands(data.close, 20, 2)
+ * // Returns: { upper: [...], middle: [...], lower: [...] }
+ * ```
  */
 export function calculateBands(data, length, multiplier) {
     const bands = ArrayUtils.processWindow(data, length, (window, _i) => {
@@ -57,13 +71,20 @@ export function calculateBands(data, length, multiplier) {
     };
 }
 /**
- * Calculate Bollinger Band Width using centralized utilities
+ * Bollinger Band Width - measures volatility using band width percentage
+ * Formula: Band Width = ((Upper Band - Lower Band) / Middle Band) × 100
  *
  * @param data - Price data array
  * @param length - Period for moving average
  * @param multiplier - Standard deviation multiplier
  * @returns Array of band width values
  * @throws {Error} If data is invalid or missing required fields
+ *
+ * @example
+ * ```typescript
+ * const width = calculateBollingerBandWidth(data.close, 20, 2)
+ * // Returns: [NaN, NaN, ..., 15.2, 14.8, ...]
+ * ```
  */
 export function calculateBollingerBandWidth(data, length, multiplier) {
     if (!data || data.length === 0) {

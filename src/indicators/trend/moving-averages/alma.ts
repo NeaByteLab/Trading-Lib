@@ -9,7 +9,7 @@ import { pineLength, pineSource } from '@utils/pine-script-utils'
 import { validateIndicatorData } from '@utils/validation-utils'
 
 /**
- * Calculate Adaptive Linear Moving Average (ALMA)
+ * Calculate Adaptive Linear Moving Average (ALMA) - Optimized Version
  *
  * ALMA = Σ(Price[i] * Weight[i]) / Σ(Weight[i])
  * Weight[i] = exp(-(i - m)² / (2 * s²))
@@ -31,19 +31,35 @@ function calculateALMA(data: number[], length: number = 9, sigma: number = 6): n
   if (sigma <= 0) {
     throw new Error(ERROR_MESSAGES.INVALID_SIGMA)
   }
+
+  // Pre-calculate Gaussian parameters for better performance
   const m = (length - 1) * (sigma / 6)
   const s = length / 6
-  const weights = ArrayUtils.processArray(Array.from({ length }, (_, i) => i), (_, i) => {
-    return MathUtils.exp(-MathUtils.pow(i - m, 2) / (2 * MathUtils.pow(s, 2)))
-  })
+  const sSquared = s * s
+
+  // Pre-calculate weights array once
+  const weights: number[] = []
+  for (let i = 0; i < length; i++) {
+    const weight = MathUtils.exp(-MathUtils.pow(i - m, 2) / (2 * sSquared))
+    weights.push(weight)
+  }
+
   return ArrayUtils.processWindow(data, length, (window) => {
     const validValues = filterFiniteValues(window)
     if (validValues.length === 0) {
       return NaN
     }
-    const weightedValues = ArrayUtils.processArray(validValues, (val, i) => val * weights[i]!)
-    const weightedSum = MathUtils.sum(weightedValues)
-    const weightSum = MathUtils.sum(weights.slice(0, validValues.length))
+
+    // Optimized: Use pre-calculated weights
+    let weightedSum = 0
+    let weightSum = 0
+
+    for (let i = 0; i < validValues.length; i++) {
+      const weight = weights[i] || 0
+      weightedSum += validValues[i]! * weight
+      weightSum += weight
+    }
+
     return weightSum > 0 ? weightedSum / weightSum : NaN
   })
 }

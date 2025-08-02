@@ -10,13 +10,24 @@ import { validateVolumeData } from '@utils/validation-utils'
 /**
  * Calculate Chaikin Money Flow (CMF)
  *
- * A volume-based indicator that measures buying and selling pressure.
+ * CMF measures buying and selling pressure using volume-weighted price changes.
  * Formula: CMF = Σ(Money Flow Volume) / Σ(Volume) over period
+ * Money Flow Volume = Money Flow Multiplier × Volume
+ * Money Flow Multiplier = ((Close - Low) - (High - Close)) / (High - Low)
  *
  * @param data - Market data with OHLCV values
  * @param length - Calculation period (default: 20)
- * @returns CMF values array
+ * @param source - Price source (default: 'hlc3')
+ * @returns Array of CMF values (-1 to +1)
  * @throws {Error} If market data is invalid or volume data is missing
+ *
+ * @example
+ * ```typescript
+ * import { ta } from '@api/ta'
+ *
+ * const cmf = ta.cmf(marketData, 20)
+ * // Returns: [0.15, 0.25, -0.10, 0.30, ...]
+ * ```
  */
 function calculateCMF(data: MarketData | number[], length: number = 20): number[] {
   if (Array.isArray(data)) {

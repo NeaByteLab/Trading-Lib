@@ -1,11 +1,19 @@
 /**
- * Calculate moving average using specified type
+ * Moving Average - calculates various types of moving averages
+ * Formula: SMA = Σ(Price) / n, EMA = Price × α + Previous EMA × (1 - α)
  *
  * @param data - Source data array
  * @param length - Moving average period
  * @param type - Moving average type (default: 'sma')
  * @returns Array of moving average values
  * @throws {Error} If data is empty or length is invalid
+ *
+ * @example
+ * ```typescript
+ * const sma = movingAverage(data.close, 20, 'sma')
+ * const ema = movingAverage(data.close, 20, 'ema')
+ * // Returns: [NaN, NaN, ..., 45.2, 45.8, ...]
+ * ```
  */
 export declare function movingAverage(data: number[], length: number, type?: 'sma' | 'ema' | 'wma' | 'hull' | 'rma'): number[];
 /**

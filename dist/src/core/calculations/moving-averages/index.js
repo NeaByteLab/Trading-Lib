@@ -118,7 +118,7 @@ function findFirstEMA(data, length) {
  * @returns Array of WMA values
  */
 function calculateWMA(data, length) {
-    const result = ArrayUtils.processWindow(data, length, (window) => {
+    return ArrayUtils.processWindow(data, length, (window) => {
         const validValues = sanitizeArray(window);
         if (validValues.length === 0) {
             return NaN;
@@ -129,12 +129,6 @@ function calculateWMA(data, length) {
         const result = weightSum === 0 ? NaN : weightedSum / weightSum;
         return isFinite(result) ? result : NaN;
     });
-    // Pad the result to match the input data length
-    const padding = data.length - result.length;
-    if (padding > 0) {
-        return Array(padding).fill(NaN).concat(result);
-    }
-    return result;
 }
 /**
  * Calculate Hull Moving Average (HMA) with numerical stability

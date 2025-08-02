@@ -4,13 +4,20 @@ import { ArrayUtils } from '@utils/array-utils'
 import { calculateEMADifference } from '@utils/calculation-utils'
 
 /**
- * Calculate MACD with signal and histogram
+ * MACD (Moving Average Convergence Divergence) - trend-following momentum indicator
+ * Formula: MACD = Fast EMA - Slow EMA, Signal = EMA(MACD), Histogram = MACD - Signal
  *
  * @param data - Market data or price array
  * @param fastLength - Fast EMA period (default: 12)
  * @param slowLength - Slow EMA period (default: 26)
  * @param signalLength - Signal line period (default: 9)
  * @returns Object with MACD, signal, and histogram values
+ *
+ * @example
+ * ```typescript
+ * const macd = ta.macd(data.close, 12, 26, 9)
+ * // Returns: { macd: [...], signal: [...], histogram: [...] }
+ * ```
  */
 function calculateMACDWithSignal(data: number[], fastLength: number = 12, slowLength: number = 26, signalLength: number = 9): {
   macd: number[]
@@ -53,7 +60,8 @@ function calculateMACDWithSignal(data: number[], fastLength: number = 12, slowLe
 }
 
 /**
- * Calculate MACD values using wrapper function
+ * MACD (Moving Average Convergence Divergence) - trend-following momentum indicator
+ * Formula: MACD = Fast EMA - Slow EMA, Signal = EMA(MACD), Histogram = MACD - Signal
  *
  * @param data - Market data or price array
  * @param fastLength - Fast EMA period (default: 12)
@@ -61,6 +69,12 @@ function calculateMACDWithSignal(data: number[], fastLength: number = 12, slowLe
  * @param signalLength - Signal EMA period (default: 9)
  * @param source - Price source (default: 'close')
  * @returns Object with macd, signal, and histogram arrays
+ *
+ * @example
+ * ```typescript
+ * const macd = ta.macd(data.close, 12, 26, 9)
+ * // Returns: { macd: [...], signal: [...], histogram: [...] }
+ * ```
  */
 export function macd(data: MarketData | number[], fastLength?: number, slowLength?: number, signalLength?: number, _source?: string): {
   macd: number[]

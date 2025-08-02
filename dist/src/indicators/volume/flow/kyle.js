@@ -2,10 +2,18 @@ import { BaseIndicator } from '@base/base-indicator';
 import { calculateKylesLambda } from '@utils/calculations/volume';
 import { createIndicatorWrapper } from '@utils/indicator-utils';
 /**
- * Kyle's Lambda indicator
+ * Kyle's Lambda Indicator
  *
  * Kyle's Lambda measures the price impact of trades and market liquidity.
  * Higher values indicate lower liquidity and higher price impact.
+ * Formula: λ = |Price Change| / Volume
+ *
+ * @example
+ * ```typescript
+ * const kyle = new KylesLambda()
+ * const result = kyle.calculate(marketData)
+ * console.log(result.values) // Kyle's Lambda values
+ * ```
  */
 export class KylesLambda extends BaseIndicator {
     constructor() {
@@ -37,10 +45,23 @@ export class KylesLambda extends BaseIndicator {
     }
 }
 /**
- * Calculate Kyle's Lambda values using wrapper function
+ * Calculate Kyle's Lambda values
  *
- * @param data - Market data
- * @returns Kyle's Lambda values array
+ * Kyle's Lambda measures the price impact of trades and market liquidity.
+ * Formula: λ = |Price Change| / Volume
+ * Higher values indicate lower liquidity and higher price impact.
+ *
+ * @param data - Market data with OHLCV values
+ * @returns Array of Kyle's Lambda values
+ * @throws {Error} If market data is invalid or volume data is missing
+ *
+ * @example
+ * ```typescript
+ * import { ta } from '@api/ta'
+ *
+ * const lambda = ta.kylesLambda(marketData)
+ * // Returns: [0.001, 0.002, 0.0015, 0.003, ...]
+ * ```
  */
 export function kylesLambda(data) {
     return createIndicatorWrapper(KylesLambda, data);

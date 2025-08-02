@@ -2,13 +2,20 @@ import { ERROR_MESSAGES } from '@constants/indicator-constants'
 import { ArrayUtils } from '@core/utils/array-utils'
 
 /**
- * Calculate standard pivot points using centralized utilities
+ * Standard Pivot Points - support and resistance levels based on previous period
+ * Formula: PP = (High + Low + Close) / 3, R1 = 2×PP - Low, S1 = 2×PP - High
  *
  * @param high - High prices array
  * @param low - Low prices array
  * @param close - Close prices array
  * @returns Pivot point levels
  * @throws {Error} If data is empty or arrays have different lengths
+ *
+ * @example
+ * ```typescript
+ * const pivots = calculatePivotPoints(data.high, data.low, data.close)
+ * // Returns: { pp: [...], r1: [...], r2: [...], r3: [...], s1: [...], s2: [...], s3: [...] }
+ * ```
  */
 export function calculatePivotPoints(high: number[], low: number[], close: number[]): {
   pp: number[]
@@ -73,13 +80,20 @@ export function calculatePivotPoints(high: number[], low: number[], close: numbe
 }
 
 /**
- * Calculate Camarilla pivot points using centralized utilities
+ * Camarilla Pivot Points - intraday support and resistance levels
+ * Formula: PP = (High + Low + Close) / 3, R1 = Close + (High - Low) × 1.1/12
  *
  * @param high - High prices array
  * @param low - Low prices array
  * @param close - Close prices array
  * @returns Camarilla pivot levels
  * @throws {Error} If data is empty or arrays have different lengths
+ *
+ * @example
+ * ```typescript
+ * const camarilla = calculateCamarillaPivots(data.high, data.low, data.close)
+ * // Returns: { pp: [...], r1: [...], r2: [...], r3: [...], s1: [...], s2: [...], s3: [...] }
+ * ```
  */
 export function calculateCamarillaPivots(high: number[], low: number[], close: number[]): {
   pp: number[]

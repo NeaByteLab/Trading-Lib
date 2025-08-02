@@ -3,12 +3,20 @@ import type { MarketData } from '@core/types/indicator-types'
 import { calculateStochastic } from '@utils/calculation-utils'
 
 /**
- * Calculate Stochastic using centralized utilities
+ * Stochastic Oscillator - momentum indicator measuring price position within range
+ * Formula: %K = ((Current Close - Lowest Low) / (Highest High - Lowest Low)) × 100
+ * Formula: %D = SMA(%K, n periods)
  *
  * @param data - Market data with high, low, close arrays
  * @param kLength - K line period (default: 14)
  * @param dLength - D line period (default: 3)
  * @returns Stochastic K and D values
+ *
+ * @example
+ * ```typescript
+ * const stoch = ta.stochastic(data, 14, 3)
+ * // Returns: { k: [...], d: [...] }
+ * ```
  */
 function calculateStochasticWrapper(data: MarketData, kLength: number = 14, dLength: number = 3): {
   k: number[]
@@ -19,15 +27,21 @@ function calculateStochasticWrapper(data: MarketData, kLength: number = 14, dLen
   return { k, d }
 }
 
-
-
 /**
- * Calculate Stochastic Oscillator values using wrapper function
+ * Stochastic Oscillator - momentum indicator measuring price position within range
+ * Formula: %K = ((Current Close - Lowest Low) / (Highest High - Lowest Low)) × 100
+ * Formula: %D = SMA(%K, n periods)
  *
  * @param data - Market data
  * @param kLength - K line period (default: 14)
  * @param dLength - D line period (default: 3)
  * @returns Stochastic K and D values
+ *
+ * @example
+ * ```typescript
+ * const stoch = ta.stochastic(data, 14, 3)
+ * // Returns: { k: [...], d: [...] }
+ * ```
  */
 export function stochastic(data: MarketData, kLength?: number, dLength?: number): {
   k: number[]

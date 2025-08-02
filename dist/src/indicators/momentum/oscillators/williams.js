@@ -1,11 +1,18 @@
 import { BaseIndicator } from '@base/base-indicator';
 import { calculateWilliamsR } from '@utils/calculation-utils';
 /**
- * Calculate Williams %R using centralized utilities
+ * Williams %R - momentum oscillator measuring overbought/oversold levels
+ * Formula: %R = ((Highest High - Close) / (Highest High - Lowest Low)) × -100
  *
  * @param data - Market data with high, low, close arrays
  * @param length - Period length (default: 14)
  * @returns Williams %R values
+ *
+ * @example
+ * ```typescript
+ * const williams = ta.williamsR(data, 14)
+ * // Returns: [NaN, NaN, ..., -25.6, -18.9, ...]
+ * ```
  */
 function calculateWilliamsRWrapper(data, length = 14) {
     return calculateWilliamsR(data.close, data.high, data.low, length);
@@ -35,12 +42,19 @@ class WilliamsRIndicator extends BaseIndicator {
 }
 const WilliamsR = new WilliamsRIndicator();
 /**
- * Calculate Williams %R values using wrapper function
+ * Williams %R - momentum oscillator measuring overbought/oversold levels
+ * Formula: %R = ((Highest High - Close) / (Highest High - Lowest Low)) × -100
  *
  * @param data - Market data
  * @param length - Period length (default: 14)
  * @param source - Price source (default: 'close')
  * @returns Williams %R values
+ *
+ * @example
+ * ```typescript
+ * const williams = ta.williamsR(data, 14)
+ * // Returns: [NaN, NaN, ..., -25.6, -18.9, ...]
+ * ```
  */
 export function williamsR(data, length, source) {
     const config = { length: length || 14, source: source || 'close' };

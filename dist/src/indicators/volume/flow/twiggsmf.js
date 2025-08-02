@@ -28,11 +28,24 @@ function calculateTwiggsMoneyFlowWrapper(data, length = 21) {
 }
 const TwiggsMoneyFlow = createVolumeIndicator('Twiggs Money Flow', 'Volume-weighted momentum indicator', calculateTwiggsMoneyFlowWrapper, 21);
 /**
- * Calculate Twiggs Money Flow values using wrapper function
+ * Calculate Twiggs Money Flow
  *
- * @param data - Market data
+ * Twiggs Money Flow is a volume-weighted momentum indicator that measures buying and selling pressure.
+ * Formula: TMF = (HLC3 - L) / (H - L) × V where HLC3 = (H + L + C) / 3
+ * Uses exponential smoothing to reduce noise and identify trend changes.
+ *
+ * @param data - Market data with OHLCV values
  * @param length - Calculation period (default: 21)
- * @returns Twiggs Money Flow values array
+ * @returns Array of Twiggs Money Flow values
+ * @throws {Error} If market data is invalid or volume data is missing
+ *
+ * @example
+ * ```typescript
+ * import { ta } from '@api/ta'
+ *
+ * const tmf = ta.twiggsMoneyFlow(marketData, 21)
+ * // Returns: [0.5, 0.7, 0.3, 0.8, ...]
+ * ```
  */
 export function twiggsMoneyFlow(data, length) {
     return createIndicatorWrapper(TwiggsMoneyFlow, data, length);
